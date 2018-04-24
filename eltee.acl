@@ -1,0 +1,24 @@
+hostaddr: "localhost:9010"
+
+universes {
+    1 {
+        fixtures  {
+            Stinger {
+                kind: stinger
+            }
+            "Disco Spot 1" {
+                kind: pinspot
+            }
+            "Disco Spot 2" {
+                kind: pinspot
+            }
+            "Gobo Mover 1" {
+                kind: tomshine_gobomover
+            }
+            "Gobo Mover 2" {
+                kind: tomshine_gobomover
+            }
+        }    
+    }
+}
+
