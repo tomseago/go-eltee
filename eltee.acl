@@ -1,24 +1,154 @@
-hostaddr: "localhost:9010"
+logging: {
+    level: debug
+    format: "%{time:15:04:05.000} %{level:4.4s} %{module:8.8s} %{shortfunc:10.10s} ▶ %{message}"
 
-universes {
-    1 {
-        fixtures  {
-            Stinger {
-                kind: stinger
+    backends: {
+        /*
+        file: {
+            type: file
+            filename: "dev.log"
+        }
+        */
+
+        console: {
+            type: stdout
+            format: "%{color}%{time:15:04:05.000} %{level:4.4s} %{module:8.8s} %{color:bold}%{shortfunc:10.10s}%{color:reset} ▶ %{message}"
+        }        
+    }
+
+    // Set debug to true to print a log message to each log level after
+    // the configuration is complete
+    // debug: true
+}
+
+
+// Output channels
+dmx: {
+    connections: {
+        log: {
+            kind: log
+        }
+
+        olad: {
+            kind: olad
+            //hostaddr: "localhost:9090"
+            hostaddr: "10.0.1.121:9090"
+        }
+    }
+
+
+    tester: {
+        scenes: {
+            first: {
+                data: [
+                    200 0 0 177 0 0 98 121 174 180 0 255 0 167 0 175 202
+                ]
+                start_channel: 10
             }
-            "Disco Spot 1" {
-                kind: pinspot
-            }
-            "Disco Spot 2" {
-                kind: pinspot
-            }
-            "Gobo Mover 1" {
-                kind: tomshine_gobomover
-            }
-            "Gobo Mover 2" {
-                kind: tomshine_gobomover
-            }
-        }    
+        }
+
+        // The name of a test to run
+        run: first
+    }
+}
+
+
+// fixtures
+//
+// A catalog of fixture definitions. Order is relevant because it is the 
+// default dmx addressing layout.
+fixtures:  {
+    /*
+    Stinger: {
+        kind: adj_stinger        
+    }
+    */
+
+    "Disco Spot 1": {
+        kind: donner_pinspot
+        base: 10
+    }
+
+    "Disco Spot 2": {
+        kind: donner_pinspot
+    }
+
+    "Flood Mover 1": {
+        kind: tomshine_floodmover
+    }
+
+    /*
+
+    "Gobo Mover 1": {
+        kind: tomshine_gobomover
+    }
+    "Gobo Mover 2": {
+        kind: tomshine_gobomover
+    }
+
+    "Flood Par 1": {
+        kind: coidak_floodpar
+    }
+    "Flood Par 2": {
+        kind: coidak_floodpar
+    }
+
+
+    //// New guys
+    "Flood Par 3": {
+        kind: coidak_floodpar
+    }
+    "Flood Par 4": {
+        kind: coidak_floodpar
+    }
+
+    "Flood Mover 1": {
+        kind: tomshine_floodmover
+    }
+    "Flood Mover 2": {
+        kind: tomshine_floodmover
+    }
+
+    "Wash 1": {
+        kind: jlpow_cobpar
+    }
+    "Wash 2": {
+        kind: jlpow_cobpar
+    }
+
+    "Double Mover 1": {
+        kind: ogori_doubleface
+    }
+    "Double Mover 2": {
+        kind: ogori_doubleface
+    }
+
+    "UV Flood 1": {
+        kind: tomled_uvpar
+    }
+    "UV Flood 2": {
+        kind: tomled_uvpar
+    }
+    */
+}
+
+
+world_state: {
+    colors: {
+        default: {
+            red: 0.7
+            green: 0.5
+            blue: 0.0
+
+            uv: 1.0
+        }
+    }
+
+    points: {
+        default_target: {
+            x: 0.3
+            y: 0.5
+        }
     }
 }
 

@@ -1,0 +1,44 @@
+name: "Donner Pinspot"
+channel_count: 6
+
+controls: {
+    rgbw: {
+        name: "RGBW"
+        kind: rgbw
+        channels: {
+            red: 2
+            green: 3
+            blue: 4
+            white: 5
+        }
+    }
+
+    mode: {
+        name: "Mode"
+        kind: enum
+        channel: 1
+        values: {
+            "Off"   : { v: 0 }
+            "Step Change" : { range: [9 134] }
+            "Strobe Speed" : { range: [135 239] }
+            "Use RGBW" : { v: 240 }
+        }
+    }
+
+    color_macro: {
+        name: "Auto Color Change"
+        kind: enum
+        channel: 6
+        values: {
+            "Off"  : { v: 0 }
+            "Jump RGBW" : { range: [3 31] }
+            "Jump GBW, R static" : { range: [32 63] }
+            "Jump RBW, G static" : { range: [64 79] }
+            "Jump RGW, B static" : { range: [80 95] }
+            "Jump RGB, W static" : { range: [96 111] }
+
+            // more stuff here....
+        }
+    }
+
+}

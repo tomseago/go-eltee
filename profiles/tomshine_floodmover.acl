@@ -1,0 +1,56 @@
+name: "Tomshine Flood Mover"
+channel_count: 18
+
+default_values: [
+        98 121 174 180
+        0 181 0 
+        167 0 175 202 0 0 // colors
+        0 0 0 0 0
+    ]
+
+controls: {
+    color: {
+        name: "Color"
+        kind: led_var
+        leds: {
+            red: 8
+            green: 9
+            blue: 10
+            white: 11
+            amber: 12
+            uv: 13
+        }
+    }
+
+    position: {
+        name: "Position"
+        kind: pan_tilt
+        pan: {
+            coarse: 1
+            fine: 2
+        }
+        tilt: {
+            coarse: 3
+            fine: 4
+        }
+        speed: 5
+    }
+
+    master_dimmer: {
+        name: "Master Dimmer"
+        kind: fader
+        channel: 6
+        range: [0 255] // Which should be the default really
+    }
+
+    strobe: {
+        name: "Strobe"
+        kind: enum
+        channel: 7
+        values: {
+            "Off"   : { v: 0 }
+            "Strobe Speed" : { v: [1 255] }
+        }
+    }
+
+}
