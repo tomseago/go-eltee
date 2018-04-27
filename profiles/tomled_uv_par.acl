@@ -1,32 +1,11 @@
-name: "Tomshine Flood Mover"
-channel_count: 18
+name: "Tom LED UV Par"
+channel_count: 2
 
 default_values: [
-        98 121 174 180 // Pan Tilt Coarse & Fine
-        0 // 5: PanTilt Speed high to low
-        100 // 6: Master Dimmer
-        0 // 7: Strobe {off:0, slow to fast: [1 255]} 
-
-        167 0 175 202 0 0 // 8-13: RGBWAU
-
-        0 /* 14: Motor Macro
-            off: 0
-            auto_3: 16
-            auto_2: 45
-            auto_1: 75
-            auto_0: 105
-            sound_3: 129
-            sound_2: 158
-            sound_1: 188
-            sound_0: 218
-        */
-        0 // 15: Motor sound sensitivity low to high
-
-        0 // 16:
-        0 // 17
-        0 // 18: Standard reset thing, 3seconds
+        128 // Dimmer
+        0   // Strobe {off: 0, slow_fast:[1, 250], sound:[251 255]}
     ]
-
+/*
 controls: {
     color: {
         name: "Color"
@@ -71,5 +50,5 @@ controls: {
             "Strobe Speed" : { v: [1 255] }
         }
     }
-
+    */
 }

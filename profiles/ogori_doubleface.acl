@@ -1,0 +1,90 @@
+name: "Ogori Double Face Mover"
+channel_count: 21
+
+default_values: [
+        64 0 // Pan 540, starts point reward, rotates 540, clockwise from above
+        64 0 // Tilt 360 rotation
+
+        0 // Tilt Spin neg=[6 127], pos=[128 255]
+        0 // 6: Tilt Spin Speed F->S [0 255]
+            // Hanging upside down, from behind and above
+            // Spot points straight up at 0 and positive is towards the back
+            // At 50% the spot is straight down
+
+        255 // 7: Master dimmer [0 255]
+        0 // 8: Strobe {off: [0 9], slow_to_fast: [10 255]}
+
+        255 0 0 0 // Flood Color RGBW
+        0 255 0 0 // Spot Color RGBW
+
+        0 // 17: Auto spin {off:[0 15], use_speed:[16 128], ignore_speed:[129 255] }
+        0 // 18: Auto spin Speed also  fast_to_slow:[0 255]
+
+        0 // 19: Auto Color  
+          /* { off: 0, fade:[1 7], 
+                // Consider the color speed
+                fx_cycle_1 [8 39],
+                fx_cycle_2 GBWF [40 72] matched sides
+                fx_cycle_3 [73 105] matched sides
+                fx_cycle_4 [106 138] unmatched spot->flood movement
+                fx_cycle_5 [139 140] [141 142] one side at a time, RGBW flood->spot, same animation but first range respects speed whereas after 141 speed is ignored
+
+                // Same thing with no speed consideration
+                fx_cycle_6 [143 167] 
+                fx_cycle_7 [168 195] like 2? GBWF 
+                fx_cycle_8 [196 223] matched
+                fx_cycle_9 [224 251] unmatched spot->flood like 4
+                fx_cycle_10 [252 255] one at a time, RGBW flood->spot
+
+
+        0 // 20: AUto Color Speed  slow_to_fast:[0 255]
+
+        0 // 21: Reset [250 255] for 3 sec
+    ]
+/*
+controls: {
+    color: {
+        name: "Color"
+        kind: led_var
+        leds: {
+            red: 8
+            green: 9
+            blue: 10
+            white: 11
+            amber: 12
+            uv: 13
+        }
+    }
+
+    position: {
+        name: "Position"
+        kind: pan_tilt
+        pan: {
+            coarse: 1
+            fine: 2
+        }
+        tilt: {
+            coarse: 3
+            fine: 4
+        }
+        speed: 5
+    }
+
+    master_dimmer: {
+        name: "Master Dimmer"
+        kind: fader
+        channel: 6
+        range: [0 255] // Which should be the default really
+    }
+
+    strobe: {
+        name: "Strobe"
+        kind: enum
+        channel: 7
+        values: {
+            "Off"   : { v: 0 }
+            "Strobe Speed" : { v: [1 255] }
+        }
+    }
+    */
+}

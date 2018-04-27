@@ -1,0 +1,39 @@
+name: "JLPOW 3in1 COB Par"
+channel_count: 7
+
+default_values: [
+        0 /* 1: Color Mode 
+            off: v[0 10] 
+            static: v[11 50] -- color from channel 2
+            jump: v[51 100] -- speed from channel 3
+            fade: v[101 150] -- color from ch2, speed from ch3
+            sound: v[151 200] -- color from ch2
+            strobe: v[201 255] -- color from ch2, strobe speed ch3
+            */
+
+        0 /* 2: Macro color select
+            white: v:0
+            red: 40
+            green: 60
+            blue: 80
+            yellow RG: 100
+            cyan BG: 120
+            magenta RB: 140
+            warm white: 160
+            cool white: 180
+            pink white: 200
+            yellow white: 220
+
+            Fade colors A3
+            RYGCBMW: 0
+            CW: 40
+            // bunch of other stuff...
+        */
+
+        0 /* 3: Speed slow to fast [0 255] */
+
+        255 // 4: Master dimmer low to high
+        255 // 5: Red
+        255 // 6: Green
+        255 // 7: Blue
+    ]
