@@ -12,19 +12,15 @@ import (
 var log = config.Logger("eltee")
 
 type Server struct {
-	cfg        *config.AclNode
-	dmxHarness *DmxHarness
-	dmxes      map[string]DMXConn
+	cfg *config.AclNode
 
-	library *ProfileLibrary
+	dmxHarness *DmxHarness
+	library    *ProfileLibrary
 
 	fixtures       []Fixture
 	fixturesByName map[string]Fixture
 
 	currentWS *WorldState
-	nextWS    *WorldState
-
-	defaultMappers []StateMapper
 }
 
 func NewServer(cfg *config.AclNode) *Server {
@@ -34,8 +30,6 @@ func NewServer(cfg *config.AclNode) *Server {
 
 		fixtures:       make([]Fixture, 0),
 		fixturesByName: make(map[string]Fixture),
-
-		defaultMappers: make([]StateMapper, 0),
 	}
 
 	var err error
@@ -61,32 +55,30 @@ func NewServer(cfg *config.AclNode) *Server {
 	} else {
 		base := 1
 		fixNode.ForEachOrderedChild(func(name string, child *config.AclNode) {
-			fixture := s.CreateFixture(name, child, base)
+			fixture, base := s.CreateFixture(name, child, base, s.dmxHarness.frame)
 			if fixture != nil {
-				base = fixture.Base() + fixture.Profile().ChannelCount
-
 				s.fixtures = append(s.fixtures, fixture)
 				s.fixturesByName[name] = fixture
 
-				log.Infof("Added %v @ %v", fixture.Name(), fixture.Base())
+				log.Infof("Added %v @ %v", fixture.Name(), base)
 			}
 		})
 	}
 
 	// Create our basic world states
-	s.currentWS = NewWorldState()
-	s.currentWS.Root = cfg.Child("world_state").Duplicate()
+	// s.currentWS = NewWorldState()
+	// s.currentWS.Root = cfg.Child("world_state").Duplicate()
 
-	s.nextWS = s.currentWS.Duplicate()
+	// s.nextWS = s.currentWS.Duplicate()
 
 	// Iterate through all fixtures to setup a whole bunch of mappers to go from
 	// the world state to outputable values
-	s.BuildDefaultMappers()
+	// s.BuildDefaultMappers()
 
 	return s
 }
 
-func (s *Server) CreateFixture(name string, node *config.AclNode, defBase int) Fixture {
+func (s *Server) CreateFixture(name string, node *config.AclNode, defBase int, dmx []byte) (f Fixture, actualBase int) {
 
 	// First lets see if we can find a profile of the right kind
 	kind := node.ChildAsString("kind")
@@ -97,8 +89,10 @@ func (s *Server) CreateFixture(name string, node *config.AclNode, defBase int) F
 		return nil
 	}
 
-	fixture := NewDmxFixture(name, profile)
-	fixture.base = node.DefChildAsInt(defBase, "base")
+	actualBase = node.DefChildAsInt(defBase, "base")
+	channels = dmx[actualBase-1 : profile.ChannelCount]
+
+	fixture := NewDmxFixture(name, actualBase, channels, profile)
 	return fixture
 }
 
@@ -114,6 +108,9 @@ func CreateConn(name string, cfg *config.AclNode) (DMXConn, error) {
 
 	case "log":
 		return NewLogConn(cfg)
+
+	case "ftdi":
+		return NewFtdiConn(cfg)
 	}
 
 	return nil, fmt.Errorf("Unknown dmx kind '%v'", kind)
@@ -136,11 +133,11 @@ func (s *Server) BuildDefaultMappers() {
 				log.Infof("%v %v", fixture.Name(), pc)
 
 				// Can it do color?
-				colorSettable, ok := inst.(WorldColorSettable)
-				if ok {
-					m := NewColorMapper("default")
-					s.defaultMappers = append(s.defaultMappers, m)
-				}
+				// colorSettable, ok := inst.(WorldColorSettable)
+				// if ok {
+				// 	m := NewColorMapper("default")
+				// 	s.defaultMappers = append(s.defaultMappers, m)
+				// }
 			}
 		})
 	}

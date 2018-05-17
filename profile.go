@@ -4,36 +4,63 @@ import (
 	"fmt"
 	"github.com/eyethereal/go-config"
 	"io/ioutil"
-	"math"
 	"path/filepath"
 	"sort"
 	"strings"
 )
 
-const (
-	RedIx   = 0
-	GreenIx = 1
-	BlueIx  = 2
-	WhiteIx = 3
-)
+// const (
+// 	RedIx   = 0
+// 	GreenIx = 1
+// 	BlueIx  = 2
+// 	WhiteIx = 3
+// )
 
-type WorldColorSettable interface {
-	SetFromWorldColor(color *WorldColor)
+// Profiles are classes of fixtures. All Tomshine Gobo movers have the same
+// behaviors and can be controlled in the same way. Fixtures are physical things
+// so they are therefore instances of profiles.
+//
+// Profiles have a set of controls that can be used to manipulate the fixture.
+
+// type WorldColorSettable interface {
+// 	SetFromWorldColor(color *WorldColor)
+// }
+
+type FixtureControlUpdater interface {
+	// Causes the FixtureControlUpdater to observe the control point
+	// and update it's output state
+	ObserveFor(fc *FixtureControl)
 }
 
-type ProfileControlInstance interface {
-	ProfileControl() ProfileControl
-	SetDmx(channels []byte) error
+//////
+
+type FixtureControl struct {
+	ProfileControl ProfileControl
+	ControlPoint   ControlPoint
+	LensStack      LensStack
+
+	Updater FixtureControlUpdater
 }
 
+func NewFixtureControl(profileControl ProfileControl, updater FixtureControlUpdater) *FixtureControl {
+	return &FixtureControl{
+		ProfileControl: profileControl,
+		Updater:        updater,
+	}
+}
+
+//////
+
+// A ProfileControl is a control on a theoretical fixture.
 type ProfileControl interface {
 	Id() string
 	Name() string
 
 	String() string
 
-	Instantiate() ProfileControlInstance
-	SetDmx(inst ProfileControlInstance, channels []byte) error
+	// A Profile can be instantiated for a particular fixture. This instance
+	// is expected to be held by the fixture
+	Instantiate(fixture Fixture) *FixtureControl
 }
 
 /////////
@@ -70,501 +97,524 @@ func MakeProfileControlBase(id string, rootNode *config.AclNode) ProfileControlB
 
 // /////////
 
-type ProfileControlRGBWInstance struct {
-	control *ProfileControlRGBW
-	Values  [WhiteIx + 1]byte
+// type FixtureControlRGBW struct {
+// 	control *ProfileControlRGBW
+// 	Values  [WhiteIx + 1]byte
+// }
+
+// func (inst *ProfileControlRGBWInstance) ProfileControl() ProfileControl {
+// 	return inst.control
+// }
+
+// func (inst *ProfileControlRGBWInstance) SetDmx(channels []byte) error {
+// 	return inst.control.SetDmx(inst, channels)
+// }
+
+// func (inst *ProfileControlRGBWInstance) SetFromWorldColor(color *WorldColor) {
+// 	if inst == nil || color == nil {
+// 		return
+// 	}
+
+// 	inst.Values[RedIx] = ByteFromFloat(color.Red)
+// 	inst.Values[GreenIx] = ByteFromFloat(color.Green)
+// 	inst.Values[BlueIx] = ByteFromFloat(color.Blue)
+// 	inst.Values[WhiteIx] = ByteFromFloat(color.White)
+// }
+
+// type ProfileControlRGBW struct {
+// 	ProfileControlBase
+
+// 	Channels [WhiteIx + 1]int
+// }
+
+// func NewProfileControlRGBW(id string, rootNode *config.AclNode) (*ProfileControlRGBW, error) {
+// 	pc := &ProfileControlRGBW{
+// 		ProfileControlBase: MakeProfileControlBase(id, rootNode),
+// 	}
+
+// 	pc.Channels[RedIx] = rootNode.ChildAsInt("channels", "red")
+// 	pc.Channels[GreenIx] = rootNode.ChildAsInt("channels", "green")
+// 	pc.Channels[BlueIx] = rootNode.ChildAsInt("channels", "blue")
+// 	pc.Channels[WhiteIx] = rootNode.ChildAsInt("channels", "white")
+
+// 	return pc, nil
+// }
+
+// func (pc *ProfileControlRGBW) Id() string {
+// 	return pc.id
+// }
+
+// func (pc *ProfileControlRGBW) Name() string {
+// 	return pc.name
+// }
+
+// func (pc *ProfileControlRGBW) String() string {
+// 	return fmt.Sprintf("RGBW %v(%v) %v", pc.name, pc.id, pc.Channels)
+// }
+
+// func (pc *ProfileControlRGBW) Instantiate() ProfileControlInstance {
+// 	inst := &ProfileControlRGBWInstance{
+// 		control: pc,
+// 	}
+
+// 	return inst
+// }
+
+// func (pc *ProfileControlRGBW) SetDmx(inst ProfileControlInstance, channels []byte) error {
+
+// 	rgbwInst, ok := inst.(*ProfileControlRGBWInstance)
+// 	if !ok {
+// 		return fmt.Errorf("Tried to SetDmx on a rgbw with a bad instance type")
+// 	}
+
+// 	channels[pc.Channels[RedIx]-1] = byte(rgbwInst.Values[RedIx])
+// 	channels[pc.Channels[GreenIx]-1] = byte(rgbwInst.Values[GreenIx])
+// 	channels[pc.Channels[BlueIx]-1] = byte(rgbwInst.Values[BlueIx])
+// 	channels[pc.Channels[WhiteIx]-1] = byte(rgbwInst.Values[WhiteIx])
+
+// 	return nil
+// }
+
+/////////////////////////////////////////////////////////////////////////////////
+
+// Control Kind: led_var
+
+type LedVarUpdater struct {
+	channels []byte
 }
 
-func (inst *ProfileControlRGBWInstance) ProfileControl() ProfileControl {
-	return inst.control
-}
-
-func (inst *ProfileControlRGBWInstance) SetDmx(channels []byte) error {
-	return inst.control.SetDmx(inst, channels)
-}
-
-func (inst *ProfileControlRGBWInstance) SetFromWorldColor(color *WorldColor) {
-	if inst == nil || color == nil {
+func (u *LedVarUpdater) ObserveFor(fc *FixtureControl) {
+	if u == nil || fc == nil || fc.ControlPoint == nil {
 		return
 	}
 
-	inst.Values[RedIx] = ByteFromFloat(color.Red)
-	inst.Values[GreenIx] = ByteFromFloat(color.Green)
-	inst.Values[BlueIx] = ByteFromFloat(color.Blue)
-	inst.Values[WhiteIx] = ByteFromFloat(color.White)
-}
-
-type ProfileControlRGBW struct {
-	ProfileControlBase
-
-	Channels [WhiteIx + 1]int
-}
-
-func NewProfileControlRGBW(id string, rootNode *config.AclNode) (*ProfileControlRGBW, error) {
-	pc := &ProfileControlRGBW{
-		ProfileControlBase: MakeProfileControlBase(id, rootNode),
+	var value interface{}
+	if fc.LensStack != nil {
+		value = fc.LensStack.Observe(fc.ControlPoint)
+	} else {
+		value = fc.ControlPoint.Observe()
 	}
 
-	pc.Channels[RedIx] = rootNode.ChildAsInt("channels", "red")
-	pc.Channels[GreenIx] = rootNode.ChildAsInt("channels", "green")
-	pc.Channels[BlueIx] = rootNode.ChildAsInt("channels", "blue")
-	pc.Channels[WhiteIx] = rootNode.ChildAsInt("channels", "white")
-
-	return pc, nil
-}
-
-func (pc *ProfileControlRGBW) Id() string {
-	return pc.id
-}
-
-func (pc *ProfileControlRGBW) Name() string {
-	return pc.name
-}
-
-func (pc *ProfileControlRGBW) String() string {
-	return fmt.Sprintf("RGBW %v(%v) %v", pc.name, pc.id, pc.Channels)
-}
-
-func (pc *ProfileControlRGBW) Instantiate() ProfileControlInstance {
-	inst := &ProfileControlRGBWInstance{
-		control: pc,
-	}
-
-	return inst
-}
-
-func (pc *ProfileControlRGBW) SetDmx(inst ProfileControlInstance, channels []byte) error {
-
-	rgbwInst, ok := inst.(*ProfileControlRGBWInstance)
+	color, ok := value.(ColorValues)
 	if !ok {
-		return fmt.Errorf("Tried to SetDmx on a rgbw with a bad instance type")
-	}
-
-	channels[pc.Channels[RedIx]-1] = byte(rgbwInst.Values[RedIx])
-	channels[pc.Channels[GreenIx]-1] = byte(rgbwInst.Values[GreenIx])
-	channels[pc.Channels[BlueIx]-1] = byte(rgbwInst.Values[BlueIx])
-	channels[pc.Channels[WhiteIx]-1] = byte(rgbwInst.Values[WhiteIx])
-
-	return nil
-}
-
-/////////
-
-type ProfileControlLedVarInstance struct {
-	control *ProfileControlLedVar
-	Values  map[string]byte
-}
-
-func (inst *ProfileControlLedVarInstance) ProfileControl() ProfileControl {
-	return inst.control
-}
-
-func (inst *ProfileControlLedVarInstance) SetDmx(channels []byte) error {
-	return inst.control.SetDmx(inst, channels)
-}
-
-func (inst *ProfileControlLedVarInstance) SetFromWorldColor(color *WorldColor) {
-	if inst == nil || color == nil {
+		// not a color
 		return
 	}
 
-	inst.Values["red"] = ByteFromFloat(color.Red)
-	inst.Values["green"] = ByteFromFloat(color.Green)
-	inst.Values["blue"] = ByteFromFloat(color.Blue)
-	inst.Values["white"] = ByteFromFloat(color.White)
-	inst.Values["amber"] = ByteFromFloat(color.Amber)
-	inst.Values["pink"] = ByteFromFloat(color.Pink)
-	inst.Values["uv"] = ByteFromFloat(color.UV)
-}
-
-type ProfileControlLedVar struct {
-	ProfileControlBase
-
-	Channels map[string]int
-}
-
-func NewProfileControlLedVar(id string, rootNode *config.AclNode) (*ProfileControlLedVar, error) {
-	pc := &ProfileControlLedVar{
-		ProfileControlBase: MakeProfileControlBase(id, rootNode),
-
-		Channels: make(map[string]int),
-	}
-
-	rootNode.Child("leds").ForEachOrderedChild(func(name string, child *config.AclNode) {
-		pc.Channels[name] = child.AsInt()
-	})
-
-	return pc, nil
-}
-
-func (pc *ProfileControlLedVar) Id() string {
-	return pc.id
-}
-
-func (pc *ProfileControlLedVar) Name() string {
-	return pc.name
-}
-
-func (pc *ProfileControlLedVar) String() string {
-	return fmt.Sprintf("LedVar %v(%v) %v", pc.name, pc.id, pc.Channels)
-}
-
-func (pc *ProfileControlLedVar) Instantiate() ProfileControlInstance {
-	inst := &ProfileControlLedVarInstance{
-		control: pc,
-		Values:  make(map[string]byte),
-	}
-
-	// Fill in the defaults so the outside world can know what channels there are
-	for name, _ := range pc.Channels {
-		inst.Values[name] = 0
-	}
-
-	return inst
-}
-
-func (pc *ProfileControlLedVar) SetDmx(inst ProfileControlInstance, channels []byte) error {
-
-	ledVarInst, ok := inst.(*ProfileControlLedVarInstance)
+	pc, ok := fc.ProfileControl.(*LedVarProfileControl)
 	if !ok {
-		return fmt.Errorf("Tried to SetDmx on a LedVar with a bad instance type")
+		// attached to the wrong type of control. Bad
+		return
 	}
 
-	for name, channelIx := range pc.Channels {
-		if channelIx == 0 || channelIx > len(channels) {
+	for name, channelIx := range pc.ColorMap {
+		if channelIx == 0 || channelIx > len(u.channels) {
+			// Invalid channel number
 			continue
 		}
 		// Adjust to network 0 index
 		channelIx--
 
-		channels[channelIx] = ledVarInst.Values[name]
+		u.channels[channelIx] = ByteFromFloat(color.Component(name))
 	}
 
-	return nil
 }
 
-/////////
-
-type ProfileControlPanTiltInstance struct {
-	control *ProfileControlPanTilt
-
-	Pan   float64
-	Tilt  float64
-	Speed float64
-}
-
-func (inst *ProfileControlPanTiltInstance) ProfileControl() ProfileControl {
-	return inst.control
-}
-
-func (inst *ProfileControlPanTiltInstance) SetDmx(channels []byte) error {
-	return inst.control.SetDmx(inst, channels)
-}
-
-type ProfileControlPanTilt struct {
+type LedVarProfileControl struct {
 	ProfileControlBase
 
-	PanCoarseCh  int
-	PanFineCh    int
-	TiltCoarseCh int
-	TiltFineCh   int
-	SpeedCh      int
+	ColorMap map[string]int
 }
 
-func NewProfileControlPanTilt(id string, rootNode *config.AclNode) (*ProfileControlPanTilt, error) {
-	pc := &ProfileControlPanTilt{
+func NewLedVarProfileControl(id string, rootNode *config.AclNode) (*LedVarProfileControl, error) {
+	pc := &LedVarProfileControl{
 		ProfileControlBase: MakeProfileControlBase(id, rootNode),
 
-		PanCoarseCh:  rootNode.ChildAsInt("pan", "coarse"),
-		PanFineCh:    rootNode.ChildAsInt("pan", "fine"),
-		TiltCoarseCh: rootNode.ChildAsInt("tilt", "coarse"),
-		TiltFineCh:   rootNode.ChildAsInt("tilt", "fine"),
-
-		SpeedCh: rootNode.ChildAsInt("speed"),
+		ColorMap: make(map[string]int),
 	}
+
+	rootNode.Child("leds").ForEachOrderedChild(func(name string, child *config.AclNode) {
+		pc.ColorMap[name] = child.AsInt()
+	})
 
 	return pc, nil
 }
 
-func (pc *ProfileControlPanTilt) Id() string {
+func (pc *LedVarProfileControl) Id() string {
 	return pc.id
 }
 
-func (pc *ProfileControlPanTilt) Name() string {
+func (pc *LedVarProfileControl) Name() string {
 	return pc.name
 }
 
-func (pc *ProfileControlPanTilt) String() string {
-	return fmt.Sprintf("PanTilt %v(%v) pan(%v %v) tilt(%v %v) sp(%v)", pc.name, pc.id, pc.PanCoarseCh, pc.PanFineCh, pc.TiltCoarseCh, pc.TiltFineCh, pc.SpeedCh)
+func (pc *LedVarProfileControl) String() string {
+	return fmt.Sprintf("LedVar %v(%v) %v", pc.name, pc.id, pc.ColorMap)
 }
 
-func (pc *ProfileControlPanTilt) Instantiate() ProfileControlInstance {
-	inst := &ProfileControlPanTiltInstance{
-		control: pc,
-
-		Pan:   0.5,
-		Tilt:  0.5,
-		Speed: 1.0,
-	}
-
-	return inst
-}
-
-func (pc *ProfileControlPanTilt) SetDmx(inst ProfileControlInstance, channels []byte) error {
-
-	panTiltInst, ok := inst.(*ProfileControlPanTiltInstance)
+func (pc *LedVarProfileControl) Instantiate(fixture Fixture) *FixtureControl {
+	dmx, ok := fixture.(*DmxFixture)
 	if !ok {
-		return fmt.Errorf("Tried to SetDmx on a PanTilt with a bad instance type")
+		return nil
 	}
 
-	iPan := uint16(math.MaxUint16 * panTiltInst.Pan)
-	iTilt := uint16(math.MaxUint16 * panTiltInst.Tilt)
-	iSpeed := uint8(math.MaxUint8 * panTiltInst.Speed)
-
-	if pc.PanCoarseCh > 0 && pc.PanCoarseCh <= len(channels) {
-		channels[pc.PanCoarseCh-1] = byte(iPan >> 8)
-		if pc.PanFineCh > 0 && pc.PanFineCh <= len(channels) {
-			channels[pc.PanFineCh-1] = byte(iPan)
-		}
+	updater := &LedVarUpdater{
+		channels: dmx.channels,
 	}
 
-	if pc.TiltCoarseCh > 0 && pc.TiltCoarseCh <= len(channels) {
-		channels[pc.TiltCoarseCh-1] = byte(iTilt >> 8)
-		if pc.TiltFineCh > 0 && pc.TiltFineCh <= len(channels) {
-			channels[pc.TiltFineCh-1] = byte(iTilt)
-		}
-	}
+	fc := NewFixtureControl(pc, updater)
 
-	if pc.SpeedCh > 0 && pc.SpeedCh <= len(channels) {
-		channels[pc.SpeedCh-1] = byte(iSpeed)
-	}
-
-	return nil
+	return fc
 }
+
+// func (pc *ProfileControlLedVar) SetDmx(inst ProfileControlInstance, channels []byte) error {
+
+// 	ledVarInst, ok := inst.(*ProfileControlLedVarInstance)
+// 	if !ok {
+// 		return fmt.Errorf("Tried to SetDmx on a LedVar with a bad instance type")
+// 	}
+
+// 	for name, channelIx := range pc.Channels {
+// 		if channelIx == 0 || channelIx > len(channels) {
+// 			continue
+// 		}
+// 		// Adjust to network 0 index
+// 		channelIx--
+
+// 		channels[channelIx] = ledVarInst.Values[name]
+// 	}
+
+// 	return nil
+// }
 
 /////////
 
-type ProfileControlFaderInstance struct {
-	control *ProfileControlFader
-	Value   byte
-}
+// type ProfileControlPanTiltInstance struct {
+// 	control *ProfileControlPanTilt
 
-func (inst *ProfileControlFaderInstance) ProfileControl() ProfileControl {
-	return inst.control
-}
+// 	Pan   float64
+// 	Tilt  float64
+// 	Speed float64
+// }
 
-func (inst *ProfileControlFaderInstance) SetDmx(channels []byte) error {
-	return inst.control.SetDmx(inst, channels)
-}
+// func (inst *ProfileControlPanTiltInstance) ProfileControl() ProfileControl {
+// 	return inst.control
+// }
 
-type ProfileControlFader struct {
-	ProfileControlBase
+// func (inst *ProfileControlPanTiltInstance) SetDmx(channels []byte) error {
+// 	return inst.control.SetDmx(inst, channels)
+// }
 
-	Channel int
-	Range   []int
-}
+// type ProfileControlPanTilt struct {
+// 	ProfileControlBase
 
-func NewProfileControlFader(id string, rootNode *config.AclNode) (*ProfileControlFader, error) {
-	pc := &ProfileControlFader{
-		ProfileControlBase: MakeProfileControlBase(id, rootNode),
+// 	PanCoarseCh  int
+// 	PanFineCh    int
+// 	TiltCoarseCh int
+// 	TiltFineCh   int
+// 	SpeedCh      int
+// }
 
-		Channel: rootNode.ChildAsInt("channel"),
-		Range:   rootNode.ChildAsIntList("range"),
-	}
+// func NewProfileControlPanTilt(id string, rootNode *config.AclNode) (*ProfileControlPanTilt, error) {
+// 	pc := &ProfileControlPanTilt{
+// 		ProfileControlBase: MakeProfileControlBase(id, rootNode),
 
-	return pc, nil
-}
+// 		PanCoarseCh:  rootNode.ChildAsInt("pan", "coarse"),
+// 		PanFineCh:    rootNode.ChildAsInt("pan", "fine"),
+// 		TiltCoarseCh: rootNode.ChildAsInt("tilt", "coarse"),
+// 		TiltFineCh:   rootNode.ChildAsInt("tilt", "fine"),
 
-func (pc *ProfileControlFader) Id() string {
-	return pc.id
-}
+// 		SpeedCh: rootNode.ChildAsInt("speed"),
+// 	}
 
-func (pc *ProfileControlFader) Name() string {
-	return pc.name
-}
+// 	return pc, nil
+// }
 
-func (pc *ProfileControlFader) String() string {
-	return fmt.Sprintf("Fader %v(%v) %v %v", pc.name, pc.id, pc.Channel, pc.Range)
-}
+// func (pc *ProfileControlPanTilt) Id() string {
+// 	return pc.id
+// }
 
-func (pc *ProfileControlFader) Instantiate() ProfileControlInstance {
-	inst := &ProfileControlFaderInstance{
-		control: pc,
-	}
+// func (pc *ProfileControlPanTilt) Name() string {
+// 	return pc.name
+// }
 
-	return inst
-}
+// func (pc *ProfileControlPanTilt) String() string {
+// 	return fmt.Sprintf("PanTilt %v(%v) pan(%v %v) tilt(%v %v) sp(%v)", pc.name, pc.id, pc.PanCoarseCh, pc.PanFineCh, pc.TiltCoarseCh, pc.TiltFineCh, pc.SpeedCh)
+// }
 
-func (pc *ProfileControlFader) SetDmx(inst ProfileControlInstance, channels []byte) error {
+// func (pc *ProfileControlPanTilt) Instantiate() ProfileControlInstance {
+// 	inst := &ProfileControlPanTiltInstance{
+// 		control: pc,
 
-	faderInst, ok := inst.(*ProfileControlFaderInstance)
-	if !ok {
-		return fmt.Errorf("Tried to SetDmx on a Fader with a bad instance type")
-	}
+// 		Pan:   0.5,
+// 		Tilt:  0.5,
+// 		Speed: 1.0,
+// 	}
 
-	if pc.Channel != 0 && pc.Channel <= len(channels) {
-		// Adjust to network 0 index
-		channels[pc.Channel-1] = faderInst.Value
-	}
+// 	return inst
+// }
 
-	return nil
-}
+// func (pc *ProfileControlPanTilt) SetDmx(inst ProfileControlInstance, channels []byte) error {
 
-/////////
+// 	panTiltInst, ok := inst.(*ProfileControlPanTiltInstance)
+// 	if !ok {
+// 		return fmt.Errorf("Tried to SetDmx on a PanTilt with a bad instance type")
+// 	}
 
-type PCEnumValue struct {
-	Name    string
-	Channel int
-	Values  []int
+// 	iPan := uint16(math.MaxUint16 * panTiltInst.Pan)
+// 	iTilt := uint16(math.MaxUint16 * panTiltInst.Tilt)
+// 	iSpeed := uint8(math.MaxUint8 * panTiltInst.Speed)
 
-	VariableName   string
-	VariableOffset int
-}
+// 	if pc.PanCoarseCh > 0 && pc.PanCoarseCh <= len(channels) {
+// 		channels[pc.PanCoarseCh-1] = byte(iPan >> 8)
+// 		if pc.PanFineCh > 0 && pc.PanFineCh <= len(channels) {
+// 			channels[pc.PanFineCh-1] = byte(iPan)
+// 		}
+// 	}
 
-func (inst *PCEnumValue) SetDmx(channels []byte) error {
-	//return inst.control.SetDmx(inst, channels)
-	return nil
-}
+// 	if pc.TiltCoarseCh > 0 && pc.TiltCoarseCh <= len(channels) {
+// 		channels[pc.TiltCoarseCh-1] = byte(iTilt >> 8)
+// 		if pc.TiltFineCh > 0 && pc.TiltFineCh <= len(channels) {
+// 			channels[pc.TiltFineCh-1] = byte(iTilt)
+// 		}
+// 	}
 
-func NewPCEnumValue(name string, node *config.AclNode) (*PCEnumValue, error) {
-	v := &PCEnumValue{
-		Name:           name,
-		Values:         make([]int, 0),
-		VariableName:   node.ChildAsString("variable", "name"),
-		VariableOffset: node.ChildAsInt("variable", "offset"),
-	}
+// 	if pc.SpeedCh > 0 && pc.SpeedCh <= len(channels) {
+// 		channels[pc.SpeedCh-1] = byte(iSpeed)
+// 	}
 
-	if len(v.VariableName) > 0 {
-		// That's enough
-		return v, nil
-	}
-
-	valsNode := node.Child("v")
-	if valsNode == nil {
-		valsNode = node.Child("range")
-	}
-
-	for ix := 0; ix < valsNode.Len(); ix++ {
-		v.Values = append(v.Values, valsNode.AsIntN(ix))
-	}
-
-	return v, nil
-}
-
-func (ev *PCEnumValue) String() string {
-	var b strings.Builder
-	b.WriteString("<'")
-	b.WriteString(ev.Name)
-	b.WriteString("' ")
-	if len(ev.VariableName) > 0 {
-		b.WriteString("${")
-		b.WriteString(ev.VariableName)
-		b.WriteString(" ")
-		b.WriteString(fmt.Sprintf("%v", ev.VariableOffset))
-		b.WriteString("}")
-	} else {
-		b.WriteString(fmt.Sprintf("%v", ev.Values))
-	}
-	b.WriteString(">")
-
-	return b.String()
-}
-
-//
-
-type ProfileControlEnum struct {
-	ProfileControlBase
-
-	Channel int
-	Values  []*PCEnumValue
-}
-
-func NewProfileControlEnum(id string, rootNode *config.AclNode) (*ProfileControlEnum, error) {
-	pc := &ProfileControlEnum{
-		ProfileControlBase: MakeProfileControlBase(id, rootNode),
-
-		Channel: rootNode.ChildAsInt("channel"),
-		Values:  make([]*PCEnumValue, 0),
-	}
-
-	vNode := rootNode.Child("values")
-	if vNode != nil {
-		keys := vNode.OrderedChildNames
-		for kix := 0; kix < len(keys); kix++ {
-			name := keys[kix]
-
-			val, err := NewPCEnumValue(name, vNode.Child(name))
-			if err != nil {
-				return nil, err
-			}
-
-			pc.Values = append(pc.Values, val)
-		}
-	}
-
-	return pc, nil
-}
-
-func (pc *ProfileControlEnum) Id() string {
-	return pc.id
-}
-
-func (pc *ProfileControlEnum) Name() string {
-	return pc.name
-}
-
-func (pc *ProfileControlEnum) String() string {
-	return fmt.Sprintf("Enum %v(%v) %v->%v", pc.name, pc.id, pc.Channel, pc.Values)
-}
-
-func (pc *ProfileControlEnum) Instantiate() ProfileControlInstance {
-	return nil
-}
-
-func (pc *ProfileControlEnum) SetDmx(inst ProfileControlInstance, channels []byte) error {
-
-	return nil
-}
+// 	return nil
+// }
 
 // /////////
 
-type ProfileControlGroupInstance struct {
-	control   *ProfileControlGroup
-	Instances []ProfileControlInstance
+// type ProfileControlFaderInstance struct {
+// 	control *ProfileControlFader
+// 	Value   byte
+// }
+
+// func (inst *ProfileControlFaderInstance) ProfileControl() ProfileControl {
+// 	return inst.control
+// }
+
+// func (inst *ProfileControlFaderInstance) SetDmx(channels []byte) error {
+// 	return inst.control.SetDmx(inst, channels)
+// }
+
+// type ProfileControlFader struct {
+// 	ProfileControlBase
+
+// 	Channel int
+// 	Range   []int
+// }
+
+// func NewProfileControlFader(id string, rootNode *config.AclNode) (*ProfileControlFader, error) {
+// 	pc := &ProfileControlFader{
+// 		ProfileControlBase: MakeProfileControlBase(id, rootNode),
+
+// 		Channel: rootNode.ChildAsInt("channel"),
+// 		Range:   rootNode.ChildAsIntList("range"),
+// 	}
+
+// 	return pc, nil
+// }
+
+// func (pc *ProfileControlFader) Id() string {
+// 	return pc.id
+// }
+
+// func (pc *ProfileControlFader) Name() string {
+// 	return pc.name
+// }
+
+// func (pc *ProfileControlFader) String() string {
+// 	return fmt.Sprintf("Fader %v(%v) %v %v", pc.name, pc.id, pc.Channel, pc.Range)
+// }
+
+// func (pc *ProfileControlFader) Instantiate() ProfileControlInstance {
+// 	inst := &ProfileControlFaderInstance{
+// 		control: pc,
+// 	}
+
+// 	return inst
+// }
+
+// func (pc *ProfileControlFader) SetDmx(inst ProfileControlInstance, channels []byte) error {
+
+// 	faderInst, ok := inst.(*ProfileControlFaderInstance)
+// 	if !ok {
+// 		return fmt.Errorf("Tried to SetDmx on a Fader with a bad instance type")
+// 	}
+
+// 	if pc.Channel != 0 && pc.Channel <= len(channels) {
+// 		// Adjust to network 0 index
+// 		channels[pc.Channel-1] = faderInst.Value
+// 	}
+
+// 	return nil
+// }
+
+// /////////
+
+// type PCEnumValue struct {
+// 	Name    string
+// 	Channel int
+// 	Values  []int
+
+// 	VariableName   string
+// 	VariableOffset int
+// }
+
+// func (inst *PCEnumValue) SetDmx(channels []byte) error {
+// 	//return inst.control.SetDmx(inst, channels)
+// 	return nil
+// }
+
+// func NewPCEnumValue(name string, node *config.AclNode) (*PCEnumValue, error) {
+// 	v := &PCEnumValue{
+// 		Name:           name,
+// 		Values:         make([]int, 0),
+// 		VariableName:   node.ChildAsString("variable", "name"),
+// 		VariableOffset: node.ChildAsInt("variable", "offset"),
+// 	}
+
+// 	if len(v.VariableName) > 0 {
+// 		// That's enough
+// 		return v, nil
+// 	}
+
+// 	valsNode := node.Child("v")
+// 	if valsNode == nil {
+// 		valsNode = node.Child("range")
+// 	}
+
+// 	for ix := 0; ix < valsNode.Len(); ix++ {
+// 		v.Values = append(v.Values, valsNode.AsIntN(ix))
+// 	}
+
+// 	return v, nil
+// }
+
+// func (ev *PCEnumValue) String() string {
+// 	var b strings.Builder
+// 	b.WriteString("<'")
+// 	b.WriteString(ev.Name)
+// 	b.WriteString("' ")
+// 	if len(ev.VariableName) > 0 {
+// 		b.WriteString("${")
+// 		b.WriteString(ev.VariableName)
+// 		b.WriteString(" ")
+// 		b.WriteString(fmt.Sprintf("%v", ev.VariableOffset))
+// 		b.WriteString("}")
+// 	} else {
+// 		b.WriteString(fmt.Sprintf("%v", ev.Values))
+// 	}
+// 	b.WriteString(">")
+
+// 	return b.String()
+// }
+
+// //
+
+// type ProfileControlEnum struct {
+// 	ProfileControlBase
+
+// 	Channel int
+// 	Values  []*PCEnumValue
+// }
+
+// func NewProfileControlEnum(id string, rootNode *config.AclNode) (*ProfileControlEnum, error) {
+// 	pc := &ProfileControlEnum{
+// 		ProfileControlBase: MakeProfileControlBase(id, rootNode),
+
+// 		Channel: rootNode.ChildAsInt("channel"),
+// 		Values:  make([]*PCEnumValue, 0),
+// 	}
+
+// 	vNode := rootNode.Child("values")
+// 	if vNode != nil {
+// 		keys := vNode.OrderedChildNames
+// 		for kix := 0; kix < len(keys); kix++ {
+// 			name := keys[kix]
+
+// 			val, err := NewPCEnumValue(name, vNode.Child(name))
+// 			if err != nil {
+// 				return nil, err
+// 			}
+
+// 			pc.Values = append(pc.Values, val)
+// 		}
+// 	}
+
+// 	return pc, nil
+// }
+
+// func (pc *ProfileControlEnum) Id() string {
+// 	return pc.id
+// }
+
+// func (pc *ProfileControlEnum) Name() string {
+// 	return pc.name
+// }
+
+// func (pc *ProfileControlEnum) String() string {
+// 	return fmt.Sprintf("Enum %v(%v) %v->%v", pc.name, pc.id, pc.Channel, pc.Values)
+// }
+
+// func (pc *ProfileControlEnum) Instantiate() ProfileControlInstance {
+// 	return nil
+// }
+
+// func (pc *ProfileControlEnum) SetDmx(inst ProfileControlInstance, channels []byte) error {
+
+// 	return nil
+// }
+
+// /////////
+
+type GroupUpdater struct {
+	children []*FixtureControl
 }
 
-func (inst *ProfileControlGroupInstance) ForEachControlInstance(fn func(ProfileControlInstance)) {
+func (u *GroupUpdater) ObserveFor(fc *FixtureControl) {
+	// At the moment we don't look at a control point for groups. We might want
+	// to make them enableable or some such, but the group thing is currently
+	// not all that exciting outside of having a hierarchy of controls (for no
+	// real reason...)
+	if u == nil || fc == nil {
+		return
+	}
 
-	for i := 0; i < len(inst.Instances); i++ {
-		child := inst.Instances[i]
+	u.ForEachFixtureControl(func(child *FixtureControl) {
+		child.Updater.ObserveFor(child)
+	})
+
+}
+
+func (u *GroupUpdater) ForEachFixtureControl(fn func(*FixtureControl)) {
+
+	for i := 0; i < len(u.children); i++ {
+		child := u.children[i]
 
 		fn(child)
 
 		// Possibly recurse into it
-		grpChild, ok := child.(*ProfileControlGroupInstance)
+		grpChild, ok := child.Updater.(*GroupUpdater)
 		if ok {
-			grpChild.ForEachControlInstance(fn)
+			grpChild.ForEachFixtureControl(fn)
 		}
 	}
 }
 
-func (inst *ProfileControlGroupInstance) ProfileControl() ProfileControl {
-	return inst.control
-}
-
-func (inst *ProfileControlGroupInstance) SetDmx(channels []byte) error {
-	return inst.control.SetDmx(inst, channels)
-}
-
-type ProfileControlGroup struct {
+type GroupProfileControl struct {
 	ProfileControlBase
 
 	Controls     []ProfileControl
 	ControlsById map[string]ProfileControl
 }
 
-func NewProfileControlGroup(id string, rootNode *config.AclNode) (*ProfileControlGroup, error) {
-	pcg := &ProfileControlGroup{
+func NewGroupProfileControl(id string, rootNode *config.AclNode) (*GroupProfileControl, error) {
+	pcg := &GroupProfileControl{
 		ProfileControlBase: ProfileControlBase{
 			id: id,
 		},
@@ -598,15 +648,15 @@ func NewProfileControlGroup(id string, rootNode *config.AclNode) (*ProfileContro
 	return pcg, nil
 }
 
-func (pc *ProfileControlGroup) Id() string {
+func (pc *GroupProfileControl) Id() string {
 	return pc.id
 }
 
-func (pc *ProfileControlGroup) Name() string {
+func (pc *GroupProfileControl) Name() string {
 	return pc.name
 }
 
-func (pc *ProfileControlGroup) String() string {
+func (pc *GroupProfileControl) String() string {
 	var b strings.Builder
 
 	b.WriteString(fmt.Sprintf("Group %v(%v)", pc.name, pc.id))
@@ -620,37 +670,40 @@ func (pc *ProfileControlGroup) String() string {
 	return b.String()
 }
 
-func (pc *ProfileControlGroup) Instantiate() ProfileControlInstance {
-	inst := &ProfileControlGroupInstance{
-		control:   pc,
-		Instances: make([]ProfileControlInstance, len(pc.Controls)),
+func (pc *GroupProfileControl) Instantiate(fixture Fixture) *FixtureControl {
+	updater := &GroupUpdater{
+		children: make([]*FixtureControl, len(pc.Controls)),
 	}
+
 	for i := 0; i < len(pc.Controls); i++ {
-		child := pc.Controls[i]
-		inst.Instances[i] = child.Instantiate()
+		childPC := pc.Controls[i]
+		updater.children[i] = childPC.Instantiate(fixture)
 	}
-	return inst
+
+	fc := NewFixtureControl(pc, updater)
+
+	return fc
 }
 
-func (pc *ProfileControlGroup) SetDmx(inst ProfileControlInstance, channels []byte) error {
+// func (pc *ProfileControlGroup) SetDmx(inst ProfileControlInstance, channels []byte) error {
 
-	groupInst, ok := inst.(*ProfileControlGroupInstance)
-	if !ok {
-		return fmt.Errorf("Tried to SetDmx on a group with a bad instance type")
-	}
-	for i := 0; i < len(pc.Controls); i++ {
-		child := pc.Controls[i]
-		childInst := groupInst.Instances[i]
-		err := child.SetDmx(childInst, channels)
-		if err != nil {
-			return err
-		}
-	}
+// 	groupInst, ok := inst.(*ProfileControlGroupInstance)
+// 	if !ok {
+// 		return fmt.Errorf("Tried to SetDmx on a group with a bad instance type")
+// 	}
+// 	for i := 0; i < len(pc.Controls); i++ {
+// 		child := pc.Controls[i]
+// 		childInst := groupInst.Instances[i]
+// 		err := child.SetDmx(childInst, channels)
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
-func (pc *ProfileControlGroup) ForEachControl(fn func(ProfileControl)) {
+func (pc *GroupProfileControl) ForEachControl(fn func(ProfileControl)) {
 
 	for i := 0; i < len(pc.Controls); i++ {
 		child := pc.Controls[i]
@@ -678,22 +731,22 @@ func NewControlFromConfig(id string, node *config.AclNode) (ProfileControl, erro
 
 	switch kind {
 	case "group":
-		control, err = NewProfileControlGroup(id, node)
+		control, err = NewGroupProfileControl(id, node)
 
-	case "rgbw":
-		control, err = NewProfileControlRGBW(id, node)
+	// case "rgbw":
+	// 	control, err = NewProfileControlRGBW(id, node)
 
 	case "led_var":
-		control, err = NewProfileControlLedVar(id, node)
+		control, err = NewLedVarProfileControl(id, node)
 
-	case "pan_tilt":
-		control, err = NewProfileControlPanTilt(id, node)
+		// case "pan_tilt":
+		// 	control, err = NewProfileControlPanTilt(id, node)
 
-	case "fader":
-		control, err = NewProfileControlFader(id, node)
+		// case "fader":
+		// 	control, err = NewProfileControlFader(id, node)
 
-	case "enum":
-		control, err = NewProfileControlEnum(id, node)
+		// case "enum":
+		// 	control, err = NewProfileControlEnum(id, node)
 
 	}
 
@@ -716,7 +769,7 @@ type Profile struct {
 	Name         string
 	ChannelCount int
 
-	Controls *ProfileControlGroup
+	Controls *GroupProfileControl
 }
 
 func NewProfile(id string, rootNode *config.AclNode) (*Profile, error) {
@@ -728,7 +781,7 @@ func NewProfile(id string, rootNode *config.AclNode) (*Profile, error) {
 	p.ChannelCount = rootNode.DefChildAsInt(0, "channel_count")
 
 	var err error
-	p.Controls, err = NewProfileControlGroup("", rootNode.Child("controls"))
+	p.Controls, err = NewGroupProfileControl("", rootNode.Child("controls"))
 	if err != nil {
 		return nil, err
 	}

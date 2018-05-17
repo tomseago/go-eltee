@@ -115,3 +115,33 @@ func (c *LogConn) SendDMX(Universe int, data []byte) {
 
 	log.Debugf(b.String())
 }
+
+///////////
+
+type FtdiConn struct {
+	ctx *FtdiContext
+}
+
+func NewFtdiConn(cfg *config.AclNode) (DMXConn, error) {
+	conn := &FtdiConn{
+		ctx: NewFtdiContext(),
+	}
+
+	// No reason to start it straight away
+	err := conn.ctx.Start()
+	if err != nil {
+		return nil, err
+	}
+
+	return conn, nil
+}
+
+func (c *FtdiConn) SendDMX(Universe int, data []byte) {
+	if c == nil {
+		return
+	}
+
+	// TODO: Honor universe mappings here???
+
+	c.ctx.WriteDmx(data)
+}

@@ -29,10 +29,14 @@ dmx: {
             kind: log
         }
 
-        olad: {
-            kind: olad
-            //hostaddr: "localhost:9090"
-            hostaddr: "10.0.1.121:9090"
+        // olad: {
+        //     kind: olad
+        //     //hostaddr: "localhost:9090"
+        //     hostaddr: "10.0.1.121:9090"
+        // }
+
+        ftdi: {
+            kind: ftdi
         }
     }
 
@@ -58,43 +62,15 @@ dmx: {
 // A catalog of fixture definitions. Order is relevant because it is the 
 // default dmx addressing layout.
 fixtures:  {
-    /*
-    Stinger: {
-        kind: adj_stinger        
-    }
-    */
-
-    "Disco Spot 1": {
-        kind: donner_pinspot
-        base: 10
-    }
-
-    "Disco Spot 2": {
-        kind: donner_pinspot
-    }
-
-    "Flood Mover 1": {
-        kind: tomshine_floodmover
-    }
 
     /*
-
-    "Gobo Mover 1": {
-        kind: tomshine_gobomover
-    }
-    "Gobo Mover 2": {
-        kind: tomshine_gobomover
-    }
-
     "Flood Par 1": {
         kind: coidak_floodpar
+        base: 33
     }
     "Flood Par 2": {
         kind: coidak_floodpar
     }
-
-
-    //// New guys
     "Flood Par 3": {
         kind: coidak_floodpar
     }
@@ -102,34 +78,81 @@ fixtures:  {
         kind: coidak_floodpar
     }
 
-    "Flood Mover 1": {
-        kind: tomshine_floodmover
+    "Pin Spot 1": {
+        kind: donner_pinspot
+        base: 65
     }
-    "Flood Mover 2": {
-        kind: tomshine_floodmover
+    */
+
+    "Pin Spot 2": {
+        kind: donner_pinspot
+        base: 71
     }
 
-    "Wash 1": {
+    /*
+    "UV Flood 1": {
+        kind: tomled_uvpar
+        base: 77
+    }
+    "UV Flood 2": {
+        kind: tomled_uvpar
+    }
+    "UV Flood 3": {
+        kind: tomled_uvpar
+    }
+    "UV Flood 4": {
+        kind: tomled_uvpar
+    }
+
+
+    "COB Mini Par 1": {
+        kind: jlpow_cobpar
+        base: 97
+    }
+    "COB Mini Par 2": {
         kind: jlpow_cobpar
     }
-    "Wash 2": {
-        kind: jlpow_cobpar
-    }
+
 
     "Double Mover 1": {
         kind: ogori_doubleface
+        base: 129
     }
     "Double Mover 2": {
         kind: ogori_doubleface
     }
 
-    "UV Flood 1": {
-        kind: tomled_uvpar
+    "Flood Mover 1": {
+        kind: tomshine_floodmover
+        base: 193
     }
-    "UV Flood 2": {
-        kind: tomled_uvpar
+    "Flood Mover 2": {
+        kind: tomshine_floodmover
+    }
+
+
+    "Gobo Mover 1": {
+        kind: tomshine_gobomover
+        base: 257
+    }
+    "Gobo Mover 2": {
+        kind: tomshine_gobomover
+    }
+
+
+    Stinger: {
+        kind: adj_stinger        
+        base: 289
+    }
+
+
+    "Emma Laser": {
+        kind: emma_rgb24b
+        base: 298
     }
     */
+
+
 }
 
 

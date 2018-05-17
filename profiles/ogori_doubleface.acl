@@ -17,8 +17,8 @@ default_values: [
         255 0 0 0 // Flood Color RGBW
         0 255 0 0 // Spot Color RGBW
 
-        0 // 17: Auto spin {off:[0 15], use_speed:[16 128], ignore_speed:[129 255] }
-        0 // 18: Auto spin Speed also  fast_to_slow:[0 255]
+        0 // 17: Auto motor {off:[0 15], use_speed:[16 128], ignore_speed:[129 255] }
+        0 // 18: Auto motor Speed also  fast_to_slow:[0 255]
 
         0 // 19: Auto Color  
           /* { off: 0, fade:[1 7], 
