@@ -1,0 +1,22 @@
+profile: tomshine_floodmover
+
+control_points: {
+    position: {
+        kind: xyz
+        x: 0.5
+        y: 0.5
+        z: 0.7
+    }
+}
+
+patches: {
+    position: position
+}
+
+expected: {
+    "1": 21
+    "2": 85
+
+    "3": 63
+    "4": 150
+}

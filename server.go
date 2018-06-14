@@ -78,7 +78,7 @@ func NewServer(cfg *config.AclNode) *Server {
 	return s
 }
 
-func (s *Server) CreateFixture(name string, node *config.AclNode, defBase int, dmx []byte) (f Fixture, actualBase int) {
+func (s *Server) CreateFixture(name string, node *config.AclNode, defBase int, dmx []byte) (f Fixture, nextBase int) {
 
 	// First lets see if we can find a profile of the right kind
 	kind := node.ChildAsString("kind")
@@ -86,14 +86,15 @@ func (s *Server) CreateFixture(name string, node *config.AclNode, defBase int, d
 	profile := s.library.Profiles[kind]
 	if profile == nil {
 		log.Errorf("Unknown fixture kind '%v'", kind)
-		return nil
+		return nil, defBase
 	}
 
-	actualBase = node.DefChildAsInt(defBase, "base")
-	channels = dmx[actualBase-1 : profile.ChannelCount]
+	actualBase := node.DefChildAsInt(defBase, "base")
+	channels := dmx[actualBase-1 : actualBase-1+profile.ChannelCount]
 
 	fixture := NewDmxFixture(name, actualBase, channels, profile)
-	return fixture
+
+	return fixture, actualBase + profile.ChannelCount
 }
 
 func CreateConn(name string, cfg *config.AclNode) (DMXConn, error) {
@@ -116,41 +117,41 @@ func CreateConn(name string, cfg *config.AclNode) (DMXConn, error) {
 	return nil, fmt.Errorf("Unknown dmx kind '%v'", kind)
 }
 
-func (s *Server) BuildDefaultMappers() {
-	for fIx := 0; fIx < len(s.fixtures); fIx++ {
-		fixture := s.fixtures[fIx]
+// func (s *Server) BuildDefaultMappers() {
+// 	for fIx := 0; fIx < len(s.fixtures); fIx++ {
+// 		fixture := s.fixtures[fIx]
 
-		inst := fixture.ProfileControlInstance()
-		groupInst, ok := inst.(*ProfileControlGroupInstance)
-		if !ok {
-			continue
-		}
-		groupInst.ForEachControlInstance(func(inst ProfileControlInstance) {
-			if inst == nil {
-				log.Warningf("%v has nil PCI", fixture.Name())
-			} else {
-				pc := inst.ProfileControl()
-				log.Infof("%v %v", fixture.Name(), pc)
+// 		inst := fixture.ProfileControlInstance()
+// 		groupInst, ok := inst.(*ProfileControlGroupInstance)
+// 		if !ok {
+// 			continue
+// 		}
+// 		groupInst.ForEachControlInstance(func(inst ProfileControlInstance) {
+// 			if inst == nil {
+// 				log.Warningf("%v has nil PCI", fixture.Name())
+// 			} else {
+// 				pc := inst.ProfileControl()
+// 				log.Infof("%v %v", fixture.Name(), pc)
 
-				// Can it do color?
-				// colorSettable, ok := inst.(WorldColorSettable)
-				// if ok {
-				// 	m := NewColorMapper("default")
-				// 	s.defaultMappers = append(s.defaultMappers, m)
-				// }
-			}
-		})
-	}
-}
+// 				// Can it do color?
+// 				// colorSettable, ok := inst.(WorldColorSettable)
+// 				// if ok {
+// 				// 	m := NewColorMapper("default")
+// 				// 	s.defaultMappers = append(s.defaultMappers, m)
+// 				// }
+// 			}
+// 		})
+// 	}
+// }
 
 func (s *Server) Start() {
 	go s.dmxHarness.FramePump()
 
 }
 
-func (s *Server) FrameState() ([]Fixture, *WorldState, []StateMapper) {
-	return s.fixtures, s.currentWS, s.defaultMappers
-}
+// func (s *Server) FrameState() ([]Fixture, *WorldState, []StateMapper) {
+// 	return s.fixtures, s.currentWS, s.defaultMappers
+// }
 
 func (s *Server) DumpFixtures() {
 	log.Info("All fixtures....")

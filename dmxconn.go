@@ -88,10 +88,15 @@ func (c *OLADConn) SendDMX(universe int, data []byte) {
 ///////////
 
 type LogConn struct {
+	start  int
+	length int
 }
 
 func NewLogConn(cfg *config.AclNode) (DMXConn, error) {
-	conn := &LogConn{}
+	conn := &LogConn{
+		start:  cfg.DefChildAsInt(0, "start"),
+		length: cfg.DefChildAsInt(30, "length"),
+	}
 
 	return conn, nil
 }
@@ -101,15 +106,13 @@ func (c *LogConn) SendDMX(Universe int, data []byte) {
 		return
 	}
 
-	toLog := len(data)
-	if toLog > 30 {
-		toLog = 30
-	}
-
 	var b strings.Builder
-	b.WriteString("SendDMX [")
-	for i := 0; i < toLog; i++ {
-		b.WriteString(fmt.Sprintf("%d ", data[i]))
+	b.WriteString(fmt.Sprintf("SendDMX %d [", c.start))
+	for i := 0; i < c.length; i++ {
+		if c.start+i >= len(data) {
+			break
+		}
+		b.WriteString(fmt.Sprintf("%d ", data[c.start+i]))
 	}
 	b.WriteString("]")
 

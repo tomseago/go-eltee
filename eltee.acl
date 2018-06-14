@@ -27,6 +27,8 @@ dmx: {
     connections: {
         log: {
             kind: log
+            start: 33
+            length: 10
         }
 
         // olad: {
@@ -52,7 +54,7 @@ dmx: {
         }
 
         // The name of a test to run
-        run: first
+        xrun: first
     }
 }
 
@@ -63,11 +65,11 @@ dmx: {
 // default dmx addressing layout.
 fixtures:  {
 
-    /*
     "Flood Par 1": {
         kind: coidak_floodpar
         base: 33
     }
+    /*
     "Flood Par 2": {
         kind: coidak_floodpar
     }

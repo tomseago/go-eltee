@@ -1,0 +1,39 @@
+profile: coidak_floodpar
+
+control_points: {
+    color: {
+        kind: color
+        red: 0.5
+        green: 0.5
+        blue: 0
+        white: 0
+    }
+
+    master: {
+        kind: intensity
+        intensity: 0.75
+    }
+
+    mode: {
+        kind: enum
+        item: 1
+        degree: 1.0
+    }
+}
+
+patches: {
+    mode: mode
+    color: color
+    master: master
+}
+
+expected: {
+    "1": 50
+
+    "4": 191
+
+    "5": 127
+    "6": 127
+    "7": 0
+    "8": 0
+}

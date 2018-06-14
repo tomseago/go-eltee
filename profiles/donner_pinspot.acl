@@ -18,10 +18,10 @@ controls: {
         kind: enum
         channel: 1
         values: {
-            "Off"   : { v: 0 }
-            "Step Change" : { range: [9 134] }
-            "Strobe Speed" : { range: [135 239] }
-            "Use RGBW" : { v: 240 }
+            "Off"   : 0 
+            "Step Change" : [9 134] 
+            "Strobe Speed" : [135 239] 
+            "Use RGBW" : 240 
         }
     }
 
@@ -30,12 +30,12 @@ controls: {
         kind: enum
         channel: 6
         values: {
-            "Off"  : { v: 0 }
-            "Jump RGBW" : { range: [3 31] }
-            "Jump GBW, R static" : { range: [32 63] }
-            "Jump RBW, G static" : { range: [64 79] }
-            "Jump RGW, B static" : { range: [80 95] }
-            "Jump RGB, W static" : { range: [96 111] }
+            "Off"  : 0 
+            "Jump RGBW" : [3 31]
+            "Jump GBW, R static" : [32 63]
+            "Jump RBW, G static" : [64 79]
+            "Jump RGW, B static" : [80 95]
+            "Jump RGB, W static" : [96 111]
 
             // more stuff here....
         }

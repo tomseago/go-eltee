@@ -5,50 +5,24 @@ default_values: [
         128 // Dimmer
         0   // Strobe {off: 0, slow_fast:[1, 250], sound:[251 255]}
     ]
-/*
+
 controls: {
-    color: {
-        name: "Color"
-        kind: led_var
-        leds: {
-            red: 8
-            green: 9
-            blue: 10
-            white: 11
-            amber: 12
-            uv: 13
-        }
-    }
 
-    position: {
-        name: "Position"
-        kind: pan_tilt
-        pan: {
-            coarse: 1
-            fine: 2
-        }
-        tilt: {
-            coarse: 3
-            fine: 4
-        }
-        speed: 5
-    }
-
-    master_dimmer: {
+    master: {
         name: "Master Dimmer"
-        kind: fader
-        channel: 6
-        range: [0 255] // Which should be the default really
+        kind: intensity
+        channel: 1
     }
 
     strobe: {
         name: "Strobe"
         kind: enum
-        channel: 7
+        channel: 2
         values: {
-            "Off"   : { v: 0 }
-            "Strobe Speed" : { v: [1 255] }
+            "Off": 0
+            "Strobing": [1 250]
+            "Sound Activated": [251 255]
         }
     }
-    */
+    
 }

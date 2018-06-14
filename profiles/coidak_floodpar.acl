@@ -1,0 +1,50 @@
+name: "Coidak Flood Par"
+channel_count: 8
+
+default_values: [
+    // Mode etc.
+    0 0 0 
+
+    64 // Master dimmer
+
+    // RGBW
+    255 0 0 255
+]
+
+controls: {
+    mode: {
+        name: "Mode"
+        kind: enum
+        channel: 1
+        values: {
+            "Use RGBW" : 0
+            "Static Color A1"   : [11 50] 
+            "Jump Function A2"  : [51 100]
+            "Fade Mode A3"      : [101 150]
+            "Sound Activated A4" : [151 200]
+            "Strobe A5"          : [201 255]
+        }
+    }
+
+    // 2 = Color Macro (enum of colors)
+    // 3 = Speed, strobe??? change???
+
+    
+    master: {
+        name: "Master Dimmer"
+        kind: intensity
+        channel: 4
+    }
+
+    color: {
+        name: "RGBW"
+        kind: led_var
+        leds: {
+            red: 5
+            green: 6
+            blue: 7
+            white: 8
+        }
+    }
+
+}
