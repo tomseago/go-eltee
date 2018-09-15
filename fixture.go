@@ -1,8 +1,10 @@
 package eltee
 
 import (
-// "github.com/eyethereal/go-config"
+	"sort"
 )
+
+// "github.com/eyethereal/go-config"
 
 type Fixture interface {
 	// Say my name... It is unique
@@ -98,8 +100,14 @@ func (f *DmxFixture) ForEachFixtureControl(fn func(string, *FixtureControl)) {
 		return
 	}
 
-	for id, fc := range f.controlsById {
-		fn(id, fc)
+	var ids []string
+	for id, _ := range f.controlsById {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+
+	for _, id := range ids {
+		fn(id, f.controlsById[id])
 	}
 }
 

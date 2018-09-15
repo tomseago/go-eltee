@@ -1,0 +1,66 @@
+logging: {
+    level: debug
+    format: "%{time:15:04:05.000} %{level:4.4s} %{module:8.8s} %{shortfunc:10.10s} ▶ %{message}"
+
+    backends: {
+        /*
+        file: {
+            type: file
+            filename: "dev.log"
+        }
+        */
+
+        console: {
+            type: stdout
+            format: "%{color}%{time:15:04:05.000} %{level:4.4s} %{module:8.8s} %{color:bold}%{shortfunc:10.10s}%{color:reset} ▶ %{message}"
+        }        
+    }
+
+    // Set debug to true to print a log message to each log level after
+    // the configuration is complete
+    // debug: true
+}
+
+
+// Output channels
+dmx: {
+    connections: {
+        log: {
+            kind: log
+            start: 33
+            length: 10
+        }
+
+        // olad: {
+        //     kind: olad
+        //     //hostaddr: "localhost:9090"
+        //     hostaddr: "10.0.1.121:9090"
+        // }
+
+        ftdi: {
+            kind: ftdi
+        }
+    }
+
+
+    tester: {
+        scenes: {
+            first: {
+                data: [
+                    200 0 0 177 0 0 98 121 174 180 0 255 0 167 0 175 202
+                ]
+                start_channel: 10
+            }
+        }
+
+        // The name of a test to run
+        xrun: first
+    }
+}
+
+
+defaults: {
+    fixtures: "default"
+    control_points: "default"
+    patches: "default"
+}

@@ -1,0 +1,119 @@
+control_points: {
+    ////////////////////////////////////////////////////////////////////////
+    // Color
+
+    default_color: {
+        kind: color
+        red: 0.7
+        green: 0.5
+        blue: 0.0
+
+        uv: 1.0
+    }
+
+    primary_color: {
+        kind: color
+        red: 1.0
+        green: 0.0
+        blue: 0.0
+    }
+
+    secondary_color: {
+        kind: color
+        red: 0.0
+        green: 1.0
+        blue: 0.0
+    }
+
+    tertiary_color: {
+        kind: color
+        red: 0.0
+        green: 0.0
+        blue: 1.0
+    }
+
+    red:   { kind: color, red: 1.0, blue: 0.0, green: 0.0 }
+    blue:  { kind: color, red: 0.0, blue: 1.0, green: 0.0 }
+    green: { kind: color, red: 0.0, blue: 0.0, green: 1.0 }
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // XYZ
+
+    default_xyz: {
+        kind: xyz
+        x: 0.3
+        y: 0.5
+        z: 0.0
+    }
+
+    stage_left_up: {
+        kind: xyz
+        x: -1.0
+        y: -1.0
+        z: -1.0
+    }
+
+    stage_left_down: {
+        kind: xyz
+        x: -1.0
+        y: 1.0
+        z: -1.0
+    }
+
+    stage_right_up: {
+        kind: xyz
+        x: 1.0
+        y: -1.0
+        z: -1.0
+    }
+
+    stage_right_down: {
+        kind: xyz
+        x: 1.0
+        y: 1.0
+        z: -1.0
+    }
+
+    primary_xyz: {
+        kind: xyz
+        x: 0.0
+        y: 0.0
+        z: -1.0
+    }
+
+    secondary_xyz: {
+        kind: xyz
+        x: 0.0
+        y: 0.0
+        z: 1.0
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Intensity
+
+    master_intensity: {
+        kind: intensity
+        intensity: 1.0
+    }
+
+    on: {
+        kind: intensity
+        intensity: 1.0
+    }
+
+    off: {
+        kind: intensity
+        intensity: 0.0
+    }
+
+    primary_intensity: {
+        kind: intensity
+        intensity: 0.5
+    }
+
+    secondary_intensity: {
+        kind: intensity
+        intensity: 0.5
+    }
+}

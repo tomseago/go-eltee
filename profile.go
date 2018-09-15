@@ -11,6 +11,11 @@ import (
 
 /////////
 
+// A Profile is basically a class of fixture. That is, it represents a particular model of
+// light from a particular manufacturer and holds all the information about controls that
+// can be manipulated for that light. It is represented by a single .acl file in the
+// profiles directory. There may be multiple instances of a profile - each instance being
+// known as a fixture - within a particular setup.
 type Profile struct {
 	Id string
 
@@ -29,7 +34,7 @@ func NewProfile(id string, rootNode *config.AclNode) (*Profile, error) {
 	p.ChannelCount = rootNode.DefChildAsInt(0, "channel_count")
 
 	var err error
-	p.Controls, err = NewGroupProfileControl("", rootNode.Child("controls"))
+	p.Controls, err = NewGroupProfileControl("_root", rootNode.Child("controls"))
 	if err != nil {
 		return nil, err
 	}

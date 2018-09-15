@@ -2,9 +2,9 @@ name: "Donner Pinspot"
 channel_count: 6
 
 controls: {
-    rgbw: {
+    color: {
         name: "RGBW"
-        kind: rgbw
+        kind: led_var
         channels: {
             red: 2
             green: 3

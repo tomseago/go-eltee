@@ -1,0 +1,14 @@
+patches:  {
+
+    "Flood Par 1": {
+        color: {
+            cp: primary_color
+        }   
+    }
+
+    "Pin Spot 2": {
+        color: {
+            cp: secondary_color
+        }   
+    }
+}    

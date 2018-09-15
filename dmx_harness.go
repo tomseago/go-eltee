@@ -1,6 +1,7 @@
 package eltee
 
 import (
+	"fmt"
 	"github.com/eyethereal/go-config"
 	"time"
 )
@@ -38,6 +39,28 @@ func NewDmxHarness(server *Server, node *config.AclNode) *DmxHarness {
 	return h
 }
 
+func CreateConn(name string, cfg *config.AclNode) (DMXConn, error) {
+	if cfg == nil {
+		return nil, fmt.Errorf("AclNode was nil")
+	}
+
+	kind := cfg.ChildAsString("kind")
+	switch kind {
+	case "olad":
+		return NewOLADConn(cfg)
+
+	case "log":
+		return NewLogConn(cfg)
+
+	case "ftdi":
+		return NewFtdiConn(cfg)
+	}
+
+	return nil, fmt.Errorf("Unknown dmx kind '%v'", kind)
+}
+
+// Called periodically to fetch a new frame from either the tester or the main server
+// and then send that out to all DMX connections
 func (h *DmxHarness) SendFrame() {
 
 	if h.dmxTester.HasTest() {
@@ -45,7 +68,7 @@ func (h *DmxHarness) SendFrame() {
 	} else {
 		// use the mappers to update the frame
 		// fixtures, state, mappers := h.server.FrameState()
-
+		h.server.UpdateFrame()
 	}
 
 	// Send this frame to all of our connections
@@ -54,6 +77,8 @@ func (h *DmxHarness) SendFrame() {
 	}
 }
 
+// The main pump function which should almost certainly be run from a go routine. It will
+// repeatedly call SendFrame on the DmxHarness forever at some pre-defined frame interval.
 func (h *DmxHarness) FramePump() {
 	log.Infof("DmxHarness pump routine started")
 

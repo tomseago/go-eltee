@@ -19,7 +19,12 @@ var log = config.Logger("eltee")
 func main() {
 
 	// Load the configuration
+	info, err := os.Stat("config")
+	if err == nil && info.IsDir() {
+		os.Chdir("config")
+	}
 	cfg := config.LoadACLConfig("eltee", "ELTEE")
+
 	log.Warningf("***********************************************************************************")
 	log.Warningf("ElTee build %v - Starting Up", cfg.PrettyVersion())
 	log.Warningf("***********************************************************************************")
@@ -27,6 +32,8 @@ func main() {
 	server := eltee.NewServer(cfg)
 
 	server.DumpFixtures()
+	server.DumpControlPoints()
+
 	server.Start()
 
 	// Wait for sigKill???

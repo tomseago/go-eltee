@@ -1,8 +1,8 @@
 package eltee
 
 import (
-	"fmt"
 	"github.com/eyethereal/go-config"
+	"path"
 )
 
 //////////////////////////////////////////////////////////////////////
@@ -11,6 +11,12 @@ import (
 
 var log = config.Logger("eltee")
 
+///////////////////
+
+// The Server is the main object which gets instantiated and then creates everything
+// else. Generally there is only one, but as it is an object a larger server might
+// embed this server along with other servers, or multiple servers for some crazy
+// reason.
 type Server struct {
 	cfg *config.AclNode
 
@@ -20,7 +26,8 @@ type Server struct {
 	fixtures       []Fixture
 	fixturesByName map[string]Fixture
 
-	currentWS *WorldState
+	controlPoints       []ControlPoint
+	controlPointsByName map[string]ControlPoint
 }
 
 func NewServer(cfg *config.AclNode) *Server {
@@ -48,36 +55,101 @@ func NewServer(cfg *config.AclNode) *Server {
 	log.Debugf("%v", s.library)
 	log.Debugf("*****************************")
 
-	// Load the fixtures instances
-	fixNode := cfg.Child("fixtures")
-	if fixNode == nil {
-		log.Warningf("No fixtures key found")
-	} else {
-		base := 1
-		fixNode.ForEachOrderedChild(func(name string, child *config.AclNode) {
-			fixture, base := s.CreateFixture(name, child, base, s.dmxHarness.frame)
-			if fixture != nil {
-				s.fixtures = append(s.fixtures, fixture)
-				s.fixturesByName[name] = fixture
-
-				log.Infof("Added %v @ %v", fixture.Name(), base)
-			}
-		})
+	defaultsNode := cfg.Child("defaults")
+	if defaultsNode == nil {
+		defaultsNode = config.NewAclNode()
 	}
 
-	// Create our basic world states
-	// s.currentWS = NewWorldState()
-	// s.currentWS.Root = cfg.Child("world_state").Duplicate()
+	// Load the fixtures instances. Fixtures are instances of profiles
+	defFixturesFilename := defaultsNode.DefChildAsString("default", "fixtures")
+	defFixturesFilename = path.Join("fixtures", defFixturesFilename) + ".acl"
+	fixNode := config.NewAclNode()
+	err = fixNode.ParseFile(defFixturesFilename)
+	if err != nil {
+		log.Warningf("Unable to load default fixtures file '%v': %v", defFixturesFilename, err)
+	} else {
+		fixNode = fixNode.Child("fixtures")
+		if fixNode == nil {
+			log.Warningf("File '%v' did not contain a fixtures node", defFixturesFilename)
+		} else {
+			base := 1
+			fixNode.ForEachOrderedChild(func(name string, child *config.AclNode) {
+				fixture, base := s.CreateFixture(name, child, base, s.dmxHarness.frame)
+				if fixture != nil {
+					s.fixtures = append(s.fixtures, fixture)
+					s.fixturesByName[name] = fixture
 
-	// s.nextWS = s.currentWS.Duplicate()
+					log.Infof("Added %v @ %v", fixture.Name(), base)
+				}
+			})
+		}
+	}
 
-	// Iterate through all fixtures to setup a whole bunch of mappers to go from
-	// the world state to outputable values
-	// s.BuildDefaultMappers()
+	// Load the initial set of control points
+	defCPFilename := defaultsNode.DefChildAsString("default", "control_points")
+	defCPFilename = path.Join("control_points", defCPFilename) + ".acl"
+	cpNode := config.NewAclNode()
+	err = cpNode.ParseFile(defCPFilename)
+	if err != nil {
+		log.Warningf("Unable to load default control points file '%v': %v", defCPFilename, err)
+	} else {
+		cpNode = cpNode.Child("control_points")
+		if cpNode == nil {
+			log.Warningf("File '%v' did not contain a control_points node", defCPFilename)
+		} else {
+			s.controlPoints, s.controlPointsByName = CreateControlPointList(cpNode)
+		}
+	}
+
+	// Load an initial mapping between fixtures and control points
+	defPatchFilename := defaultsNode.DefChildAsString("default", "patches")
+	defPatchFilename = path.Join("patches", defPatchFilename) + ".acl"
+	patchesNode := config.NewAclNode()
+	err = patchesNode.ParseFile(defPatchFilename)
+	if err != nil {
+		log.Warningf("Unable to load default patches file '%v': %v", defPatchFilename, err)
+	} else {
+		patchesNode = patchesNode.Child("patches")
+		if patchesNode == nil {
+			log.Warningf("File '%v' did not contain a patches node", defPatchFilename)
+		} else {
+			// The order of names is fixture -> fixture_control -> control_point & lens_stack
+
+			patchesNode.ForEachOrderedChild(func(fixName string, fixPatches *config.AclNode) {
+				fixture := s.fixturesByName[fixName]
+				if fixture == nil {
+					log.Warningf("Patching: Unable to find fixture named '%v'", fixName)
+					return
+				}
+
+				fixPatches.ForEachOrderedChild(func(fcId string, fcNode *config.AclNode) {
+					fixtureControl := fixture.Control(fcId)
+					if fixtureControl == nil {
+						log.Warningf("Patching: Fixture '%v' does not have a control with id '%v'", fixName, fcId)
+						return
+					}
+
+					// Get the control point, if any
+					cpName := fcNode.ChildAsString("cp")
+					if len(cpName) > 0 {
+						cp := s.controlPointsByName[cpName]
+						if cp == nil {
+							log.Warningf("Patching: Could not find control point '%v' to patch to fixture '%v' control '%v'", cpName, fixName, fcId)
+						} else {
+							fixtureControl.ControlPoint = cp
+						}
+					}
+
+					// TODO: Add the lens stack
+				})
+			})
+		}
+	}
 
 	return s
 }
 
+// Create a new fixture with the given node from the config file
 func (s *Server) CreateFixture(name string, node *config.AclNode, defBase int, dmx []byte) (f Fixture, nextBase int) {
 
 	// First lets see if we can find a profile of the right kind
@@ -95,26 +167,6 @@ func (s *Server) CreateFixture(name string, node *config.AclNode, defBase int, d
 	fixture := NewDmxFixture(name, actualBase, channels, profile)
 
 	return fixture, actualBase + profile.ChannelCount
-}
-
-func CreateConn(name string, cfg *config.AclNode) (DMXConn, error) {
-	if cfg == nil {
-		return nil, fmt.Errorf("AclNode was nil")
-	}
-
-	kind := cfg.ChildAsString("kind")
-	switch kind {
-	case "olad":
-		return NewOLADConn(cfg)
-
-	case "log":
-		return NewLogConn(cfg)
-
-	case "ftdi":
-		return NewFtdiConn(cfg)
-	}
-
-	return nil, fmt.Errorf("Unknown dmx kind '%v'", kind)
 }
 
 // func (s *Server) BuildDefaultMappers() {
@@ -149,17 +201,54 @@ func (s *Server) Start() {
 
 }
 
+// A function to be called by the DmxHarness to update the frame slice that it
+// contains with new values. Essentially this is a pull of new data into the
+// DmxHarness at the time that it will then immediately be wanting to send the
+// data out. If the data was pre-calculated then lovely. In a simple first
+// implementation this is where we will actually do the updates to the frame
+// values based on the current time.
+//
+// The job to be done in the function is the first part of what is described
+// as the main looper
+//
+// 1. Polling animators for control point updates
+// 2. Polling input adapters for control point changes
+// 3. Publishing changed control point values to subscribed input adaptors
+// 4. Publishing changed control point values to observing fixture controls
+// 5. Poking all Fixtures to have them generate their DMX output
+//
+func (s *Server) UpdateFrame() {
+
+}
+
 // func (s *Server) FrameState() ([]Fixture, *WorldState, []StateMapper) {
 // 	return s.fixtures, s.currentWS, s.defaultMappers
 // }
 
 func (s *Server) DumpFixtures() {
-	log.Info("All fixtures....")
-	// for _, univ := range s.universes {
-	// 	all := univ.AllFixtures()
-	// 	for _, fix := range all {
-	// 		log.Info("Fixture [%v] @ %v", fix.Name(), fix.Base())
-	// 	}
-	// }
-	log.Info("...done")
+	log.Info("--------- All fixtures....")
+	for _, fix := range s.fixtures {
+		log.Infof("Fixture [%v] † %v", fix.Name(), fix.Profile().Name)
+		// Controls and mappings
+		fix.ForEachFixtureControl(func(id string, fc *FixtureControl) {
+			if fc.ControlPoint != nil {
+				log.Debugf("  %v <- %v", id, fc.ControlPoint.Name())
+			} else {
+				// Don't bother showing the root group
+				if id != "_root" {
+					log.Debugf("  %v ... unattached", id)
+				}
+			}
+		})
+	}
+	log.Info("--------- fixutres done")
+}
+
+func (s *Server) DumpControlPoints() {
+	log.Info("--------- All control points....")
+	for _, cp := range s.controlPoints {
+		log.Infof("CP [%v] %v", cp.Name(), cp)
+	}
+	log.Info("--------- control points done")
+
 }

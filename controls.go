@@ -5,6 +5,9 @@ import (
 	"github.com/eyethereal/go-config"
 )
 
+// An instance of fixture control updater is attached to each fixture control and knows
+// how to use the control point in the fixture control instance to update some DMX
+// values (which are known to the updater).
 type FixtureControlUpdater interface {
 	// Causes the FixtureControlUpdater to observe the control point
 	// and update it's output state
@@ -13,6 +16,15 @@ type FixtureControlUpdater interface {
 
 //////
 
+// A Fixture Control binds together a number of concepts needed to produce a DMX update.
+//  * the Fixture it is attached to (which has some state data that is
+//    almost certainly of interest to the Updater)
+//  * the ProfileControl which tells us the shared interesting data about this control
+//    like type, ranges, etc.
+//  * the current ControlPoint which should be referenced to perform any updates
+//  * an optional LensStack through which the ControlPoint should be observed by the
+//    updater when it's trying to figure out new DMX output values
+//  * the Updater which is the logic used to get from the ControlPoint to DMX output
 type FixtureControl struct {
 	Fixture        Fixture
 	ProfileControl ProfileControl
@@ -23,6 +35,8 @@ type FixtureControl struct {
 	Updater FixtureControlUpdater
 }
 
+// Creates a new fixture control which while it nominally has an updater attached it does not
+// yet have a Fixture, ControlPoint, or LensStack
 func NewFixtureControl(profileControl ProfileControl, updater FixtureControlUpdater) *FixtureControl {
 	return &FixtureControl{
 		ProfileControl: profileControl,
@@ -32,7 +46,11 @@ func NewFixtureControl(profileControl ProfileControl, updater FixtureControlUpda
 
 //////
 
-// A ProfileControl is a control on a theoretical fixture.
+// A ProfileControl is a control on a theoretical fixture. Profile Controls can be
+// used to instantiate FixtureControls which are bound to both this profile control
+// and the particular Fixture given during instantiation. These resultant FixtureControls
+// are the interesting things which bind together enough elements to actually do
+// useful work translating from control points to dmx.
 type ProfileControl interface {
 	Id() string
 	Name() string
