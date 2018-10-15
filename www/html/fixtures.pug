@@ -1,0 +1,17 @@
+doctype html
+head
+    link(rel="stylesheet" href="app.css")
+    title Fixtures
+
+body
+    h1 Fixtures
+    div#fixtureList
+
+    script(type="text/javascript" src="js/jquery.js")
+    script(type="text/javascript" src="js/app.min.js")
+    script(type="text/javascript").
+        $(document).ready(function() {
+            Profiles.start();
+            Fixtures.start();        
+        })
+    

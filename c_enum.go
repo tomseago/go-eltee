@@ -26,6 +26,8 @@ func (u *EnumUpdater) Update(fc *FixtureControl) {
 		return
 	}
 
+	// TODO: Use the control point WasDirty() method?
+
 	value := fc.LensStack.Observe(fc.ControlPoint)
 
 	point, ok := value.(EnumPoint)
@@ -154,6 +156,10 @@ func (pc *EnumProfileControl) Id() string {
 
 func (pc *EnumProfileControl) Name() string {
 	return pc.name
+}
+
+func (pc *EnumProfileControl) Type() string {
+	return "enum"
 }
 
 func (pc *EnumProfileControl) String() string {

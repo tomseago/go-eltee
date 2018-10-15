@@ -54,6 +54,7 @@ func NewFixtureControl(profileControl ProfileControl, updater FixtureControlUpda
 type ProfileControl interface {
 	Id() string
 	Name() string
+	Type() string
 
 	String() string
 

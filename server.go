@@ -28,6 +28,8 @@ type Server struct {
 
 	controlPoints       []ControlPoint
 	controlPointsByName map[string]ControlPoint
+
+	inputAdapters []*InputAdapterRegistration
 }
 
 func NewServer(cfg *config.AclNode) *Server {
@@ -213,17 +215,54 @@ func (s *Server) Start() {
 //
 // 1. Polling animators for control point updates
 // 2. Polling input adapters for control point changes
-// 3. Publishing changed control point values to subscribed input adaptors
-// 4. Publishing changed control point values to observing fixture controls
-// 5. Poking all Fixtures to have them generate their DMX output
+// 3. Commit all the control point changes (which collects the dirty ones)
+// 4. Publishing changed control point values to subscribed input adaptors
+// 5. Publishing changed control point values to observing fixture controls
+// 6. Poking all Fixtures to have them generate their DMX output
 //
 func (s *Server) UpdateFrame() {
 
+	// 1. Poll animators
+	// todo: poll animators
+
+	// 2. Poll all input adapters
+	for _, reg := range s.inputAdapters {
+		reg.ia.UpdateControlPoints()
+	}
+
+	// 3. Commit all the control point updates
+	dirtyNames := make([]string, 0)
+	for _, cp := range s.controlPoints {
+		if cp.Commit() {
+			dirtyNames = append(dirtyNames, cp.Name())
+		}
+	}
+
+	// TODO: Get rid of dirtyNames???
+
+	// 4. Tell Input adapters that control points might have changes
+	for _, reg := range s.inputAdapters {
+		reg.ia.ObserveControlPoints()
+	}
+
+	// 5 & 6. Tell fixtures to update check for updates and do new DMX
+	for _, fix := range s.fixtures {
+		fix.Update()
+	}
 }
 
 // func (s *Server) FrameState() ([]Fixture, *WorldState, []StateMapper) {
 // 	return s.fixtures, s.currentWS, s.defaultMappers
 // }
+
+func (s *Server) RegisterInputAdapter(name string, adapter InputAdapter) {
+	registration := &InputAdapterRegistration{
+		ia:   adapter,
+		name: name,
+	}
+
+	s.inputAdapters = append(s.inputAdapters, registration)
+}
 
 func (s *Server) DumpFixtures() {
 	log.Info("--------- All fixtures....")
@@ -251,4 +290,14 @@ func (s *Server) DumpControlPoints() {
 	}
 	log.Info("--------- control points done")
 
+}
+
+func (s *Server) GetFixtures() map[string]Fixture {
+	// TODO: Full encapsulation so callers can't accidentally fuck up the fixtures slice???
+	return s.fixturesByName
+}
+
+func (s *Server) GetProfiles() map[string]*Profile {
+	// TODO: Full encapsulation so callers can't accidentally fuck up the  slice???
+	return s.library.Profiles
 }

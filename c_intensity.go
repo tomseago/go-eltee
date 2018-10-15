@@ -25,6 +25,8 @@ func (u *IntensityUpdater) Update(fc *FixtureControl) {
 		return
 	}
 
+	// TODO: Use the control point WasDirty() method?
+
 	value := fc.LensStack.Observe(fc.ControlPoint)
 
 	intensity, ok := value.(IntensityPoint)
@@ -76,6 +78,10 @@ func (pc *IntensityProfileControl) Id() string {
 
 func (pc *IntensityProfileControl) Name() string {
 	return pc.name
+}
+
+func (pc *IntensityProfileControl) Type() string {
+	return "intensity"
 }
 
 func (pc *IntensityProfileControl) String() string {

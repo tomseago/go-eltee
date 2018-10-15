@@ -23,6 +23,8 @@ func (u *PanTiltUpdater) Update(fc *FixtureControl) {
 		return
 	}
 
+	// TODO: Use the control point WasDirty() method?
+
 	value := fc.LensStack.Observe(fc.ControlPoint)
 
 	xyz, ok := value.(XYZPoint)
@@ -184,6 +186,10 @@ func (pc *PanTiltProfileControl) Id() string {
 
 func (pc *PanTiltProfileControl) Name() string {
 	return pc.name
+}
+
+func (pc *PanTiltProfileControl) Type() string {
+	return "pan_tilt"
 }
 
 func (pc *PanTiltProfileControl) String() string {

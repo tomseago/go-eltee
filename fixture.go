@@ -44,6 +44,9 @@ type DmxFixture struct {
 	controlsById map[string]*FixtureControl
 
 	variables map[string]int
+
+	overrideValues []byte
+	useOverrides   bool
 }
 
 func NewDmxFixture(name string, base int, channels []byte, profile *Profile) *DmxFixture {
@@ -57,6 +60,9 @@ func NewDmxFixture(name string, base int, channels []byte, profile *Profile) *Dm
 		controlsById: make(map[string]*FixtureControl),
 
 		variables: make(map[string]int),
+
+		overrideValues: make([]byte, len(channels)),
+		useOverrides:   false,
 	}
 	f.rootControl = profile.Controls.Instantiate(f)
 
@@ -124,6 +130,11 @@ func (f *DmxFixture) Update() {
 		return
 	}
 
+	if f.useOverrides {
+		copy(f.channels, f.overrideValues)
+		return
+	}
+
 	// Instead of doing this update, we just tell the group to update and
 	// that cascades down. This makes sense if we want to enable and disable
 	// groups. Or we could ignore groups. Or not have groups do recursive updates.
@@ -142,4 +153,34 @@ func (f *DmxFixture) GetInt(id string) int {
 
 func (f *DmxFixture) SetInt(id string, val int) {
 	f.variables[id] = val
+}
+
+func (f *DmxFixture) SetUseOverrides(use bool) {
+	if f == nil {
+		return
+	}
+
+	f.useOverrides = use
+}
+
+func (f *DmxFixture) GetUseOverrides() bool {
+	if f == nil {
+		return false
+	}
+
+	return f.useOverrides
+}
+
+func (f *DmxFixture) SetOverrides(overrides []byte) {
+	if f == nil {
+		return
+	}
+
+	copy(f.overrideValues, overrides)
+}
+
+func (f *DmxFixture) GetChannels() []byte {
+	out := make([]byte, len(f.channels))
+	copy(out, f.channels)
+	return out
 }

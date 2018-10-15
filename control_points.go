@@ -14,6 +14,16 @@ type ControlPoint interface {
 	// ObserveAsXYZ() XYZValues
 
 	SetFromNode(node *config.AclNode)
+
+	// Set control point values do not take effect until Commit is called so that updates
+	// can happen all at once under the control of the main event loop. This keeps DMX updates
+	// from sending out incomplete frames for example. This should generally only be
+	// called by the main loop and not by InputAdapters or anything else.
+	Commit() bool
+
+	// Returns the last value returned by Commit. This is can be used by observers to know if they
+	// should take the new updated value
+	WasDirty() bool
 }
 
 /*
@@ -45,6 +55,7 @@ func CreateControlPoint(name string, node *config.AclNode) ControlPoint {
 	}
 
 	cp.SetFromNode(node)
+	cp.Commit()
 	return cp
 }
 
@@ -114,14 +125,20 @@ type SettableIntensityPoint interface {
 type ColorControlPoint struct {
 	name string
 
-	components map[string]float64
+	components     map[string]float64
+	nextComponents map[string]float64
+
+	// Since a commit creates a new map let's track dirtiness
+	dirty    bool
+	wasDirty bool
 }
 
 func NewColorControlPoint(name string) *ColorControlPoint {
 	cp := &ColorControlPoint{
 		name: name,
 
-		components: make(map[string]float64),
+		components:     make(map[string]float64),
+		nextComponents: make(map[string]float64),
 	}
 
 	return cp
@@ -148,7 +165,34 @@ func (cp *ColorControlPoint) SetColorComponent(name string, val float64) {
 		return
 	}
 
-	cp.components[name] = val
+	cp.nextComponents[name] = val
+	cp.dirty = true
+}
+
+// Note the Commit is going to totally erase previous components so if they
+// haven't been set they are going to get lost
+func (cp *ColorControlPoint) Commit() bool {
+	if cp == nil {
+		return false
+	}
+	cp.wasDirty = cp.dirty
+
+	if !cp.dirty {
+		return false
+	}
+
+	cp.components = cp.nextComponents
+	cp.nextComponents = make(map[string]float64)
+	cp.dirty = false
+	return true
+}
+
+func (cp *ColorControlPoint) WasDirty() bool {
+	if cp == nil {
+		return false
+	}
+
+	return cp.wasDirty
 }
 
 func (cp *ColorControlPoint) SetFromNode(node *config.AclNode) {
@@ -159,13 +203,14 @@ func (cp *ColorControlPoint) SetFromNode(node *config.AclNode) {
 			return
 		}
 
-		cp.components[nn] = val.AsFloat()
+		cp.nextComponents[nn] = val.AsFloat()
 	})
+	cp.dirty = true
 }
 
 func (cp *ColorControlPoint) String() string {
 	if cp == nil {
-		return "ColorCP(nil)"
+		return "Color(nil)"
 	}
 
 	ids := make([]string, 0, len(cp.components))
@@ -175,7 +220,7 @@ func (cp *ColorControlPoint) String() string {
 	sort.Strings(ids)
 
 	var b strings.Builder
-	b.WriteString("ColorCP(")
+	b.WriteString("Color(")
 
 	for ix := 0; ix < len(ids); ix++ {
 		id := ids[ix]
@@ -213,6 +258,13 @@ type XYZControlPoint struct {
 	x float64
 	y float64
 	z float64
+
+	nextX float64
+	nextY float64
+	nextZ float64
+
+	dirty    bool
+	wasDirty bool
 }
 
 func NewXYZControlPoint(name string) *XYZControlPoint {
@@ -244,15 +296,53 @@ func (cp *XYZControlPoint) SetXYZ(x float64, y float64, z float64) {
 		return
 	}
 
-	cp.x = x
-	cp.y = y
-	cp.z = z
+	cp.nextX = x
+	cp.nextY = y
+	cp.nextZ = z
+
+	cp.dirty = true
+}
+
+func (cp *XYZControlPoint) Commit() bool {
+	if cp == nil {
+		return false
+	}
+
+	cp.wasDirty = cp.dirty
+	if !cp.dirty {
+		return false
+	}
+
+	cp.x = cp.nextX
+	cp.y = cp.nextY
+	cp.z = cp.nextZ
+
+	cp.dirty = false
+	return true
+}
+
+func (cp *XYZControlPoint) WasDirty() bool {
+	if cp == nil {
+		return false
+	}
+
+	return cp.wasDirty
 }
 
 func (cp *XYZControlPoint) SetFromNode(node *config.AclNode) {
-	cp.x = node.ChildAsFloat("x")
-	cp.y = node.ChildAsFloat("y")
-	cp.z = node.ChildAsFloat("z")
+	cp.nextX = node.ChildAsFloat("x")
+	cp.nextY = node.ChildAsFloat("y")
+	cp.nextZ = node.ChildAsFloat("z")
+
+	cp.dirty = true
+}
+
+func (cp *XYZControlPoint) String() string {
+	if cp == nil {
+		return "XYZ(nil)"
+	}
+
+	return fmt.Sprintf("XYZ(%v,%v,%v)", cp.x, cp.y, cp.z)
 }
 
 ////////////////////////////////////////
@@ -262,6 +352,12 @@ type EnumControlPoint struct {
 
 	item   int
 	degree float64
+
+	nextItem   int
+	nextDegree float64
+
+	dirty    bool
+	wasDirty bool
 }
 
 func NewEnumControlPoint(name string) *EnumControlPoint {
@@ -293,13 +389,50 @@ func (cp *EnumControlPoint) SetOption(item int, degree float64) {
 		return
 	}
 
-	cp.item = item
-	cp.degree = degree
+	cp.nextItem = item
+	cp.nextDegree = degree
+
+	cp.dirty = true
+}
+
+func (cp *EnumControlPoint) Commit() bool {
+	if cp == nil {
+		return false
+	}
+
+	cp.wasDirty = cp.dirty
+	if !cp.dirty {
+		return false
+	}
+
+	cp.item = cp.nextItem
+	cp.degree = cp.nextDegree
+	cp.dirty = false
+
+	return true
+}
+
+func (cp *EnumControlPoint) WasDirty() bool {
+	if cp == nil {
+		return false
+	}
+
+	return cp.wasDirty
 }
 
 func (cp *EnumControlPoint) SetFromNode(node *config.AclNode) {
-	cp.item = node.ChildAsInt("item")
-	cp.degree = node.ChildAsFloat("degree")
+	cp.nextItem = node.ChildAsInt("item")
+	cp.nextDegree = node.ChildAsFloat("degree")
+
+	cp.dirty = true
+}
+
+func (cp *EnumControlPoint) String() string {
+	if cp == nil {
+		return "Enum(nil)"
+	}
+
+	return fmt.Sprintf("Enum(%v,%v)", cp.item, cp.degree)
 }
 
 ////////////////////////////////////////
@@ -307,7 +440,11 @@ func (cp *EnumControlPoint) SetFromNode(node *config.AclNode) {
 type IntensityControlPoint struct {
 	name string
 
-	intensity float64
+	intensity     float64
+	nextIntensity float64
+
+	dirty    bool
+	wasDirty bool
 }
 
 func NewIntensityControlPoint(name string) *IntensityControlPoint {
@@ -339,9 +476,43 @@ func (cp *IntensityControlPoint) SetIntensity(intensity float64) {
 		return
 	}
 
-	cp.intensity = intensity
+	cp.nextIntensity = intensity
+	cp.dirty = true
+}
+
+func (cp *IntensityControlPoint) Commit() bool {
+	if cp == nil {
+		return false
+	}
+
+	cp.wasDirty = cp.dirty
+	if !cp.dirty {
+		return false
+	}
+
+	cp.intensity = cp.nextIntensity
+	cp.dirty = false
+
+	return true
+}
+
+func (cp *IntensityControlPoint) WasDirty() bool {
+	if cp == nil {
+		return false
+	}
+
+	return cp.wasDirty
 }
 
 func (cp *IntensityControlPoint) SetFromNode(node *config.AclNode) {
-	cp.intensity = node.ChildAsFloat("intensity")
+	cp.nextIntensity = node.ChildAsFloat("intensity")
+	cp.dirty = true
+}
+
+func (cp *IntensityControlPoint) String() string {
+	if cp == nil {
+		return "Intensity(nil)"
+	}
+
+	return fmt.Sprintf("Intensity(%v,%v)", cp.intensity)
 }

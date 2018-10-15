@@ -96,6 +96,10 @@ func (pc *GroupProfileControl) Name() string {
 	return pc.name
 }
 
+func (pc *GroupProfileControl) Type() string {
+	return "group"
+}
+
 func (pc *GroupProfileControl) String() string {
 	var b strings.Builder
 

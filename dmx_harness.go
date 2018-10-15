@@ -88,7 +88,7 @@ func (h *DmxHarness) FramePump() {
 
 	for {
 		<-frameTimer.C
-		log.Info("tick")
+		//log.Info("tick")
 
 		h.SendFrame()
 

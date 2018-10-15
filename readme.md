@@ -40,3 +40,17 @@ The main looper is the central animation and event loop. It goes through the fol
 5. Poking all Fixtures to have them generate their DMX output
 6. Sending the DMX frame
 7. Checking for shutdown/reset conditions???
+
+
+TODOs
+=====
+* Complete the update frame function in the server.go file. This is basically the main looper described above
+* Implement some input adapters
+* Implement animations of control points
+* Add a web server for hosting UI
+* UI to change control point to fixture control mappings (Fixture Patches)
+* UI for Input Patches
+* UI For direct DMX control of a fixture
+* UI/wizardry for creating a set of control points that directly map one to one to a fixtures controls
+
+Possibly want to add an optimization to FixtureControl updaters where they use the WasDirty() method from their attached control points. However since they might be observing the control point through a lens stack that stack also probably requires a dirty marker so for now we just always recalculate everything from scratch on each frame.

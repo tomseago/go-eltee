@@ -6,6 +6,7 @@ import (
 	"os/signal"
 
 	"github.com/tomseago/go-eltee"
+	"github.com/tomseago/go-eltee/web"
 )
 
 //////////////////////////////////////////////////////////////////////
@@ -34,6 +35,11 @@ func main() {
 	server.DumpFixtures()
 	server.DumpControlPoints()
 
+	// Start up the web server
+	webServer := web.NewWebServer(cfg.Child("web"), server)
+	server.RegisterInputAdapter("web", webServer)
+
+	///////
 	server.Start()
 
 	// Wait for sigKill???

@@ -22,6 +22,8 @@ func (u *LedVarUpdater) Update(fc *FixtureControl) {
 		return
 	}
 
+	// TODO: Use the control point WasDirty() method?
+
 	value := fc.LensStack.Observe(fc.ControlPoint)
 
 	color, ok := value.(ColorPoint)
@@ -77,6 +79,10 @@ func (pc *LedVarProfileControl) Id() string {
 
 func (pc *LedVarProfileControl) Name() string {
 	return pc.name
+}
+
+func (pc *LedVarProfileControl) Type() string {
+	return "led_var"
 }
 
 func (pc *LedVarProfileControl) String() string {
