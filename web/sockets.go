@@ -21,11 +21,11 @@ func NewWebSocketHandler(server *WebServer) http.HandlerFunc {
 			return
 		}
 
-		server.AddWebSocket(conn)
+		server.NewClientFor(conn)
 	}
 }
 
-func (web *WebServer) AddWebSocket(conn *websocket.Conn) {
+func (web *WebServer) NewClientFor(conn *websocket.Conn) {
 	client := &WebServerSocketClient{
 		web:  web,
 		conn: conn,
@@ -39,6 +39,21 @@ func (web *WebServer) AddWebSocket(conn *websocket.Conn) {
 
 	web.sockets = append(web.sockets, client)
 	log.Infof("New websocket connection from %v", conn.RemoteAddr())
+}
+
+func (web *WebServer) RemoveClient(client *WebServerSocketClient) {
+	ix := -1
+	for i := 0; i < len(web.sockets); i++ {
+		if web.sockets[i] == client {
+			ix = i
+			break
+		}
+	}
+	if ix != -1 {
+		web.sockets[ix] = web.sockets[len(web.sockets)-1]
+		web.sockets = web.sockets[:len(web.sockets)-1]
+	}
+	// log.Infof("New websocket connection from %v", conn.RemoteAddr())
 }
 
 ////////////////////////////////////////////////////////
@@ -71,6 +86,9 @@ type WebServerSocketClient struct {
 	conn *websocket.Conn
 
 	writeQ chan *WSMessage
+
+	// Local state of interest
+	wantsDmx bool
 }
 
 func (client *WebServerSocketClient) readPump() {
@@ -85,7 +103,7 @@ func (client *WebServerSocketClient) readPump() {
 		msg.msgType, msg.data, err = client.conn.ReadMessage()
 		if err != nil {
 			log.Infof("Closing connection from %v: %v", client.conn.RemoteAddr(), err)
-			return
+			break
 		}
 
 		err = client.handleMessage(msg)
@@ -131,6 +149,12 @@ func (client *WebServerSocketClient) handleMessage(msg *WSMessage) error {
 		case "reqProfiles":
 			client.HandleReqProfiles(&cMsg)
 
+		case "dmxMonStart":
+			client.HandleDmxMonStart(&cMsg)
+
+		case "dmxMonStop":
+			client.HandleDmxMonStop(&cMsg)
+
 		default:
 			log.Warningf("Don't know how to handle this: %v", cMsg)
 		}
@@ -152,6 +176,7 @@ func (client *WebServerSocketClient) writePump() {
 
 		if msg == nil {
 			log.Warningf("Closing the writePump()")
+			client.web.RemoveClient(client)
 			return
 		}
 
@@ -161,6 +186,7 @@ func (client *WebServerSocketClient) writePump() {
 
 			// Is it close worthy though???? Yeah, probably
 			client.conn.Close()
+			client.web.RemoveClient(client)
 			return
 		}
 	}

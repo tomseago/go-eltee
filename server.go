@@ -23,6 +23,8 @@ type Server struct {
 	dmxHarness *DmxHarness
 	library    *ProfileLibrary
 
+	backingFrame []byte
+
 	fixtures       []Fixture
 	fixturesByName map[string]Fixture
 
@@ -34,8 +36,9 @@ type Server struct {
 
 func NewServer(cfg *config.AclNode) *Server {
 	s := &Server{
-		cfg:     cfg,
-		library: NewProfileLibrary(),
+		cfg:          cfg,
+		library:      NewProfileLibrary(),
+		backingFrame: make([]byte, 512),
 
 		fixtures:       make([]Fixture, 0),
 		fixturesByName: make(map[string]Fixture),
@@ -76,7 +79,7 @@ func NewServer(cfg *config.AclNode) *Server {
 		} else {
 			base := 1
 			fixNode.ForEachOrderedChild(func(name string, child *config.AclNode) {
-				fixture, base := s.CreateFixture(name, child, base, s.dmxHarness.frame)
+				fixture, base := s.CreateFixture(name, child, base)
 				if fixture != nil {
 					s.fixtures = append(s.fixtures, fixture)
 					s.fixturesByName[name] = fixture
@@ -152,7 +155,7 @@ func NewServer(cfg *config.AclNode) *Server {
 }
 
 // Create a new fixture with the given node from the config file
-func (s *Server) CreateFixture(name string, node *config.AclNode, defBase int, dmx []byte) (f Fixture, nextBase int) {
+func (s *Server) CreateFixture(name string, node *config.AclNode, defBase int) (f Fixture, nextBase int) {
 
 	// First lets see if we can find a profile of the right kind
 	kind := node.ChildAsString("kind")
@@ -164,7 +167,7 @@ func (s *Server) CreateFixture(name string, node *config.AclNode, defBase int, d
 	}
 
 	actualBase := node.DefChildAsInt(defBase, "base")
-	channels := dmx[actualBase-1 : actualBase-1+profile.ChannelCount]
+	channels := s.backingFrame[actualBase-1 : actualBase-1+profile.ChannelCount]
 
 	fixture := NewDmxFixture(name, actualBase, channels, profile)
 
@@ -199,7 +202,7 @@ func (s *Server) CreateFixture(name string, node *config.AclNode, defBase int, d
 // }
 
 func (s *Server) Start() {
-	go s.dmxHarness.FramePump()
+	go s.dmxHarness.Start()
 
 }
 
@@ -220,8 +223,8 @@ func (s *Server) Start() {
 // 5. Publishing changed control point values to observing fixture controls
 // 6. Poking all Fixtures to have them generate their DMX output
 //
-func (s *Server) UpdateFrame() {
 
+func (s *Server) UpdateBackingFrame() {
 	// 1. Poll animators
 	// todo: poll animators
 
@@ -251,6 +254,14 @@ func (s *Server) UpdateFrame() {
 	}
 }
 
+// Updates the passed in frame from the backing frame. In the future we should
+// maybe decouple the rates???
+func (s *Server) UpdateFrame(frame []byte) {
+	s.UpdateBackingFrame()
+
+	copy(frame, s.backingFrame)
+}
+
 // func (s *Server) FrameState() ([]Fixture, *WorldState, []StateMapper) {
 // 	return s.fixtures, s.currentWS, s.defaultMappers
 // }
@@ -262,6 +273,11 @@ func (s *Server) RegisterInputAdapter(name string, adapter InputAdapter) {
 	}
 
 	s.inputAdapters = append(s.inputAdapters, registration)
+
+	adapterAsDmx, ok := adapter.(DMXConn)
+	if ok {
+		s.dmxHarness.AddConnection(name, adapterAsDmx)
+	}
 }
 
 func (s *Server) DumpFixtures() {

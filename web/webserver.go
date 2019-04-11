@@ -62,11 +62,20 @@ func NewWebServer(cfg *config.AclNode, s *eltee.Server) *WebServer {
 }
 
 // Update any control points with values from this input adapter
-func (*WebServer) UpdateControlPoints() {
+func (ws *WebServer) UpdateControlPoints() {
 
 }
 
 // Update this input adapter with any values from the control points
-func (*WebServer) ObserveControlPoints() {
+func (ws *WebServer) ObserveControlPoints() {
 
+}
+
+// If there is anyone listening, send them some data
+func (ws *WebServer) SendDMX(universe int, data []byte) {
+	for _, sock := range ws.sockets {
+		if sock.wantsDmx {
+			sock.SendDmx(data)
+		}
+	}
 }

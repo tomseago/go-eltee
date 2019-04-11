@@ -54,3 +54,19 @@ TODOs
 * UI/wizardry for creating a set of control points that directly map one to one to a fixtures controls
 
 Possibly want to add an optimization to FixtureControl updaters where they use the WasDirty() method from their attached control points. However since they might be observing the control point through a lens stack that stack also probably requires a dirty marker so for now we just always recalculate everything from scratch on each frame.
+
+Installation
+============
+
+Raspberry PI, starting with Raspian base image.
+
+Get the latest go tarball for ARM from https://golang.org/dl/
+
+Unpack that somewhere and set GOROOT to the location. Add $GOROOT/bin to path.
+
+Create a `go` directory at `~/go` and set GOPATH to this.
+
+Install libftdi1 using
+    
+    sudo apt-get install libftdi1
+

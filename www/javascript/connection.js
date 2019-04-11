@@ -73,6 +73,14 @@ Connection = new (function(){
 
         this.isOpen = OPEN;
         setTimeout(this.trySend.bind(this), 1);
+
+        if (this.onOpen) {
+            try {
+                this.onOpen()
+            } catch (e) {
+                Log.error(e);
+            }
+        }
     }
 
     this.handleMessage = function handleMessage(event) {
@@ -107,6 +115,14 @@ Connection = new (function(){
         Log.info("handleClose", event);
         this.isOpen = CLOSED;
         this._socket = false;
+
+        if (this.onClose) {
+            try {
+                this.onClose()
+            } catch (e) {
+                Log.error(e);
+            }
+        }
     }
 
     this.handleError = function handleError(event) {
@@ -127,4 +143,15 @@ Connection = new (function(){
         list.push(fn);
     }
 
+    this.showStateInElement = function showStateInElement(id) {
+        this.onOpen = function() {
+            var el = $("#"+id);
+            el.text("Open");
+        }
+
+        this.onClose = function() {
+            var el = $("#"+id);
+            el.text("Closed");
+        }
+    }
 })();

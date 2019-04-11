@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+///////////////////
+// The DmxHarness holds a current DMX frame and a set of connectors that will send that
+// Dmx frame somewhere. It pulls new frames from the server at a rate that it decides
+// is appropriate. This isn't the same rate that the server is generating frames. It can
+// do that however often it wishes (and should double buffer them).
 type DmxHarness struct {
 	server *Server
 	conns  map[string]DMXConn
@@ -13,6 +18,9 @@ type DmxHarness struct {
 	dmxTester *DmxTester
 
 	frame []byte
+
+	// milliseconds between frames
+	frameDelay time.Duration
 }
 
 func NewDmxHarness(server *Server, node *config.AclNode) *DmxHarness {
@@ -23,12 +31,14 @@ func NewDmxHarness(server *Server, node *config.AclNode) *DmxHarness {
 		frame: make([]byte, 512),
 	}
 
+	fps := time.Duration(node.DefChildAsInt(30, "frames_per_second"))
+	h.frameDelay = time.Second / fps
+
 	cConns := node.Child("connections")
 	cConns.ForEachOrderedChild(func(name string, n *config.AclNode) {
 		conn, err := CreateConn(name, n)
 		if err == nil {
-			log.Infof("Added connection %s", name)
-			h.conns[name] = conn
+			h.AddConnection(name, conn)
 		} else {
 			log.Errorf("Error adding connection %s : %v", name, err)
 		}
@@ -59,6 +69,11 @@ func CreateConn(name string, cfg *config.AclNode) (DMXConn, error) {
 	return nil, fmt.Errorf("Unknown dmx kind '%v'", kind)
 }
 
+func (h *DmxHarness) AddConnection(name string, c DMXConn) {
+	log.Infof("Added connection %s", name)
+	h.conns[name] = c
+}
+
 // Called periodically to fetch a new frame from either the tester or the main server
 // and then send that out to all DMX connections
 func (h *DmxHarness) SendFrame() {
@@ -68,7 +83,7 @@ func (h *DmxHarness) SendFrame() {
 	} else {
 		// use the mappers to update the frame
 		// fixtures, state, mappers := h.server.FrameState()
-		h.server.UpdateFrame()
+		h.server.UpdateFrame(h.frame)
 	}
 
 	// Send this frame to all of our connections
@@ -79,12 +94,12 @@ func (h *DmxHarness) SendFrame() {
 
 // The main pump function which should almost certainly be run from a go routine. It will
 // repeatedly call SendFrame on the DmxHarness forever at some pre-defined frame interval.
-func (h *DmxHarness) FramePump() {
+func (h *DmxHarness) Start() {
 	log.Infof("DmxHarness pump routine started")
 
-	desiredDelay := 500 * time.Millisecond
+	// desiredDelay := h.frameDelay * time.Millisecond
 
-	frameTimer := time.NewTimer(desiredDelay)
+	frameTimer := time.NewTimer(h.frameDelay)
 
 	for {
 		<-frameTimer.C
@@ -92,7 +107,7 @@ func (h *DmxHarness) FramePump() {
 
 		h.SendFrame()
 
-		frameTimer.Reset(desiredDelay)
+		frameTimer.Reset(h.frameDelay)
 	}
 
 }

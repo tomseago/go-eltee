@@ -43,6 +43,8 @@ dmx: {
         }
     }
 
+    // If not set the default is 30. The DMX spec max is something like 48
+    frames_per_second: 2
 
     tester: {
         scenes: {
