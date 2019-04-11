@@ -1,15 +1,15 @@
 name: "Coidak Flood Par"
 channel_count: 8
 
-default_values: [
-    // Mode etc.
-    0 0 0 
+// default_values: [
+//     // Mode etc.
+//     0 0 0 
 
-    64 // Master dimmer
+//     64 // Master dimmer
 
-    // RGBW
-    255 0 0 255
-]
+//     // RGBW
+//     255 0 0 255
+// ]
 
 controls: {
     mode: {

@@ -5,7 +5,7 @@ controls: {
     color: {
         name: "RGBW"
         kind: led_var
-        channels: {
+        leds: {
             red: 2
             green: 3
             blue: 4

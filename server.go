@@ -28,8 +28,9 @@ type Server struct {
 	fixtures       []Fixture
 	fixturesByName map[string]Fixture
 
-	controlPoints       []ControlPoint
-	controlPointsByName map[string]ControlPoint
+	stateJuggler *StateJuggler
+	// controlPoints       []ControlPoint
+	// controlPointsByName map[string]ControlPoint
 
 	inputAdapters []*InputAdapterRegistration
 }
@@ -91,6 +92,8 @@ func NewServer(cfg *config.AclNode) *Server {
 	}
 
 	// Load the initial set of control points
+	s.stateJuggler = NewStateJuggler()
+
 	defCPFilename := defaultsNode.DefChildAsString("default", "control_points")
 	defCPFilename = path.Join("control_points", defCPFilename) + ".acl"
 	cpNode := config.NewAclNode()
@@ -102,7 +105,8 @@ func NewServer(cfg *config.AclNode) *Server {
 		if cpNode == nil {
 			log.Warningf("File '%v' did not contain a control_points node", defCPFilename)
 		} else {
-			s.controlPoints, s.controlPointsByName = CreateControlPointList(cpNode)
+			// s.controlPoints, s.controlPointsByName = CreateControlPointList(cpNode)
+			s.stateJuggler.BaseFrom(cpNode)
 		}
 	}
 
@@ -137,7 +141,7 @@ func NewServer(cfg *config.AclNode) *Server {
 					// Get the control point, if any
 					cpName := fcNode.ChildAsString("cp")
 					if len(cpName) > 0 {
-						cp := s.controlPointsByName[cpName]
+						cp := s.stateJuggler.CurrentCP(cpName)
 						if cp == nil {
 							log.Warningf("Patching: Could not find control point '%v' to patch to fixture '%v' control '%v'", cpName, fixName, fcId)
 						} else {
@@ -233,13 +237,13 @@ func (s *Server) UpdateBackingFrame() {
 		reg.ia.UpdateControlPoints()
 	}
 
-	// 3. Commit all the control point updates
-	dirtyNames := make([]string, 0)
-	for _, cp := range s.controlPoints {
-		if cp.Commit() {
-			dirtyNames = append(dirtyNames, cp.Name())
-		}
-	}
+	// // 3. Commit all the control point updates
+	// dirtyNames := make([]string, 0)
+	// for _, cp := range s.controlPoints {
+	// 	if cp.Commit() {
+	// 		dirtyNames = append(dirtyNames, cp.Name())
+	// 	}
+	// }
 
 	// TODO: Get rid of dirtyNames???
 
@@ -300,12 +304,12 @@ func (s *Server) DumpFixtures() {
 }
 
 func (s *Server) DumpControlPoints() {
-	log.Info("--------- All control points....")
-	for _, cp := range s.controlPoints {
-		log.Infof("CP [%v] %v", cp.Name(), cp)
-	}
-	log.Info("--------- control points done")
-
+	s.stateJuggler.DumpControlPoints()
+	// log.Info("--------- All control points....")
+	// for _, cp := range s.controlPoints {
+	// 	log.Infof("CP [%v] %v", cp.Name(), cp)
+	// }
+	// log.Info("--------- control points done")
 }
 
 func (s *Server) GetFixtures() map[string]Fixture {
@@ -317,3 +321,12 @@ func (s *Server) GetProfiles() map[string]*Profile {
 	// TODO: Full encapsulation so callers can't accidentally fuck up the  slice???
 	return s.library.Profiles
 }
+
+func (s *Server) Juggler() *StateJuggler {
+	return s.stateJuggler
+}
+
+// func (s *Server) GetControlPoints() map[string]ControlPoint {
+// 	// TODO: Full encapsulation so callers can't accidentally fuck up the fixtures slice???
+// 	return s.controlPointsByName
+// }

@@ -17,7 +17,8 @@ type DmxHarness struct {
 
 	dmxTester *DmxTester
 
-	frame []byte
+	frame      []byte
+	frameCount int
 
 	// milliseconds between frames
 	frameDelay time.Duration
@@ -81,10 +82,12 @@ func (h *DmxHarness) SendFrame() {
 	if h.dmxTester.HasTest() {
 		h.dmxTester.UpdateFrame(h.frame)
 	} else {
-		// use the mappers to update the frame
-		// fixtures, state, mappers := h.server.FrameState()
 		h.server.UpdateFrame(h.frame)
 	}
+
+	// DEBUGGING
+	h.frameCount++
+	h.frame[0] = byte(h.frameCount)
 
 	// Send this frame to all of our connections
 	for _, c := range h.conns {

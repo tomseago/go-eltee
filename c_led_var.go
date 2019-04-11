@@ -46,7 +46,9 @@ func (u *LedVarUpdater) Update(fc *FixtureControl) {
 		// Adjust to network 0 index
 		channelIx--
 
-		u.channels[channelIx] = ByteFromFloat(color.ColorComponent(name))
+		cc := color.ColorComponent(name)
+		u.channels[channelIx] = ByteFromFloat(cc)
+		// log.Infof("cc %v %v = %v", name, cc, u.channels[channelIx])
 	}
 
 }

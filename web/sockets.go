@@ -122,6 +122,33 @@ type ClientMessage struct {
 	Body map[string]interface{}
 }
 
+// func (msg *ClientMessage) bvAsFloat(key string) float64 {
+// 	if msg == nil {
+// 		return 0.0
+// 	}
+
+// 	val := msg.Body[key]
+// 	return ValAsFloat(val)
+// }
+
+// func (msg *ClientMessage) bvAsInt(key string) int {
+// 	if msg == nil {
+// 		return 0
+// 	}
+
+// 	val := msg.Body[key]
+// 	return ValAsInt(val)
+// }
+
+// func (msg *ClientMessage) bvAsString(key string) string {
+// 	if msg == nil {
+// 		return ""
+// 	}
+
+// 	val := msg.Body[key]
+// 	return ValAsString(val)
+// }
+
 func (client *WebServerSocketClient) handleMessage(msg *WSMessage) error {
 	log.Infof("From %v got %v", client.conn.RemoteAddr(), msg)
 
@@ -148,6 +175,12 @@ func (client *WebServerSocketClient) handleMessage(msg *WSMessage) error {
 
 		case "reqProfiles":
 			client.HandleReqProfiles(&cMsg)
+
+		case "reqCurrentState":
+			client.HandleReqCurrentState(&cMsg)
+
+		case "setCP":
+			client.HandleSetCP(&cMsg)
 
 		case "dmxMonStart":
 			client.HandleDmxMonStart(&cMsg)

@@ -10,20 +10,16 @@ import (
 type ControlPoint interface {
 	// Control points shall be known uniquely by their name
 	Name() string
-	// ObserveAsColor() ColorValues
-	// ObserveAsXYZ() XYZValues
 
 	SetFromNode(node *config.AclNode)
+	SetToNode(root *config.AclNode, path ...string)
 
-	// Set control point values do not take effect until Commit is called so that updates
-	// can happen all at once under the control of the main event loop. This keeps DMX updates
-	// from sending out incomplete frames for example. This should generally only be
-	// called by the main loop and not by InputAdapters or anything else.
-	Commit() bool
+	SetFromJSON(val interface{})
 
-	// Returns the last value returned by Commit. This is can be used by observers to know if they
-	// should take the new updated value
-	WasDirty() bool
+	Apply(other ControlPoint)
+
+	String() string
+	Copy() ControlPoint
 }
 
 /*
@@ -55,7 +51,6 @@ func CreateControlPoint(name string, node *config.AclNode) ControlPoint {
 	}
 
 	cp.SetFromNode(node)
-	cp.Commit()
 	return cp
 }
 
@@ -114,31 +109,26 @@ type SettableEnumPoint interface {
 }
 
 type IntensityPoint interface {
-	Intensity() float64
+	Percent() float64
 }
 type SettableIntensityPoint interface {
-	SetIntensity(intensity float64)
+	SetPercent(intensity float64)
 }
 
 ////////////////////////////////////////
 
 type ColorControlPoint struct {
-	name string
-
-	components     map[string]float64
-	nextComponents map[string]float64
-
-	// Since a commit creates a new map let's track dirtiness
-	dirty    bool
-	wasDirty bool
+	name       string
+	Kind       string
+	Components map[string]float64
 }
 
 func NewColorControlPoint(name string) *ColorControlPoint {
 	cp := &ColorControlPoint{
 		name: name,
 
-		components:     make(map[string]float64),
-		nextComponents: make(map[string]float64),
+		Kind:       "color",
+		Components: make(map[string]float64),
 	}
 
 	return cp
@@ -157,7 +147,7 @@ func (cp *ColorControlPoint) ColorComponent(name string) float64 {
 		return 0.0
 	}
 
-	return cp.components[name]
+	return cp.Components[name]
 }
 
 func (cp *ColorControlPoint) SetColorComponent(name string, val float64) {
@@ -165,34 +155,7 @@ func (cp *ColorControlPoint) SetColorComponent(name string, val float64) {
 		return
 	}
 
-	cp.nextComponents[name] = val
-	cp.dirty = true
-}
-
-// Note the Commit is going to totally erase previous components so if they
-// haven't been set they are going to get lost
-func (cp *ColorControlPoint) Commit() bool {
-	if cp == nil {
-		return false
-	}
-	cp.wasDirty = cp.dirty
-
-	if !cp.dirty {
-		return false
-	}
-
-	cp.components = cp.nextComponents
-	cp.nextComponents = make(map[string]float64)
-	cp.dirty = false
-	return true
-}
-
-func (cp *ColorControlPoint) WasDirty() bool {
-	if cp == nil {
-		return false
-	}
-
-	return cp.wasDirty
+	cp.Components[name] = val
 }
 
 func (cp *ColorControlPoint) SetFromNode(node *config.AclNode) {
@@ -203,9 +166,50 @@ func (cp *ColorControlPoint) SetFromNode(node *config.AclNode) {
 			return
 		}
 
-		cp.nextComponents[nn] = val.AsFloat()
+		cp.Components[nn] = val.AsFloat()
 	})
-	cp.dirty = true
+}
+
+func (cp *ColorControlPoint) SetToNode(root *config.AclNode, path ...string) {
+	fp := append(path, cp.name)
+
+	kp := append(fp, "kind")
+	root.SetValAt("color", kp...)
+
+	for key, val := range cp.Components {
+		valPath := append(fp, key)
+		root.SetValAt(val, valPath...)
+	}
+}
+
+func (cp *ColorControlPoint) SetFromJSON(val interface{}) {
+	if cp == nil || val == nil {
+		return
+	}
+
+	v, ok := val.(map[string]interface{})
+	if !ok {
+		return
+	}
+
+	for cName, cVal := range v {
+		cp.Components[cName] = ValAsFloat(cVal)
+	}
+}
+
+func (cp *ColorControlPoint) Apply(other ControlPoint) {
+	if cp == nil || other == nil {
+		return
+	}
+
+	otherColor, ok := other.(*ColorControlPoint)
+	if !ok {
+		return
+	}
+
+	for name, val := range otherColor.Components {
+		cp.Components[name] = val
+	}
 }
 
 func (cp *ColorControlPoint) String() string {
@@ -213,8 +217,8 @@ func (cp *ColorControlPoint) String() string {
 		return "Color(nil)"
 	}
 
-	ids := make([]string, 0, len(cp.components))
-	for id, _ := range cp.components {
+	ids := make([]string, 0, len(cp.Components))
+	for id, _ := range cp.Components {
 		ids = append(ids, id)
 	}
 	sort.Strings(ids)
@@ -224,7 +228,7 @@ func (cp *ColorControlPoint) String() string {
 
 	for ix := 0; ix < len(ids); ix++ {
 		id := ids[ix]
-		val := cp.components[id]
+		val := cp.Components[id]
 		b.WriteString(fmt.Sprintf("%v:%v", id, val))
 		if ix < len(ids)-1 {
 			b.WriteByte(',')
@@ -233,6 +237,21 @@ func (cp *ColorControlPoint) String() string {
 	b.WriteByte(')')
 
 	return b.String()
+}
+
+func (cp *ColorControlPoint) Copy() ControlPoint {
+	ncp := &ColorControlPoint{
+		name: cp.name,
+
+		Kind:       "color",
+		Components: make(map[string]float64),
+	}
+
+	for name, val := range cp.Components {
+		ncp.Components[name] = val
+	}
+
+	return ncp
 }
 
 ////////////////////////////////////////
@@ -255,21 +274,16 @@ func (cp *ColorControlPoint) String() string {
 type XYZControlPoint struct {
 	name string
 
-	x float64
-	y float64
-	z float64
-
-	nextX float64
-	nextY float64
-	nextZ float64
-
-	dirty    bool
-	wasDirty bool
+	Kind string
+	X    float64
+	Y    float64
+	Z    float64
 }
 
 func NewXYZControlPoint(name string) *XYZControlPoint {
 	cp := &XYZControlPoint{
 		name: name,
+		Kind: "xyz",
 	}
 
 	return cp
@@ -288,7 +302,7 @@ func (cp *XYZControlPoint) XYZ() (float64, float64, float64) {
 		return 0.0, 0.0, 0.0
 	}
 
-	return cp.x, cp.y, cp.z
+	return cp.X, cp.Y, cp.Z
 }
 
 func (cp *XYZControlPoint) SetXYZ(x float64, y float64, z float64) {
@@ -296,45 +310,65 @@ func (cp *XYZControlPoint) SetXYZ(x float64, y float64, z float64) {
 		return
 	}
 
-	cp.nextX = x
-	cp.nextY = y
-	cp.nextZ = z
-
-	cp.dirty = true
-}
-
-func (cp *XYZControlPoint) Commit() bool {
-	if cp == nil {
-		return false
-	}
-
-	cp.wasDirty = cp.dirty
-	if !cp.dirty {
-		return false
-	}
-
-	cp.x = cp.nextX
-	cp.y = cp.nextY
-	cp.z = cp.nextZ
-
-	cp.dirty = false
-	return true
-}
-
-func (cp *XYZControlPoint) WasDirty() bool {
-	if cp == nil {
-		return false
-	}
-
-	return cp.wasDirty
+	cp.X = x
+	cp.Y = y
+	cp.Z = z
 }
 
 func (cp *XYZControlPoint) SetFromNode(node *config.AclNode) {
-	cp.nextX = node.ChildAsFloat("x")
-	cp.nextY = node.ChildAsFloat("y")
-	cp.nextZ = node.ChildAsFloat("z")
+	cp.X = node.ChildAsFloat("x")
+	cp.Y = node.ChildAsFloat("y")
+	cp.Z = node.ChildAsFloat("z")
+}
 
-	cp.dirty = true
+func (cp *XYZControlPoint) SetToNode(root *config.AclNode, path ...string) {
+	if cp == nil {
+		return
+	}
+
+	fp := append(path, cp.name)
+
+	kp := append(fp, "kind")
+	root.SetValAt("xyz", kp...)
+
+	kp = append(fp, "x")
+	root.SetValAt(cp.X, kp...)
+
+	kp = append(fp, "y")
+	root.SetValAt(cp.Y, kp...)
+
+	kp = append(fp, "z")
+	root.SetValAt(cp.Z, kp...)
+}
+
+func (cp *XYZControlPoint) SetFromJSON(val interface{}) {
+	if cp == nil || val == nil {
+		return
+	}
+
+	v, ok := val.(map[string]interface{})
+	if !ok {
+		return
+	}
+
+	cp.X = ValAsFloat(v["X"])
+	cp.Y = ValAsFloat(v["Y"])
+	cp.Z = ValAsFloat(v["Z"])
+}
+
+func (cp *XYZControlPoint) Apply(other ControlPoint) {
+	if cp == nil || other == nil {
+		return
+	}
+
+	otherXYZ, ok := other.(*XYZControlPoint)
+	if !ok {
+		return
+	}
+
+	cp.X = otherXYZ.X
+	cp.Y = otherXYZ.Y
+	cp.Z = otherXYZ.Z
 }
 
 func (cp *XYZControlPoint) String() string {
@@ -342,7 +376,20 @@ func (cp *XYZControlPoint) String() string {
 		return "XYZ(nil)"
 	}
 
-	return fmt.Sprintf("XYZ(%v,%v,%v)", cp.x, cp.y, cp.z)
+	return fmt.Sprintf("XYZ(%v,%v,%v)", cp.X, cp.Y, cp.X)
+}
+
+func (cp *XYZControlPoint) Copy() ControlPoint {
+	ncp := &XYZControlPoint{
+		name: cp.name,
+
+		Kind: "xyz",
+		X:    cp.X,
+		Y:    cp.Y,
+		Z:    cp.Z,
+	}
+
+	return ncp
 }
 
 ////////////////////////////////////////
@@ -350,19 +397,15 @@ func (cp *XYZControlPoint) String() string {
 type EnumControlPoint struct {
 	name string
 
-	item   int
-	degree float64
-
-	nextItem   int
-	nextDegree float64
-
-	dirty    bool
-	wasDirty bool
+	Kind   string
+	Item   int
+	Degree float64
 }
 
 func NewEnumControlPoint(name string) *EnumControlPoint {
 	cp := &EnumControlPoint{
 		name: name,
+		Kind: "enum",
 	}
 
 	return cp
@@ -381,7 +424,7 @@ func (cp *EnumControlPoint) Option() (int, float64) {
 		return 0, 0.0
 	}
 
-	return cp.item, cp.degree
+	return cp.Item, cp.Degree
 }
 
 func (cp *EnumControlPoint) SetOption(item int, degree float64) {
@@ -389,42 +432,58 @@ func (cp *EnumControlPoint) SetOption(item int, degree float64) {
 		return
 	}
 
-	cp.nextItem = item
-	cp.nextDegree = degree
-
-	cp.dirty = true
-}
-
-func (cp *EnumControlPoint) Commit() bool {
-	if cp == nil {
-		return false
-	}
-
-	cp.wasDirty = cp.dirty
-	if !cp.dirty {
-		return false
-	}
-
-	cp.item = cp.nextItem
-	cp.degree = cp.nextDegree
-	cp.dirty = false
-
-	return true
-}
-
-func (cp *EnumControlPoint) WasDirty() bool {
-	if cp == nil {
-		return false
-	}
-
-	return cp.wasDirty
+	cp.Item = item
+	cp.Degree = degree
 }
 
 func (cp *EnumControlPoint) SetFromNode(node *config.AclNode) {
-	cp.nextItem = node.ChildAsInt("item")
-	cp.nextDegree = node.ChildAsFloat("degree")
+	cp.Item = node.ChildAsInt("item")
+	cp.Degree = node.ChildAsFloat("degree")
+}
 
-	cp.dirty = true
+func (cp *EnumControlPoint) SetToNode(root *config.AclNode, path ...string) {
+	if cp == nil {
+		return
+	}
+
+	fp := append(path, cp.name)
+
+	kp := append(fp, "kind")
+	root.SetValAt(cp.Kind, kp...)
+
+	kp = append(fp, "item")
+	root.SetValAt(cp.Item, kp...)
+
+	kp = append(fp, "degree")
+	root.SetValAt(cp.Degree, kp...)
+}
+
+func (cp *EnumControlPoint) SetFromJSON(val interface{}) {
+	if cp == nil || val == nil {
+		return
+	}
+
+	v, ok := val.(map[string]interface{})
+	if !ok {
+		return
+	}
+
+	cp.Item = ValAsInt(v["Item"])
+	cp.Degree = ValAsFloat(v["Degree"])
+}
+
+func (cp *EnumControlPoint) Apply(other ControlPoint) {
+	if cp == nil || other == nil {
+		return
+	}
+
+	otherEnum, ok := other.(*EnumControlPoint)
+	if !ok {
+		return
+	}
+
+	cp.Item = otherEnum.Item
+	cp.Degree = otherEnum.Degree
 }
 
 func (cp *EnumControlPoint) String() string {
@@ -432,7 +491,19 @@ func (cp *EnumControlPoint) String() string {
 		return "Enum(nil)"
 	}
 
-	return fmt.Sprintf("Enum(%v,%v)", cp.item, cp.degree)
+	return fmt.Sprintf("Enum(%v,%v)", cp.Item, cp.Degree)
+}
+
+func (cp *EnumControlPoint) Copy() ControlPoint {
+	ncp := &EnumControlPoint{
+		name: cp.name,
+
+		Kind:   cp.Kind,
+		Item:   cp.Item,
+		Degree: cp.Degree,
+	}
+
+	return ncp
 }
 
 ////////////////////////////////////////
@@ -440,16 +511,15 @@ func (cp *EnumControlPoint) String() string {
 type IntensityControlPoint struct {
 	name string
 
-	intensity     float64
-	nextIntensity float64
-
-	dirty    bool
-	wasDirty bool
+	Kind      string
+	Intensity float64
 }
 
 func NewIntensityControlPoint(name string) *IntensityControlPoint {
 	cp := &IntensityControlPoint{
 		name: name,
+
+		Kind: "intensity",
 	}
 
 	return cp
@@ -463,50 +533,64 @@ func (cp *IntensityControlPoint) Name() string {
 	return cp.name
 }
 
-func (cp *IntensityControlPoint) Intensity() float64 {
+func (cp *IntensityControlPoint) Percent() float64 {
 	if cp == nil {
 		return 0.0
 	}
 
-	return cp.intensity
+	return cp.Intensity
 }
 
-func (cp *IntensityControlPoint) SetIntensity(intensity float64) {
+func (cp *IntensityControlPoint) SetPercent(intensity float64) {
 	if cp == nil {
 		return
 	}
 
-	cp.nextIntensity = intensity
-	cp.dirty = true
-}
-
-func (cp *IntensityControlPoint) Commit() bool {
-	if cp == nil {
-		return false
-	}
-
-	cp.wasDirty = cp.dirty
-	if !cp.dirty {
-		return false
-	}
-
-	cp.intensity = cp.nextIntensity
-	cp.dirty = false
-
-	return true
-}
-
-func (cp *IntensityControlPoint) WasDirty() bool {
-	if cp == nil {
-		return false
-	}
-
-	return cp.wasDirty
+	cp.Intensity = intensity
 }
 
 func (cp *IntensityControlPoint) SetFromNode(node *config.AclNode) {
-	cp.nextIntensity = node.ChildAsFloat("intensity")
-	cp.dirty = true
+	cp.Intensity = node.ChildAsFloat("intensity")
+}
+
+func (cp *IntensityControlPoint) SetToNode(root *config.AclNode, path ...string) {
+	if cp == nil {
+		return
+	}
+
+	fp := append(path, cp.name)
+
+	kp := append(fp, "kind")
+	root.SetValAt(cp.Kind, kp...)
+
+	kp = append(fp, "intensity")
+	root.SetValAt(cp.Intensity, kp...)
+}
+
+func (cp *IntensityControlPoint) SetFromJSON(val interface{}) {
+	if cp == nil || val == nil {
+		return
+	}
+
+	v, ok := val.(map[string]interface{})
+	if !ok {
+		return
+	}
+
+	cp.Intensity = ValAsFloat(v["Intensity"])
+}
+
+func (cp *IntensityControlPoint) Apply(other ControlPoint) {
+	if cp == nil || other == nil {
+		return
+	}
+
+	otherIntensity, ok := other.(*IntensityControlPoint)
+	if !ok {
+		return
+	}
+
+	cp.Intensity = otherIntensity.Intensity
 }
 
 func (cp *IntensityControlPoint) String() string {
@@ -514,5 +598,16 @@ func (cp *IntensityControlPoint) String() string {
 		return "Intensity(nil)"
 	}
 
-	return fmt.Sprintf("Intensity(%v,%v)", cp.intensity)
+	return fmt.Sprintf("Intensity(%v)", cp.Intensity)
+}
+
+func (cp *IntensityControlPoint) Copy() ControlPoint {
+	ncp := &IntensityControlPoint{
+		name: cp.name,
+
+		Kind:      cp.Kind,
+		Intensity: cp.Intensity,
+	}
+
+	return ncp
 }

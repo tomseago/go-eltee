@@ -42,7 +42,7 @@ func (u *IntensityUpdater) Update(fc *FixtureControl) {
 		return
 	}
 
-	val := intensity.Intensity()
+	val := intensity.Percent()
 
 	// TODO: Scaling. Min and max could be stored in the profile control. For now assume 0 to 255.
 
