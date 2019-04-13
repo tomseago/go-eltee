@@ -300,7 +300,8 @@ func (fc *FtdiContext) goFramePump() {
 		// str := C.GoString(C.fake_write(fc.ctx, (*_Ctype_uchar)(b), 513))
 		// log.Debugf("Fake Write> %v", str)
 
-		result := C.ftdi_write_data(fc.ctx, (*_Ctype_uchar)(b), 513)
+		result := C.ftdi_write_data(fc.ctx, (*C.uchar)(b), 513)
+		//result := C.ftdi_write_data(fc.ctx, b, 513)
 		if result < 0 {
 			// This is bad - throw us into error state
 			log.Warningf("FTDI: Frame pump: %v", fc.errorString())
