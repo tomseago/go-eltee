@@ -3,6 +3,7 @@ package eltee
 import (
 	"fmt"
 	"github.com/eyethereal/go-config"
+	"github.com/tomseago/go-eltee/api"
 	"io/ioutil"
 	"path/filepath"
 	"sort"
@@ -141,4 +142,15 @@ func (lib *ProfileLibrary) String() string {
 	}
 
 	return b.String()
+}
+
+func (p *Profile) ToAPI() *api.Profile {
+	apiP := &api.Profile{
+		Id:           p.Id,
+		Name:         p.Name,
+		ChannelCount: int32(p.ChannelCount),
+		Controls:     p.Controls.ToAPI(),
+	}
+
+	return apiP
 }

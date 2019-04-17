@@ -3,6 +3,7 @@ package eltee
 import (
 	"fmt"
 	"github.com/eyethereal/go-config"
+	"github.com/tomseago/go-eltee/api"
 	"strings"
 )
 
@@ -138,4 +139,24 @@ func (pc *GroupProfileControl) ForEachControl(fn func(ProfileControl)) {
 
 		fn(child)
 	}
+}
+
+func (pc *GroupProfileControl) ToAPI() *api.ProfileControl {
+
+	aPc := &api.GroupProfileControl{
+		Id:   pc.id,
+		Name: pc.name,
+
+		Controls: make([]*api.ProfileControl, len(pc.Controls)),
+	}
+
+	for i := 0; i < len(pc.Controls); i++ {
+		aPc.Controls[i] = pc.Controls[i].ToAPI()
+	}
+
+	aRet := &api.ProfileControl{
+		Sub: &api.ProfileControl_Group{aPc},
+	}
+
+	return aRet
 }

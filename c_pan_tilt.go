@@ -3,6 +3,7 @@ package eltee
 import (
 	"fmt"
 	"github.com/eyethereal/go-config"
+	"github.com/tomseago/go-eltee/api"
 	"math"
 )
 
@@ -156,6 +157,15 @@ func (a *Axis) String() string {
 	return fmt.Sprintf("[%v, %v](%v->%v)", a.coarse, a.fine, a.minRad, a.maxRad)
 }
 
+func (a *Axis) ToAPI() *api.PanTiltProfileControlAxis {
+	return &api.PanTiltProfileControlAxis{
+		Coarse: int32(a.coarse),
+		Fine:   int32(a.fine),
+		MinRad: a.minRad,
+		MaxRad: a.maxRad,
+	}
+}
+
 ////////////////
 
 type PanTiltProfileControl struct {
@@ -211,4 +221,22 @@ func (pc *PanTiltProfileControl) Instantiate(fixture Fixture) *FixtureControl {
 	fixture.AttachControl(pc.id, fc)
 
 	return fc
+}
+
+func (pc *PanTiltProfileControl) ToAPI() *api.ProfileControl {
+	aPc := &api.PanTiltProfileControl{
+		Id:   pc.id,
+		Name: pc.name,
+
+		Pan:  pc.pan.ToAPI(),
+		Tilt: pc.tilt.ToAPI(),
+
+		ChSpeed: int32(pc.chSpeed),
+	}
+
+	aRet := &api.ProfileControl{
+		Sub: &api.ProfileControl_PanTilt{aPc},
+	}
+
+	return aRet
 }

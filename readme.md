@@ -23,9 +23,8 @@ Glossary
 
 **Fixture Patch** - A particular set of connections between fixture controls and control points. Each fixture control can observe only a single control point, but multiple fixture controls can observe the same control point. Fixture Patches can be transitioned between each other either as a hard cut or as a fade possessing some duration. If faded, internally the system will create a temporary version of the arrival patch which matches the values of the departure patch, but has the fixtures attached to the new control points. It will then animate the control points from the departure to the arrival values following whatever easing curves may be specified.
 
-**Input Patch** - A particular set of connections between input adapters and the control points. Unlike fixture patches, input patches are two way in that input adaptors will be notified as control point values they are connected to change. Additionally, input adapters to control points is a many to many relationship where multiple input adapters can be modifying the same control point.
+**Controller Patch** - A particular set of connections between controller instances and the control points. Unlike fixture patches, controller patches are two way in that controller instances will be notified as control point values they are connected to change. 
 
-**Input Adapter** - A module which can be patched into one or more control points and which provides some sort of external communication mechanism to something like a web interface, a native app, OSC, or MIDI.
 
 
 Main Looper
@@ -70,3 +69,10 @@ Install libftdi1 using
     
     sudo apt-get install libftdi1
 
+
+Interface
+=========
+
+The ElTee server exposes a gRPC interface for all it's fun functionality. This includes management sort of things like learning the configuration or modifying it, as well as modifying control points. For web clients an external gRPC-web proxy (specifically Envoy) is needed in order to convert gRPC-web traffic into gRPC traffic.
+
+The idea is to keep everything gRPC, but if necessary we can always expose something else. For instance there is a websockets interface that was started, but is deprecated in favor of gRPC.

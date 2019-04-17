@@ -33,6 +33,8 @@ type Server struct {
 	// controlPointsByName map[string]ControlPoint
 
 	inputAdapters []*InputAdapterRegistration
+
+	apiServer *apiServer
 }
 
 func NewServer(cfg *config.AclNode) *Server {
@@ -155,6 +157,8 @@ func NewServer(cfg *config.AclNode) *Server {
 		}
 	}
 
+	s.apiServer = NewApiServer(s)
+
 	return s
 }
 
@@ -207,7 +211,7 @@ func (s *Server) CreateFixture(name string, node *config.AclNode, defBase int) (
 
 func (s *Server) Start() {
 	go s.dmxHarness.Start()
-
+	go s.apiServer.Start()
 }
 
 // A function to be called by the DmxHarness to update the frame slice that it

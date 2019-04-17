@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+message Void {    
+}
+
+message StringMsg {
+    string val = 1;
+}
+
+// This is how we get polymorphic behavior for ProfileControls
+message ProfileControl {
+    oneof sub {
+        GroupProfileControl group = 1;
+        EnumProfileControl enum = 2;
+        IntensityProfileControl intensity = 3;
+        PanTiltProfileControl panTilt = 4;
+        LedVarProfileControl ledVar = 5;
+    }
+}
+
+message GroupProfileControl {
+    string id = 1;
+    string name = 2;
+
+    repeated ProfileControl controls = 3;
+}
+
+message EnumProfileControlOption {
+    string name = 1;
+    repeated int32 values = 2;
+    string varName = 3;
+    int32 varOffset = 4;
+}
+
+message EnumProfileControl {
+    string id = 1;
+    string name = 2;
+
+    int32 channelIx = 3;
+    repeated EnumProfileControlOption options = 4;
+}
+
+message IntensityProfileControl {
+    string id = 1;
+    string name = 2;
+
+    int32 channelIx = 3;
+}
+
+message PanTiltProfileControlAxis {
+    int32 coarse = 1;
+    int32 fine = 2;
+    double minRad = 3;
+    double maxRad = 4;
+}
+
+message PanTiltProfileControl {
+    string id = 1;
+    string name = 2;
+
+    PanTiltProfileControlAxis pan = 3;
+    PanTiltProfileControlAxis tilt = 4;
+
+    int32 chSpeed = 5;
+}
+
+message LedVarProfileControl {
+    string id = 1;
+    string name = 2;
+
+    map<string, int32> colorMap = 3;
+}
+
+message Profile {
+    string id = 1;
+    string name = 2;
+    int32 channelCount = 3;
+
+    // Even though we know this is a GroupProfileControl, it's a little
+    // easier on the client side if we keep it the same abstraction. 
+    ProfileControl controls = 4;
+}
+
+message ProfilesResponse {
+    map<string, Profile> profiles = 1;
+}
+
+service ElTee {
+    rpc Ping(StringMsg) returns (StringMsg) {}
+
+    rpc ProfileLibrary(Void) returns (ProfilesResponse) {}
+}

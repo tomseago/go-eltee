@@ -3,6 +3,7 @@ package eltee
 import (
 	"fmt"
 	"github.com/eyethereal/go-config"
+	"github.com/tomseago/go-eltee/api"
 )
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -103,4 +104,19 @@ func (pc *IntensityProfileControl) Instantiate(fixture Fixture) *FixtureControl 
 	fixture.AttachControl(pc.id, fc)
 
 	return fc
+}
+
+func (pc *IntensityProfileControl) ToAPI() *api.ProfileControl {
+	aPc := &api.IntensityProfileControl{
+		Id:   pc.id,
+		Name: pc.name,
+
+		ChannelIx: int32(pc.channelIx),
+	}
+
+	aRet := &api.ProfileControl{
+		Sub: &api.ProfileControl_Intensity{aPc},
+	}
+
+	return aRet
 }

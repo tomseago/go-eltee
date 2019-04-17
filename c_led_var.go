@@ -3,6 +3,7 @@ package eltee
 import (
 	"fmt"
 	"github.com/eyethereal/go-config"
+	"github.com/tomseago/go-eltee/api"
 )
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -106,4 +107,23 @@ func (pc *LedVarProfileControl) Instantiate(fixture Fixture) *FixtureControl {
 	fixture.AttachControl(pc.id, fc)
 
 	return fc
+}
+
+func (pc *LedVarProfileControl) ToAPI() *api.ProfileControl {
+	aPc := &api.LedVarProfileControl{
+		Id:   pc.id,
+		Name: pc.name,
+
+		ColorMap: make(map[string]int32),
+	}
+
+	for k, v := range pc.ColorMap {
+		aPc.ColorMap[k] = int32(v)
+	}
+
+	aRet := &api.ProfileControl{
+		Sub: &api.ProfileControl_LedVar{aPc},
+	}
+
+	return aRet
 }

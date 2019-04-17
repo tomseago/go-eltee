@@ -3,6 +3,7 @@ package eltee
 import (
 	"fmt"
 	"github.com/eyethereal/go-config"
+	"github.com/tomseago/go-eltee/api"
 )
 
 // An instance of fixture control updater is attached to each fixture control and knows
@@ -61,6 +62,8 @@ type ProfileControl interface {
 	// A Profile can be instantiated for a particular fixture. This instance
 	// is expected to be held by the fixture
 	Instantiate(fixture Fixture) *FixtureControl
+
+	ToAPI() *api.ProfileControl
 }
 
 /////////

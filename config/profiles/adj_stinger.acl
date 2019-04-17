@@ -7,14 +7,14 @@ controls: {
         kind: enum
         default_channel: 1
         values: {
-            "Shows Off"   : { v: 0 }
-            "Show 1"      : { v: 10 }
-            "Show 2"      : { v: 45 }
-            "Show 3"      : { v: 80 }
-            "Show 4"      : { v: 115 }
-            "Show 5"      : { v: 150 }
-            "Show 6"      : { v: 185 }
-            "Random Show" : { v: 220 }
+            "Shows Off"   : 0 
+            "Show 1"      : 10 
+            "Show 2"      : 45
+            "Show 3"      : 80 
+            "Show 4"      : 115
+            "Show 5"      : 150
+            "Show 6"      : 185 
+            "Random Show" : 220
         }
     }
 
@@ -29,9 +29,9 @@ controls: {
                 default_channel: 2
                 values: {
                     "Off"  : { variable: {name: color_bitmask, offset: 10} }
-                    "Step Change" : { range: [10 198] }
-                    "Fade 1" : { range: [199 225] }
-                    "Fade 2" : { range: [226 255] }
+                    "Step Change" : [10 198]
+                    "Fade 1" : [199 225] 
+                    "Fade 2" : [226 255]
                 }
             }
 
@@ -61,9 +61,9 @@ controls: {
                 kind: enum
                 default_channel: 3
                 values: {
-                    "Off": {v: 0}
-                    "Strobe Speed": { range: [10 244] }
-                    "Sound Activated Sensitivity": { range: [245 255] } // Not sure if speed or sensitivity
+                    "Off": 0
+                    "Strobe Speed": [10 244]
+                    "Sound Activated Sensitivity": [245 255] // Not sure if speed or sensitivity
                 }
             }
 
@@ -72,8 +72,9 @@ controls: {
                 kind: enum
                 default_channel: 8
                 values: {
-                    "Off": {v: 0}
+                    "Off": 0
                     "Rotating": { range: [10 127 255], range_type: middle } 
+                    // "Rotating": { range: [10 127 255], range_type: middle } 
                         // Maybe add sub-range labels???
                         // Maybe add carousel range to loop since slow toggle would be neat
                 }

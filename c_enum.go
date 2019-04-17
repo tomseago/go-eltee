@@ -3,6 +3,7 @@ package eltee
 import (
 	"fmt"
 	"github.com/eyethereal/go-config"
+	"github.com/tomseago/go-eltee/api"
 	"strings"
 )
 
@@ -75,7 +76,12 @@ type EnumOption struct {
 
 	Values []int
 
-	// An enum option can get it's value entirely from a fixture variable
+	// An enum option can get it's value entirely from a fixture variable. This
+	// is used to support the odd bit mapped values for the stinger where
+	// we want to have toggle controls which control bits in a var on the fixture
+	// and then an enum reads that var to figure out it's value.
+	// This concept is either brilliant or insane. Not sure which. It might come
+	// up with the laser also.
 	VariableName   string
 	VariableOffset int
 }
@@ -118,6 +124,21 @@ func (eo *EnumOption) String() string {
 	}
 	b.WriteString(">")
 	return b.String()
+}
+
+func (eo *EnumOption) ToAPI() *api.EnumProfileControlOption {
+	r := &api.EnumProfileControlOption{
+		Name:      eo.Name,
+		Values:    make([]int32, len(eo.Values)),
+		VarName:   eo.VariableName,
+		VarOffset: int32(eo.VariableOffset),
+	}
+
+	for ix, val := range eo.Values {
+		r.Values[ix] = int32(val)
+	}
+
+	return r
 }
 
 ////////////////
@@ -181,4 +202,25 @@ func (pc *EnumProfileControl) Instantiate(fixture Fixture) *FixtureControl {
 	fixture.AttachControl(pc.id, fc)
 
 	return fc
+}
+
+func (pc *EnumProfileControl) ToAPI() *api.ProfileControl {
+
+	aPc := &api.EnumProfileControl{
+		Id:   pc.id,
+		Name: pc.name,
+
+		ChannelIx: int32(pc.channelIx),
+		Options:   make([]*api.EnumProfileControlOption, 0),
+	}
+
+	for _, opt := range pc.options {
+		aPc.Options = append(aPc.Options, opt.ToAPI())
+	}
+
+	aRet := &api.ProfileControl{
+		Sub: &api.ProfileControl_Enum{aPc},
+	}
+
+	return aRet
 }
