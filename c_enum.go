@@ -219,7 +219,7 @@ func (pc *EnumProfileControl) ToAPI() *api.ProfileControl {
 	}
 
 	aRet := &api.ProfileControl{
-		Sub: &api.ProfileControl_Enum{aPc},
+		Sub: &api.ProfileControl_Enm{aPc},
 	}
 
 	return aRet

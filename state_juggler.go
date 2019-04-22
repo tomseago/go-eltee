@@ -27,6 +27,14 @@ func NewStateJuggler(fixturesByName map[string]Fixture) *StateJuggler {
 	return sj
 }
 
+func (sj *StateJuggler) StateNames() []string {
+	out := make([]string, 0, len(sj.statesByName))
+	for key := range sj.statesByName {
+		out = append(out, key)
+	}
+	return out
+}
+
 // func (sj *StateJuggler) BaseFrom(root *config.AclNode) {
 // 	sj.base = NewWorldStateFromNode("BASE", root)
 
@@ -54,6 +62,10 @@ func (sj *StateJuggler) Current() *WorldState {
 }
 
 func (sj *StateJuggler) State(name string) *WorldState {
+	if len(name) == 0 {
+		return sj.current
+	}
+
 	return sj.statesByName[name]
 }
 
@@ -98,6 +110,7 @@ func (sj *StateJuggler) LoadDirectory(dirname string) error {
 	}
 
 	sj.current = sj.statesByName["base"].Copy()
+	sj.current.name = "CURRENT"
 	sj.patchFixtures(sj.current)
 
 	return nil

@@ -20,11 +20,11 @@ fixtures:  {
         kind: coidak_floodpar
     }
 
+    */
     "Pin Spot 1": {
         kind: donner_pinspot
         base: 65
     }
-    */
 
     "Pin Spot 2": {
         kind: donner_pinspot

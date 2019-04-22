@@ -2,6 +2,7 @@ package eltee
 
 import (
 	"context"
+	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
 	"net"
@@ -67,6 +68,57 @@ func (asrv *apiServer) ProfileLibrary(ctx context.Context, req *api.Void) (*api.
 	}
 
 	return rsp, nil
+}
+
+func (asrv *apiServer) StateNames(ctx context.Context, req *api.Void) (*api.StringMsg, error) {
+	rsp := &api.StringMsg{}
+
+	rsp.List = asrv.server.stateJuggler.StateNames()
+
+	return rsp, nil
+}
+
+func (asrv *apiServer) ControlPoints(ctx context.Context, req *api.StringMsg) (*api.ControlPointList, error) {
+
+	juggler := asrv.server.stateJuggler
+	stateName := req.GetVal()
+	state := juggler.State(stateName)
+	if state == nil {
+		return nil, fmt.Errorf("Invalid request. No state named %v", stateName)
+	}
+
+	rsp := &api.ControlPointList{
+		Cps:   make([]*api.ControlPoint, 0, len(state.ControlPoints())),
+		State: stateName,
+	}
+
+	for _, cp := range state.ControlPoints() {
+		rsp.Cps = append(rsp.Cps, cp.ToApi())
+	}
+
+	return rsp, nil
+}
+
+func (asrv *apiServer) SetControlPoints(ctx context.Context, req *api.ControlPointList) (*api.Void, error) {
+
+	state := asrv.server.stateJuggler.State(req.GetState())
+	if state == nil {
+		return nil, fmt.Errorf("Could not find state %v", req.GetState())
+	}
+
+	for _, apiCP := range req.GetCps() {
+		cp := state.ControlPoint(apiCP.GetName())
+
+		if cp == nil {
+			return nil, fmt.Errorf("State does not have a control point named %v", apiCP.GetName())
+		}
+
+		log.Debugf("Old: %v", cp)
+		cp.SetFromApi(apiCP)
+		log.Infof("New: %v", cp)
+	}
+
+	return &api.Void{}, nil
 }
 
 //////////////////

@@ -19,7 +19,7 @@ controls: {
         channel: 1
         values: {
             "Off"   : 0 
-            "Step Change" : [9 134] 
+            "Step Change" : [9 134] // Seems to just be all white intensity
             "Strobe Speed" : [135 239] 
             "Use RGBW" : 240 
         }

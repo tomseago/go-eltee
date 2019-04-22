@@ -5,6 +5,8 @@ message Void {
 
 message StringMsg {
     string val = 1;
+
+    repeated string list = 2;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -97,39 +99,33 @@ message ProfilesResponse {
 
 // Polymorphic holder message
 message ControlPoint {
-    oneof sub {
-        ColorPoint color = 1;
-        XYZPoint xyz = 2;
-        EnumPoint enm = 3;
-        IntensityPoint intensity = 4;
+    string name = 1;
+
+    oneof val {
+        ColorPoint color = 2;
+        XYZPoint xyz = 3;
+        EnumPoint enm = 4;
+        IntensityPoint intensity = 5;
     }
 }
 
 message ColorPoint {
-    string name = 1;
-
-    map<string, double> components = 2;
+    map<string, double> components = 1;
 }
 
 message XYZPoint {
-    string name = 1;
-
-    double x = 2;
-    double y = 3;
-    double z = 4;
+    double x = 1;
+    double y = 2;
+    double z = 3;
 }
 
 message EnumPoint {
-    string name = 1;
-
-    int32 item = 2;
-    double degree = 3;
+    int32 item = 1;
+    double degree = 2;
 }
 
 message IntensityPoint {
-    string name = 1;
-
-    double intensity = 2;
+    double intensity = 1;
 }
 
 message ControlPointQuery {
@@ -137,7 +133,25 @@ message ControlPointQuery {
 }
 
 message ControlPointList {
-    repeated ControlPoint list = 1;
+    repeated ControlPoint cps = 1;
+
+    // If set, indicates these control points are for a particular state
+    // This is useful when setting control points either to the current
+    // state or to some other state
+    string state = 2; 
+}
+
+////////////////////////////////////////////////////////////////////////
+//
+// States
+//
+
+message StateQuery {
+    string name = 1;
+}
+
+message StateQueryReply {
+    repeated string names = 1;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -147,5 +161,12 @@ service ElTee {
 
     rpc ProfileLibrary(Void) returns (ProfilesResponse) {}
 
-    rpc ControlPoints(ControlPointQuery) returns (ControlPointList) {}
+    rpc StateNames(Void) returns (StringMsg) {}
+    rpc ControlPoints(StringMsg) returns (ControlPointList) {}
+
+    /*
+    Sets current values directly without modifying any other state declaration
+    */
+    rpc SetControlPoints(ControlPointList) returns (Void) {}
+
 }

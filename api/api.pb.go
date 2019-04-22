@@ -57,6 +57,7 @@ var xxx_messageInfo_Void proto.InternalMessageInfo
 
 type StringMsg struct {
 	Val                  string   `protobuf:"bytes,1,opt,name=val,proto3" json:"val,omitempty"`
+	List                 []string `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -94,11 +95,18 @@ func (m *StringMsg) GetVal() string {
 	return ""
 }
 
+func (m *StringMsg) GetList() []string {
+	if m != nil {
+		return m.List
+	}
+	return nil
+}
+
 // This is how we get polymorphic behavior for ProfileControls
 type ProfileControl struct {
 	// Types that are valid to be assigned to Sub:
 	//	*ProfileControl_Group
-	//	*ProfileControl_Enum
+	//	*ProfileControl_Enm
 	//	*ProfileControl_Intensity
 	//	*ProfileControl_PanTilt
 	//	*ProfileControl_LedVar
@@ -141,8 +149,8 @@ type ProfileControl_Group struct {
 	Group *GroupProfileControl `protobuf:"bytes,1,opt,name=group,proto3,oneof"`
 }
 
-type ProfileControl_Enum struct {
-	Enum *EnumProfileControl `protobuf:"bytes,2,opt,name=enum,proto3,oneof"`
+type ProfileControl_Enm struct {
+	Enm *EnumProfileControl `protobuf:"bytes,2,opt,name=enm,proto3,oneof"`
 }
 
 type ProfileControl_Intensity struct {
@@ -159,7 +167,7 @@ type ProfileControl_LedVar struct {
 
 func (*ProfileControl_Group) isProfileControl_Sub() {}
 
-func (*ProfileControl_Enum) isProfileControl_Sub() {}
+func (*ProfileControl_Enm) isProfileControl_Sub() {}
 
 func (*ProfileControl_Intensity) isProfileControl_Sub() {}
 
@@ -181,9 +189,9 @@ func (m *ProfileControl) GetGroup() *GroupProfileControl {
 	return nil
 }
 
-func (m *ProfileControl) GetEnum() *EnumProfileControl {
-	if x, ok := m.GetSub().(*ProfileControl_Enum); ok {
-		return x.Enum
+func (m *ProfileControl) GetEnm() *EnumProfileControl {
+	if x, ok := m.GetSub().(*ProfileControl_Enm); ok {
+		return x.Enm
 	}
 	return nil
 }
@@ -213,7 +221,7 @@ func (m *ProfileControl) GetLedVar() *LedVarProfileControl {
 func (*ProfileControl) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
 		(*ProfileControl_Group)(nil),
-		(*ProfileControl_Enum)(nil),
+		(*ProfileControl_Enm)(nil),
 		(*ProfileControl_Intensity)(nil),
 		(*ProfileControl_PanTilt)(nil),
 		(*ProfileControl_LedVar)(nil),
@@ -749,6 +757,472 @@ func (m *ProfilesResponse) GetProfiles() map[string]*Profile {
 	return nil
 }
 
+// Polymorphic holder message
+type ControlPoint struct {
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Types that are valid to be assigned to Val:
+	//	*ControlPoint_Color
+	//	*ControlPoint_Xyz
+	//	*ControlPoint_Enm
+	//	*ControlPoint_Intensity
+	Val                  isControlPoint_Val `protobuf_oneof:"val"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
+}
+
+func (m *ControlPoint) Reset()         { *m = ControlPoint{} }
+func (m *ControlPoint) String() string { return proto.CompactTextString(m) }
+func (*ControlPoint) ProtoMessage()    {}
+func (*ControlPoint) Descriptor() ([]byte, []int) {
+	return fileDescriptor_00212fb1f9d3bf1c, []int{12}
+}
+
+func (m *ControlPoint) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ControlPoint.Unmarshal(m, b)
+}
+func (m *ControlPoint) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ControlPoint.Marshal(b, m, deterministic)
+}
+func (m *ControlPoint) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ControlPoint.Merge(m, src)
+}
+func (m *ControlPoint) XXX_Size() int {
+	return xxx_messageInfo_ControlPoint.Size(m)
+}
+func (m *ControlPoint) XXX_DiscardUnknown() {
+	xxx_messageInfo_ControlPoint.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ControlPoint proto.InternalMessageInfo
+
+func (m *ControlPoint) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+type isControlPoint_Val interface {
+	isControlPoint_Val()
+}
+
+type ControlPoint_Color struct {
+	Color *ColorPoint `protobuf:"bytes,2,opt,name=color,proto3,oneof"`
+}
+
+type ControlPoint_Xyz struct {
+	Xyz *XYZPoint `protobuf:"bytes,3,opt,name=xyz,proto3,oneof"`
+}
+
+type ControlPoint_Enm struct {
+	Enm *EnumPoint `protobuf:"bytes,4,opt,name=enm,proto3,oneof"`
+}
+
+type ControlPoint_Intensity struct {
+	Intensity *IntensityPoint `protobuf:"bytes,5,opt,name=intensity,proto3,oneof"`
+}
+
+func (*ControlPoint_Color) isControlPoint_Val() {}
+
+func (*ControlPoint_Xyz) isControlPoint_Val() {}
+
+func (*ControlPoint_Enm) isControlPoint_Val() {}
+
+func (*ControlPoint_Intensity) isControlPoint_Val() {}
+
+func (m *ControlPoint) GetVal() isControlPoint_Val {
+	if m != nil {
+		return m.Val
+	}
+	return nil
+}
+
+func (m *ControlPoint) GetColor() *ColorPoint {
+	if x, ok := m.GetVal().(*ControlPoint_Color); ok {
+		return x.Color
+	}
+	return nil
+}
+
+func (m *ControlPoint) GetXyz() *XYZPoint {
+	if x, ok := m.GetVal().(*ControlPoint_Xyz); ok {
+		return x.Xyz
+	}
+	return nil
+}
+
+func (m *ControlPoint) GetEnm() *EnumPoint {
+	if x, ok := m.GetVal().(*ControlPoint_Enm); ok {
+		return x.Enm
+	}
+	return nil
+}
+
+func (m *ControlPoint) GetIntensity() *IntensityPoint {
+	if x, ok := m.GetVal().(*ControlPoint_Intensity); ok {
+		return x.Intensity
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*ControlPoint) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*ControlPoint_Color)(nil),
+		(*ControlPoint_Xyz)(nil),
+		(*ControlPoint_Enm)(nil),
+		(*ControlPoint_Intensity)(nil),
+	}
+}
+
+type ColorPoint struct {
+	Components           map[string]float64 `protobuf:"bytes,1,rep,name=components,proto3" json:"components,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"fixed64,2,opt,name=value,proto3"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
+}
+
+func (m *ColorPoint) Reset()         { *m = ColorPoint{} }
+func (m *ColorPoint) String() string { return proto.CompactTextString(m) }
+func (*ColorPoint) ProtoMessage()    {}
+func (*ColorPoint) Descriptor() ([]byte, []int) {
+	return fileDescriptor_00212fb1f9d3bf1c, []int{13}
+}
+
+func (m *ColorPoint) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ColorPoint.Unmarshal(m, b)
+}
+func (m *ColorPoint) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ColorPoint.Marshal(b, m, deterministic)
+}
+func (m *ColorPoint) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ColorPoint.Merge(m, src)
+}
+func (m *ColorPoint) XXX_Size() int {
+	return xxx_messageInfo_ColorPoint.Size(m)
+}
+func (m *ColorPoint) XXX_DiscardUnknown() {
+	xxx_messageInfo_ColorPoint.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ColorPoint proto.InternalMessageInfo
+
+func (m *ColorPoint) GetComponents() map[string]float64 {
+	if m != nil {
+		return m.Components
+	}
+	return nil
+}
+
+type XYZPoint struct {
+	X                    float64  `protobuf:"fixed64,1,opt,name=x,proto3" json:"x,omitempty"`
+	Y                    float64  `protobuf:"fixed64,2,opt,name=y,proto3" json:"y,omitempty"`
+	Z                    float64  `protobuf:"fixed64,3,opt,name=z,proto3" json:"z,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *XYZPoint) Reset()         { *m = XYZPoint{} }
+func (m *XYZPoint) String() string { return proto.CompactTextString(m) }
+func (*XYZPoint) ProtoMessage()    {}
+func (*XYZPoint) Descriptor() ([]byte, []int) {
+	return fileDescriptor_00212fb1f9d3bf1c, []int{14}
+}
+
+func (m *XYZPoint) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_XYZPoint.Unmarshal(m, b)
+}
+func (m *XYZPoint) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_XYZPoint.Marshal(b, m, deterministic)
+}
+func (m *XYZPoint) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_XYZPoint.Merge(m, src)
+}
+func (m *XYZPoint) XXX_Size() int {
+	return xxx_messageInfo_XYZPoint.Size(m)
+}
+func (m *XYZPoint) XXX_DiscardUnknown() {
+	xxx_messageInfo_XYZPoint.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_XYZPoint proto.InternalMessageInfo
+
+func (m *XYZPoint) GetX() float64 {
+	if m != nil {
+		return m.X
+	}
+	return 0
+}
+
+func (m *XYZPoint) GetY() float64 {
+	if m != nil {
+		return m.Y
+	}
+	return 0
+}
+
+func (m *XYZPoint) GetZ() float64 {
+	if m != nil {
+		return m.Z
+	}
+	return 0
+}
+
+type EnumPoint struct {
+	Item                 int32    `protobuf:"varint,1,opt,name=item,proto3" json:"item,omitempty"`
+	Degree               float64  `protobuf:"fixed64,2,opt,name=degree,proto3" json:"degree,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *EnumPoint) Reset()         { *m = EnumPoint{} }
+func (m *EnumPoint) String() string { return proto.CompactTextString(m) }
+func (*EnumPoint) ProtoMessage()    {}
+func (*EnumPoint) Descriptor() ([]byte, []int) {
+	return fileDescriptor_00212fb1f9d3bf1c, []int{15}
+}
+
+func (m *EnumPoint) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_EnumPoint.Unmarshal(m, b)
+}
+func (m *EnumPoint) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_EnumPoint.Marshal(b, m, deterministic)
+}
+func (m *EnumPoint) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EnumPoint.Merge(m, src)
+}
+func (m *EnumPoint) XXX_Size() int {
+	return xxx_messageInfo_EnumPoint.Size(m)
+}
+func (m *EnumPoint) XXX_DiscardUnknown() {
+	xxx_messageInfo_EnumPoint.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EnumPoint proto.InternalMessageInfo
+
+func (m *EnumPoint) GetItem() int32 {
+	if m != nil {
+		return m.Item
+	}
+	return 0
+}
+
+func (m *EnumPoint) GetDegree() float64 {
+	if m != nil {
+		return m.Degree
+	}
+	return 0
+}
+
+type IntensityPoint struct {
+	Intensity            float64  `protobuf:"fixed64,1,opt,name=intensity,proto3" json:"intensity,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *IntensityPoint) Reset()         { *m = IntensityPoint{} }
+func (m *IntensityPoint) String() string { return proto.CompactTextString(m) }
+func (*IntensityPoint) ProtoMessage()    {}
+func (*IntensityPoint) Descriptor() ([]byte, []int) {
+	return fileDescriptor_00212fb1f9d3bf1c, []int{16}
+}
+
+func (m *IntensityPoint) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_IntensityPoint.Unmarshal(m, b)
+}
+func (m *IntensityPoint) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_IntensityPoint.Marshal(b, m, deterministic)
+}
+func (m *IntensityPoint) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_IntensityPoint.Merge(m, src)
+}
+func (m *IntensityPoint) XXX_Size() int {
+	return xxx_messageInfo_IntensityPoint.Size(m)
+}
+func (m *IntensityPoint) XXX_DiscardUnknown() {
+	xxx_messageInfo_IntensityPoint.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_IntensityPoint proto.InternalMessageInfo
+
+func (m *IntensityPoint) GetIntensity() float64 {
+	if m != nil {
+		return m.Intensity
+	}
+	return 0
+}
+
+type ControlPointQuery struct {
+	State                string   `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ControlPointQuery) Reset()         { *m = ControlPointQuery{} }
+func (m *ControlPointQuery) String() string { return proto.CompactTextString(m) }
+func (*ControlPointQuery) ProtoMessage()    {}
+func (*ControlPointQuery) Descriptor() ([]byte, []int) {
+	return fileDescriptor_00212fb1f9d3bf1c, []int{17}
+}
+
+func (m *ControlPointQuery) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ControlPointQuery.Unmarshal(m, b)
+}
+func (m *ControlPointQuery) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ControlPointQuery.Marshal(b, m, deterministic)
+}
+func (m *ControlPointQuery) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ControlPointQuery.Merge(m, src)
+}
+func (m *ControlPointQuery) XXX_Size() int {
+	return xxx_messageInfo_ControlPointQuery.Size(m)
+}
+func (m *ControlPointQuery) XXX_DiscardUnknown() {
+	xxx_messageInfo_ControlPointQuery.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ControlPointQuery proto.InternalMessageInfo
+
+func (m *ControlPointQuery) GetState() string {
+	if m != nil {
+		return m.State
+	}
+	return ""
+}
+
+type ControlPointList struct {
+	Cps []*ControlPoint `protobuf:"bytes,1,rep,name=cps,proto3" json:"cps,omitempty"`
+	// If set, indicates these control points are for a particular state
+	// This is useful when setting control points either to the current
+	// state or to some other state
+	State                string   `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ControlPointList) Reset()         { *m = ControlPointList{} }
+func (m *ControlPointList) String() string { return proto.CompactTextString(m) }
+func (*ControlPointList) ProtoMessage()    {}
+func (*ControlPointList) Descriptor() ([]byte, []int) {
+	return fileDescriptor_00212fb1f9d3bf1c, []int{18}
+}
+
+func (m *ControlPointList) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ControlPointList.Unmarshal(m, b)
+}
+func (m *ControlPointList) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ControlPointList.Marshal(b, m, deterministic)
+}
+func (m *ControlPointList) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ControlPointList.Merge(m, src)
+}
+func (m *ControlPointList) XXX_Size() int {
+	return xxx_messageInfo_ControlPointList.Size(m)
+}
+func (m *ControlPointList) XXX_DiscardUnknown() {
+	xxx_messageInfo_ControlPointList.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ControlPointList proto.InternalMessageInfo
+
+func (m *ControlPointList) GetCps() []*ControlPoint {
+	if m != nil {
+		return m.Cps
+	}
+	return nil
+}
+
+func (m *ControlPointList) GetState() string {
+	if m != nil {
+		return m.State
+	}
+	return ""
+}
+
+type StateQuery struct {
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *StateQuery) Reset()         { *m = StateQuery{} }
+func (m *StateQuery) String() string { return proto.CompactTextString(m) }
+func (*StateQuery) ProtoMessage()    {}
+func (*StateQuery) Descriptor() ([]byte, []int) {
+	return fileDescriptor_00212fb1f9d3bf1c, []int{19}
+}
+
+func (m *StateQuery) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_StateQuery.Unmarshal(m, b)
+}
+func (m *StateQuery) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_StateQuery.Marshal(b, m, deterministic)
+}
+func (m *StateQuery) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_StateQuery.Merge(m, src)
+}
+func (m *StateQuery) XXX_Size() int {
+	return xxx_messageInfo_StateQuery.Size(m)
+}
+func (m *StateQuery) XXX_DiscardUnknown() {
+	xxx_messageInfo_StateQuery.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_StateQuery proto.InternalMessageInfo
+
+func (m *StateQuery) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+type StateQueryReply struct {
+	Names                []string `protobuf:"bytes,1,rep,name=names,proto3" json:"names,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *StateQueryReply) Reset()         { *m = StateQueryReply{} }
+func (m *StateQueryReply) String() string { return proto.CompactTextString(m) }
+func (*StateQueryReply) ProtoMessage()    {}
+func (*StateQueryReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_00212fb1f9d3bf1c, []int{20}
+}
+
+func (m *StateQueryReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_StateQueryReply.Unmarshal(m, b)
+}
+func (m *StateQueryReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_StateQueryReply.Marshal(b, m, deterministic)
+}
+func (m *StateQueryReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_StateQueryReply.Merge(m, src)
+}
+func (m *StateQueryReply) XXX_Size() int {
+	return xxx_messageInfo_StateQueryReply.Size(m)
+}
+func (m *StateQueryReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_StateQueryReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_StateQueryReply proto.InternalMessageInfo
+
+func (m *StateQueryReply) GetNames() []string {
+	if m != nil {
+		return m.Names
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*Void)(nil), "Void")
 	proto.RegisterType((*StringMsg)(nil), "StringMsg")
@@ -764,54 +1238,83 @@ func init() {
 	proto.RegisterType((*Profile)(nil), "Profile")
 	proto.RegisterType((*ProfilesResponse)(nil), "ProfilesResponse")
 	proto.RegisterMapType((map[string]*Profile)(nil), "ProfilesResponse.ProfilesEntry")
+	proto.RegisterType((*ControlPoint)(nil), "ControlPoint")
+	proto.RegisterType((*ColorPoint)(nil), "ColorPoint")
+	proto.RegisterMapType((map[string]float64)(nil), "ColorPoint.ComponentsEntry")
+	proto.RegisterType((*XYZPoint)(nil), "XYZPoint")
+	proto.RegisterType((*EnumPoint)(nil), "EnumPoint")
+	proto.RegisterType((*IntensityPoint)(nil), "IntensityPoint")
+	proto.RegisterType((*ControlPointQuery)(nil), "ControlPointQuery")
+	proto.RegisterType((*ControlPointList)(nil), "ControlPointList")
+	proto.RegisterType((*StateQuery)(nil), "StateQuery")
+	proto.RegisterType((*StateQueryReply)(nil), "StateQueryReply")
 }
 
 func init() { proto.RegisterFile("api.proto", fileDescriptor_00212fb1f9d3bf1c) }
 
 var fileDescriptor_00212fb1f9d3bf1c = []byte{
-	// 667 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x95, 0xcf, 0x4f, 0x1b, 0x3b,
-	0x10, 0xc7, 0xd9, 0xec, 0x6e, 0xc2, 0x0e, 0x0f, 0x1e, 0xcf, 0xfc, 0x78, 0x4b, 0xc4, 0x7b, 0x8d,
-	0xdc, 0x0b, 0x55, 0x91, 0x2b, 0x85, 0x0b, 0x2a, 0x87, 0xaa, 0x45, 0x51, 0x8b, 0x04, 0x05, 0x19,
-	0x44, 0x0f, 0x3d, 0x99, 0xc4, 0x09, 0x16, 0x1b, 0x7b, 0xe5, 0xdd, 0xa4, 0xe4, 0xc2, 0x3f, 0xd0,
-	0x43, 0x6f, 0xfd, 0x47, 0x7a, 0xe9, 0x9f, 0x57, 0xad, 0xd7, 0x9b, 0x1f, 0xdd, 0x80, 0x22, 0xf5,
-	0xe6, 0x19, 0x7f, 0xc6, 0xe3, 0xf9, 0xee, 0xcc, 0x1a, 0x02, 0x16, 0x0b, 0x12, 0x6b, 0x95, 0x2a,
-	0x5c, 0x05, 0xef, 0x5a, 0x89, 0x0e, 0xfe, 0x0f, 0x82, 0xcb, 0x54, 0x0b, 0xd9, 0x3b, 0x4b, 0x7a,
-	0x68, 0x1d, 0xdc, 0x21, 0x8b, 0x42, 0xa7, 0xe1, 0xec, 0x05, 0x34, 0x5b, 0xe2, 0x6f, 0x15, 0x58,
-	0xbb, 0xd0, 0xaa, 0x2b, 0x22, 0x7e, 0xac, 0x64, 0xaa, 0x55, 0x84, 0xf6, 0xc1, 0xef, 0x69, 0x35,
-	0x88, 0x0d, 0xb6, 0xd2, 0xdc, 0x24, 0xef, 0x33, 0x6b, 0x16, 0xfa, 0xb0, 0x44, 0x73, 0x08, 0xbd,
-	0x00, 0x8f, 0xcb, 0x41, 0x3f, 0xac, 0x18, 0x78, 0x83, 0xb4, 0xe4, 0xa0, 0x5f, 0x62, 0x0d, 0x82,
-	0x0e, 0x21, 0x10, 0x32, 0xe5, 0x32, 0x11, 0xe9, 0x28, 0x74, 0x0d, 0x1f, 0x92, 0x93, 0xc2, 0x53,
-	0x0a, 0x9a, 0xc0, 0xa8, 0x09, 0xb5, 0x98, 0xc9, 0x2b, 0x11, 0xa5, 0xa1, 0x67, 0xe2, 0xb6, 0xc9,
-	0x45, 0x6e, 0x97, 0xa2, 0x0a, 0x10, 0xbd, 0x82, 0x6a, 0xc4, 0x3b, 0xd7, 0x4c, 0x87, 0xbe, 0x09,
-	0xd9, 0x22, 0xa7, 0xc6, 0x2c, 0x45, 0x58, 0xec, 0x9d, 0x0f, 0x6e, 0x32, 0xb8, 0xc1, 0x5d, 0xd8,
-	0x98, 0x53, 0x30, 0x5a, 0x83, 0x8a, 0xe8, 0x58, 0xe5, 0x2a, 0xa2, 0x83, 0x10, 0x78, 0x92, 0xf5,
-	0xb9, 0xa9, 0x3b, 0xa0, 0x66, 0x8d, 0x5e, 0xc2, 0x72, 0x3b, 0xc7, 0x93, 0xd0, 0x6d, 0xb8, 0x7b,
-	0x2b, 0xcd, 0xbf, 0xc9, 0xec, 0x31, 0x74, 0x0c, 0xe0, 0x07, 0x08, 0xcb, 0x5a, 0x9d, 0xc7, 0xa9,
-	0x50, 0x72, 0x7c, 0xb8, 0x33, 0x75, 0xf8, 0x36, 0x54, 0x87, 0x2c, 0x1a, 0xf0, 0x24, 0xac, 0x34,
-	0xdc, 0x3d, 0x9f, 0x5a, 0x0b, 0x85, 0x50, 0x1b, 0x32, 0xfd, 0x31, 0xc3, 0x5d, 0x83, 0x17, 0x26,
-	0xda, 0x85, 0x60, 0xc8, 0xf4, 0x79, 0xb7, 0x9b, 0xf0, 0x5c, 0x37, 0x9f, 0x4e, 0x1c, 0xf8, 0xab,
-	0x03, 0xa8, 0x7c, 0x81, 0x85, 0xea, 0xdc, 0x85, 0xa0, 0x7d, 0xcb, 0xa4, 0xe4, 0xd1, 0xc9, 0xbd,
-	0x49, 0xea, 0xd3, 0x89, 0x03, 0x1d, 0x40, 0x4d, 0x99, 0x32, 0x92, 0xd0, 0x33, 0x22, 0xec, 0x90,
-	0xc7, 0x0a, 0xa5, 0x05, 0x89, 0x3f, 0xc3, 0xbf, 0x8f, 0x74, 0xc2, 0x9f, 0xdf, 0x08, 0x7f, 0x81,
-	0x9d, 0xb9, 0xed, 0xf2, 0xf6, 0x5e, 0x24, 0x99, 0xae, 0x6d, 0xc5, 0x74, 0x92, 0xab, 0xed, 0x53,
-	0x6b, 0x65, 0x69, 0xba, 0x42, 0xe6, 0x69, 0x7c, 0x6a, 0xd6, 0x19, 0xdb, 0x17, 0x92, 0xb2, 0x8e,
-	0xc9, 0xe1, 0x50, 0x6b, 0x19, 0x3f, 0xbb, 0xcf, 0xfc, 0x9e, 0xf5, 0x1b, 0x0b, 0xff, 0x70, 0x60,
-	0x6b, 0x6e, 0xe6, 0x85, 0x8a, 0xda, 0x07, 0x37, 0x66, 0xd2, 0x4e, 0x4a, 0x9d, 0x3c, 0x5a, 0x02,
-	0xcd, 0x30, 0x44, 0xc0, 0x4b, 0x27, 0x03, 0xf2, 0x14, 0x6e, 0xb8, 0xac, 0x6f, 0xda, 0xb7, 0x97,
-	0x31, 0xe7, 0x1d, 0x33, 0x20, 0x3e, 0x2d, 0x4c, 0xfc, 0xd3, 0x81, 0xcd, 0x79, 0xb3, 0xb2, 0xd0,
-	0xa5, 0xdf, 0x64, 0x33, 0x10, 0x29, 0x7d, 0xc6, 0x62, 0x3b, 0x03, 0xcf, 0xe7, 0x0e, 0x1e, 0x39,
-	0xb6, 0x54, 0x4b, 0xa6, 0x7a, 0x44, 0xc7, 0x41, 0xf5, 0x23, 0x58, 0x9d, 0xd9, 0xca, 0x7e, 0x5a,
-	0x77, 0x7c, 0x54, 0xfc, 0xb4, 0xee, 0xf8, 0x08, 0x6d, 0x82, 0x6f, 0x9a, 0xdf, 0x7e, 0x9b, 0xdc,
-	0x78, 0x5d, 0x39, 0x74, 0xf0, 0x03, 0xd4, 0x6c, 0x9a, 0x85, 0x2e, 0x8b, 0xe1, 0x2f, 0xdb, 0x25,
-	0xc7, 0x6a, 0x20, 0x53, 0xdb, 0x39, 0x33, 0xbe, 0x99, 0xa1, 0xce, 0xb5, 0x7d, 0x62, 0xa8, 0xbf,
-	0x3b, 0xb0, 0x6e, 0x37, 0x13, 0xca, 0x93, 0x58, 0xc9, 0x84, 0xa3, 0x23, 0x58, 0x8e, 0xad, 0x2f,
-	0x74, 0x8c, 0x24, 0xcf, 0xc8, 0xef, 0xd0, 0xd8, 0x61, 0xe5, 0x28, 0x02, 0xea, 0x2d, 0x58, 0x9d,
-	0xd9, 0x9a, 0x23, 0xc7, 0xff, 0xd3, 0x72, 0xac, 0x34, 0x97, 0x8b, 0xb3, 0xa6, 0x84, 0x69, 0x7e,
-	0x02, 0xbf, 0x15, 0x5d, 0x71, 0x8e, 0x1a, 0xe0, 0x5d, 0x08, 0xd9, 0x43, 0x40, 0xc6, 0xcf, 0x42,
-	0x7d, 0x6a, 0x8d, 0x97, 0xd0, 0xfe, 0xf8, 0x45, 0x38, 0x15, 0x37, 0x9a, 0xe9, 0x11, 0xf2, 0x49,
-	0xf6, 0x94, 0xd4, 0xff, 0x29, 0xdd, 0x1a, 0x2f, 0xdd, 0x54, 0xcd, 0x73, 0x73, 0xf0, 0x2b, 0x00,
-	0x00, 0xff, 0xff, 0x8b, 0xcf, 0x1f, 0xc1, 0x7b, 0x06, 0x00, 0x00,
+	// 964 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x56, 0xcd, 0x6e, 0xdb, 0x46,
+	0x10, 0xd6, 0x8a, 0xa2, 0x6d, 0x8e, 0xff, 0x37, 0x4e, 0xca, 0xa8, 0x69, 0xa2, 0x6e, 0x0e, 0x71,
+	0x51, 0x63, 0xd3, 0x2a, 0x05, 0x1a, 0xd4, 0x28, 0x8a, 0xd6, 0x30, 0x5a, 0x03, 0x4e, 0xe3, 0xae,
+	0x83, 0xa0, 0x3f, 0x27, 0x5a, 0x5a, 0x29, 0x8b, 0x50, 0x4b, 0x82, 0x5c, 0xa9, 0x92, 0x0f, 0x39,
+	0x17, 0x28, 0x7a, 0xed, 0x8b, 0xf4, 0xd2, 0x53, 0x9f, 0xa4, 0x0f, 0x53, 0xec, 0x0f, 0x45, 0xd2,
+	0x92, 0x53, 0x03, 0xb9, 0xed, 0xcc, 0x7c, 0xb3, 0x33, 0xf3, 0xed, 0xcc, 0x90, 0x10, 0x44, 0xa9,
+	0xa0, 0x69, 0x96, 0xa8, 0x84, 0xac, 0x40, 0xeb, 0x65, 0x22, 0xfa, 0xe4, 0x53, 0x08, 0xce, 0x55,
+	0x26, 0xe4, 0xf0, 0x59, 0x3e, 0xc4, 0x3b, 0xe0, 0x4d, 0xa2, 0x38, 0x44, 0x1d, 0xb4, 0x1f, 0x30,
+	0x7d, 0xc4, 0x18, 0x5a, 0xb1, 0xc8, 0x55, 0xd8, 0xec, 0x78, 0xfb, 0x01, 0x33, 0x67, 0xf2, 0x47,
+	0x13, 0xb6, 0xce, 0xb2, 0x64, 0x20, 0x62, 0x7e, 0x94, 0x48, 0x95, 0x25, 0x31, 0x3e, 0x00, 0x7f,
+	0x98, 0x25, 0xe3, 0xd4, 0xb8, 0xae, 0x77, 0xf7, 0xe8, 0xb7, 0x5a, 0xaa, 0x83, 0xbe, 0x6b, 0x30,
+	0x0b, 0xc2, 0x8f, 0xc0, 0xe3, 0x72, 0x14, 0x36, 0x0d, 0xf6, 0x16, 0x3d, 0x96, 0xe3, 0xd1, 0x02,
+	0x54, 0x23, 0xf0, 0x53, 0x08, 0x84, 0x54, 0x5c, 0xe6, 0x42, 0xcd, 0x42, 0xcf, 0xc0, 0x43, 0x7a,
+	0x52, 0x68, 0x16, 0x7c, 0x4a, 0x30, 0xee, 0xc2, 0x6a, 0x1a, 0xc9, 0x17, 0x22, 0x56, 0x61, 0xcb,
+	0xf8, 0xdd, 0xa1, 0x67, 0x56, 0x5e, 0xf0, 0x2a, 0x80, 0xf8, 0x31, 0xac, 0xc4, 0xbc, 0xff, 0x32,
+	0xca, 0x42, 0xdf, 0xb8, 0xdc, 0xa6, 0xa7, 0x46, 0x5c, 0xf0, 0x70, 0xb0, 0x6f, 0x7c, 0xf0, 0xf2,
+	0xf1, 0x05, 0x19, 0xc0, 0xad, 0x25, 0xe5, 0xe2, 0x2d, 0x68, 0x8a, 0xbe, 0xe3, 0xb2, 0x29, 0xfa,
+	0x9a, 0x4a, 0x19, 0x8d, 0xb8, 0x29, 0x3b, 0x60, 0xe6, 0x8c, 0x3f, 0x86, 0xb5, 0x9e, 0x85, 0xe7,
+	0xa1, 0xd7, 0xf1, 0xf6, 0xd7, 0xbb, 0xdb, 0xb4, 0x7e, 0x0d, 0x9b, 0x03, 0xc8, 0x1b, 0x08, 0x17,
+	0xa9, 0x7a, 0x9e, 0x2a, 0x91, 0xc8, 0xf9, 0xe5, 0xa8, 0x72, 0xf9, 0x1d, 0x58, 0x99, 0x44, 0xf1,
+	0x98, 0xe7, 0xe6, 0xf5, 0x7c, 0xe6, 0x24, 0x1c, 0xc2, 0xea, 0x24, 0xca, 0xbe, 0xd7, 0x70, 0xcf,
+	0xc0, 0x0b, 0x11, 0xdf, 0x83, 0x60, 0x12, 0x65, 0xcf, 0x07, 0x83, 0x9c, 0x5b, 0xde, 0x7c, 0x56,
+	0x2a, 0xc8, 0xef, 0x08, 0xf0, 0x62, 0x02, 0x37, 0xaa, 0xf3, 0x1e, 0x04, 0xbd, 0x57, 0x91, 0x94,
+	0x3c, 0x3e, 0x99, 0x9a, 0xa0, 0x3e, 0x2b, 0x15, 0xf8, 0x09, 0xac, 0x26, 0xa6, 0x8c, 0x3c, 0x6c,
+	0x19, 0x12, 0xee, 0xd2, 0xeb, 0x0a, 0x65, 0x05, 0x92, 0xfc, 0x02, 0xef, 0x5d, 0xd3, 0x09, 0xef,
+	0x9e, 0x11, 0xf9, 0x15, 0xee, 0x2e, 0x6d, 0x97, 0xaf, 0xa7, 0x22, 0xd7, 0xbc, 0xf6, 0x92, 0x28,
+	0xcb, 0x2d, 0xdb, 0x3e, 0x73, 0x92, 0x0e, 0x33, 0x10, 0xd2, 0x86, 0xf1, 0x99, 0x39, 0x6b, 0xec,
+	0x48, 0x48, 0x16, 0xf5, 0x4d, 0x0c, 0xc4, 0x9c, 0x64, 0xf4, 0xd1, 0x54, 0xeb, 0x5b, 0x4e, 0x6f,
+	0x24, 0xf2, 0x17, 0x82, 0xdb, 0x4b, 0x23, 0xdf, 0xa8, 0xa8, 0x03, 0xf0, 0xd2, 0x48, 0xba, 0x49,
+	0x69, 0xd3, 0x6b, 0x4b, 0x60, 0x1a, 0x86, 0x29, 0xb4, 0x54, 0x39, 0x20, 0x6f, 0x83, 0x1b, 0x9c,
+	0xee, 0x9b, 0xde, 0xab, 0xf3, 0x94, 0xf3, 0xbe, 0x19, 0x10, 0x9f, 0x15, 0x22, 0xf9, 0x1b, 0xc1,
+	0xde, 0xb2, 0x59, 0xb9, 0x51, 0xd2, 0x5f, 0xe9, 0x19, 0x88, 0x93, 0xec, 0x59, 0x94, 0xba, 0x19,
+	0x78, 0xb8, 0x74, 0xf0, 0xe8, 0x91, 0x43, 0x1d, 0x4b, 0x95, 0xcd, 0xd8, 0xdc, 0xa9, 0x7d, 0x08,
+	0x9b, 0x35, 0x93, 0x5e, 0x63, 0xaf, 0xf9, 0xac, 0x58, 0x63, 0xaf, 0xf9, 0x0c, 0xef, 0x81, 0x6f,
+	0x9a, 0xdf, 0xbd, 0x8d, 0x15, 0xbe, 0x68, 0x3e, 0x45, 0xe4, 0x0d, 0xac, 0xba, 0x30, 0x37, 0x4a,
+	0x96, 0xc0, 0x86, 0xeb, 0x92, 0xa3, 0x64, 0x2c, 0x95, 0xeb, 0x9c, 0x9a, 0xae, 0x36, 0xd4, 0x96,
+	0xdb, 0xb7, 0x0c, 0xf5, 0x9f, 0x08, 0x76, 0x9c, 0x31, 0x67, 0x3c, 0x4f, 0x13, 0x99, 0x73, 0x7c,
+	0x08, 0x6b, 0xa9, 0xd3, 0x85, 0xc8, 0x50, 0xf2, 0x80, 0x5e, 0x05, 0xcd, 0x15, 0x8e, 0x8e, 0xc2,
+	0xa1, 0x7d, 0x0c, 0x9b, 0x35, 0xd3, 0x12, 0x3a, 0xee, 0x57, 0xe9, 0x58, 0xef, 0xae, 0x15, 0x77,
+	0x55, 0x89, 0xf9, 0x07, 0xc1, 0x86, 0x4b, 0xf7, 0x2c, 0x11, 0x52, 0x2d, 0x5d, 0x31, 0x0f, 0xc1,
+	0x37, 0xcf, 0xe0, 0x2e, 0x5a, 0xb7, 0x6f, 0x64, 0xf0, 0x7a, 0xdd, 0x1b, 0x1b, 0xfe, 0x00, 0xbc,
+	0xe9, 0xec, 0xd2, 0x75, 0x65, 0x40, 0x7f, 0xfc, 0xe9, 0xe7, 0x02, 0xa0, 0xf5, 0xf8, 0xbe, 0xfd,
+	0x1a, 0x58, 0xa6, 0xc0, 0x4e, 0x7e, 0x61, 0xd7, 0x1f, 0x81, 0xc7, 0xd5, 0x8f, 0x80, 0xef, 0xf8,
+	0x2c, 0x47, 0xdf, 0x41, 0x4b, 0x8c, 0x5e, 0xcb, 0x93, 0x28, 0x26, 0xbf, 0x21, 0x80, 0x32, 0x1d,
+	0x7c, 0x08, 0xd0, 0x4b, 0x46, 0x69, 0x22, 0xb9, 0x54, 0x05, 0xab, 0xef, 0x57, 0xf2, 0xa5, 0x47,
+	0x73, 0xab, 0x65, 0xb4, 0x02, 0x6f, 0x7f, 0x09, 0xdb, 0x57, 0xcc, 0xff, 0xd7, 0x64, 0xa8, 0xca,
+	0xe5, 0x67, 0xb0, 0x56, 0x54, 0x8d, 0x37, 0x00, 0x4d, 0x8d, 0x17, 0x62, 0x68, 0xaa, 0xa5, 0x99,
+	0xc3, 0xa3, 0x99, 0x96, 0x2e, 0xdd, 0xa2, 0x40, 0x97, 0xe4, 0x73, 0x08, 0xe6, 0x64, 0x68, 0xf6,
+	0x85, 0xe2, 0x23, 0xb7, 0x72, 0xcc, 0x59, 0x2f, 0x91, 0x3e, 0x1f, 0x66, 0xbc, 0x88, 0xe8, 0x24,
+	0x42, 0x61, 0xab, 0xce, 0x8f, 0xde, 0x76, 0x25, 0x87, 0x36, 0x78, 0xa9, 0x20, 0x1f, 0xc1, 0x6e,
+	0xf5, 0xa5, 0x7f, 0x18, 0xf3, 0xcc, 0x54, 0x93, 0xab, 0x48, 0x15, 0xef, 0x6d, 0x05, 0x72, 0x02,
+	0x3b, 0x55, 0xe8, 0xa9, 0xc8, 0x15, 0x7e, 0x00, 0x5e, 0x2f, 0x2d, 0x28, 0xdd, 0xa4, 0x55, 0x3b,
+	0xd3, 0x96, 0xf2, 0xaa, 0x66, 0xf5, 0xaa, 0x0e, 0xc0, 0xb9, 0x3e, 0xd8, 0x70, 0x4b, 0xba, 0x8b,
+	0x3c, 0x82, 0xed, 0x12, 0xc1, 0x78, 0x1a, 0x9b, 0xac, 0xb4, 0xc9, 0x46, 0x0b, 0x98, 0x15, 0xba,
+	0xff, 0x22, 0xf0, 0x8f, 0xe3, 0x17, 0x9c, 0xe3, 0x0e, 0xb4, 0xce, 0x84, 0x1c, 0x62, 0xa0, 0xf3,
+	0xbf, 0x9a, 0x76, 0xe5, 0x4c, 0x1a, 0xf8, 0x60, 0xfe, 0xf3, 0x72, 0x2a, 0x2e, 0xb2, 0x28, 0x9b,
+	0x61, 0x9f, 0xea, 0x3f, 0xa1, 0xf6, 0xee, 0xc2, 0x88, 0x91, 0x06, 0xfe, 0xd0, 0x25, 0xa9, 0x3f,
+	0x8f, 0x79, 0x81, 0xac, 0x5f, 0xf8, 0x89, 0x5e, 0x3f, 0x65, 0xc9, 0x79, 0x2d, 0xf6, 0x2e, 0xbd,
+	0x4a, 0x17, 0x69, 0x60, 0x0a, 0x3b, 0xe7, 0x5c, 0xd5, 0x9d, 0x16, 0x81, 0x6d, 0x1b, 0x8d, 0x34,
+	0x2e, 0x56, 0xcc, 0x2f, 0xdb, 0x93, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0x36, 0x71, 0xc4, 0x41,
+	0xbf, 0x09, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -828,6 +1331,11 @@ const _ = grpc.SupportPackageIsVersion4
 type ElTeeClient interface {
 	Ping(ctx context.Context, in *StringMsg, opts ...grpc.CallOption) (*StringMsg, error)
 	ProfileLibrary(ctx context.Context, in *Void, opts ...grpc.CallOption) (*ProfilesResponse, error)
+	StateNames(ctx context.Context, in *Void, opts ...grpc.CallOption) (*StringMsg, error)
+	ControlPoints(ctx context.Context, in *StringMsg, opts ...grpc.CallOption) (*ControlPointList, error)
+	//
+	//Sets current values directly without modifying any other state declaration
+	SetControlPoints(ctx context.Context, in *ControlPointList, opts ...grpc.CallOption) (*Void, error)
 }
 
 type elTeeClient struct {
@@ -856,10 +1364,42 @@ func (c *elTeeClient) ProfileLibrary(ctx context.Context, in *Void, opts ...grpc
 	return out, nil
 }
 
+func (c *elTeeClient) StateNames(ctx context.Context, in *Void, opts ...grpc.CallOption) (*StringMsg, error) {
+	out := new(StringMsg)
+	err := c.cc.Invoke(ctx, "/ElTee/StateNames", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *elTeeClient) ControlPoints(ctx context.Context, in *StringMsg, opts ...grpc.CallOption) (*ControlPointList, error) {
+	out := new(ControlPointList)
+	err := c.cc.Invoke(ctx, "/ElTee/ControlPoints", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *elTeeClient) SetControlPoints(ctx context.Context, in *ControlPointList, opts ...grpc.CallOption) (*Void, error) {
+	out := new(Void)
+	err := c.cc.Invoke(ctx, "/ElTee/SetControlPoints", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ElTeeServer is the server API for ElTee service.
 type ElTeeServer interface {
 	Ping(context.Context, *StringMsg) (*StringMsg, error)
 	ProfileLibrary(context.Context, *Void) (*ProfilesResponse, error)
+	StateNames(context.Context, *Void) (*StringMsg, error)
+	ControlPoints(context.Context, *StringMsg) (*ControlPointList, error)
+	//
+	//Sets current values directly without modifying any other state declaration
+	SetControlPoints(context.Context, *ControlPointList) (*Void, error)
 }
 
 // UnimplementedElTeeServer can be embedded to have forward compatible implementations.
@@ -871,6 +1411,15 @@ func (*UnimplementedElTeeServer) Ping(ctx context.Context, req *StringMsg) (*Str
 }
 func (*UnimplementedElTeeServer) ProfileLibrary(ctx context.Context, req *Void) (*ProfilesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ProfileLibrary not implemented")
+}
+func (*UnimplementedElTeeServer) StateNames(ctx context.Context, req *Void) (*StringMsg, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StateNames not implemented")
+}
+func (*UnimplementedElTeeServer) ControlPoints(ctx context.Context, req *StringMsg) (*ControlPointList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ControlPoints not implemented")
+}
+func (*UnimplementedElTeeServer) SetControlPoints(ctx context.Context, req *ControlPointList) (*Void, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetControlPoints not implemented")
 }
 
 func RegisterElTeeServer(s *grpc.Server, srv ElTeeServer) {
@@ -913,6 +1462,60 @@ func _ElTee_ProfileLibrary_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ElTee_StateNames_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Void)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ElTeeServer).StateNames(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ElTee/StateNames",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ElTeeServer).StateNames(ctx, req.(*Void))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ElTee_ControlPoints_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StringMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ElTeeServer).ControlPoints(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ElTee/ControlPoints",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ElTeeServer).ControlPoints(ctx, req.(*StringMsg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ElTee_SetControlPoints_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ControlPointList)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ElTeeServer).SetControlPoints(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ElTee/SetControlPoints",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ElTeeServer).SetControlPoints(ctx, req.(*ControlPointList))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _ElTee_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "ElTee",
 	HandlerType: (*ElTeeServer)(nil),
@@ -924,6 +1527,18 @@ var _ElTee_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ProfileLibrary",
 			Handler:    _ElTee_ProfileLibrary_Handler,
+		},
+		{
+			MethodName: "StateNames",
+			Handler:    _ElTee_StateNames_Handler,
+		},
+		{
+			MethodName: "ControlPoints",
+			Handler:    _ElTee_ControlPoints_Handler,
+		},
+		{
+			MethodName: "SetControlPoints",
+			Handler:    _ElTee_SetControlPoints_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

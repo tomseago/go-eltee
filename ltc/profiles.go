@@ -50,7 +50,7 @@ func printControl(level int, pc *api.ProfileControl) {
 		return
 	}
 
-	enum := pc.GetEnum()
+	enum := pc.GetEnm()
 	if enum != nil {
 		printEnum(level, enum)
 		return

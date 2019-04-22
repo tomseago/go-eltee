@@ -132,6 +132,28 @@ control_points: {
         kind: intensity
         intensity: 0.5
     }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Enums
+
+    pinspot_mode: {
+        kind: enum
+        item: 3
+        degree: 1.0
+    }
+
+    pinspot_color_macro: {
+        kind: enum
+        item: 0
+        degree: 0
+    }
+
+    //////////////
+    test_enum: {
+        kind: enum
+        item: 0
+        degree: 0
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -145,10 +167,18 @@ patches:  {
         }   
     }
 
-    "Pin Spot 2": {
+    "Pin Spot 1": {
         color: {
             cp: secondary_color
-        }   
+        }
+
+        mode: {
+            cp: pinspot_mode
+        }
+
+        color_macro: {
+            cp: pinspot_color_macro
+        }
     }
 }    
 

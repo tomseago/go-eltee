@@ -3,6 +3,7 @@ package eltee
 import (
 	"fmt"
 	"github.com/eyethereal/go-config"
+	"github.com/tomseago/go-eltee/api"
 	"sort"
 	"strings"
 )
@@ -15,6 +16,9 @@ type ControlPoint interface {
 	SetToNode(root *config.AclNode, path ...string)
 
 	SetFromJSON(val interface{})
+
+	ToApi() *api.ControlPoint
+	SetFromApi(apiCP *api.ControlPoint)
 
 	Apply(other ControlPoint)
 
@@ -197,6 +201,39 @@ func (cp *ColorControlPoint) SetFromJSON(val interface{}) {
 	}
 }
 
+func (cp *ColorControlPoint) ToApi() *api.ControlPoint {
+	val := &api.ControlPoint{
+		Name: cp.name,
+	}
+
+	apiCP := &api.ColorPoint{
+		Components: make(map[string]float64),
+	}
+	for k, v := range cp.Components {
+		apiCP.Components[k] = v
+	}
+	val.Val = &api.ControlPoint_Color{apiCP}
+
+	return val
+}
+
+func (cp *ColorControlPoint) SetFromApi(apiCP *api.ControlPoint) {
+	log.Warningf("Setting %v from %v", cp, apiCP)
+
+	if apiCP == nil || apiCP.Val == nil {
+		return
+	}
+
+	apiVal := apiCP.GetColor()
+	if apiVal == nil {
+		return
+	}
+
+	for k, v := range apiVal.Components {
+		cp.Components[k] = v
+	}
+}
+
 func (cp *ColorControlPoint) Apply(other ControlPoint) {
 	if cp == nil || other == nil {
 		return
@@ -356,6 +393,36 @@ func (cp *XYZControlPoint) SetFromJSON(val interface{}) {
 	cp.Z = ValAsFloat(v["Z"])
 }
 
+func (cp *XYZControlPoint) ToApi() *api.ControlPoint {
+	val := &api.ControlPoint{
+		Name: cp.name,
+	}
+
+	apiCP := &api.XYZPoint{
+		X: cp.X,
+		Y: cp.Y,
+		Z: cp.Z,
+	}
+	val.Val = &api.ControlPoint_Xyz{apiCP}
+
+	return val
+}
+
+func (cp *XYZControlPoint) SetFromApi(apiCP *api.ControlPoint) {
+	if apiCP == nil || apiCP.Val == nil {
+		return
+	}
+
+	apiVal := apiCP.GetXyz()
+	if apiVal == nil {
+		return
+	}
+
+	cp.X = apiVal.X
+	cp.Y = apiVal.Y
+	cp.Z = apiVal.Z
+}
+
 func (cp *XYZControlPoint) Apply(other ControlPoint) {
 	if cp == nil || other == nil {
 		return
@@ -472,6 +539,34 @@ func (cp *EnumControlPoint) SetFromJSON(val interface{}) {
 	cp.Degree = ValAsFloat(v["Degree"])
 }
 
+func (cp *EnumControlPoint) ToApi() *api.ControlPoint {
+	val := &api.ControlPoint{
+		Name: cp.name,
+	}
+
+	apiCP := &api.EnumPoint{
+		Item:   int32(cp.Item),
+		Degree: cp.Degree,
+	}
+	val.Val = &api.ControlPoint_Enm{apiCP}
+
+	return val
+}
+
+func (cp *EnumControlPoint) SetFromApi(apiCP *api.ControlPoint) {
+	if apiCP == nil || apiCP.Val == nil {
+		return
+	}
+
+	apiVal := apiCP.GetEnm()
+	if apiVal == nil {
+		return
+	}
+
+	cp.Item = int(apiVal.Item)
+	cp.Degree = apiVal.Degree
+}
+
 func (cp *EnumControlPoint) Apply(other ControlPoint) {
 	if cp == nil || other == nil {
 		return
@@ -578,6 +673,31 @@ func (cp *IntensityControlPoint) SetFromJSON(val interface{}) {
 	}
 
 	cp.Intensity = ValAsFloat(v["Intensity"])
+}
+
+func (cp *IntensityControlPoint) ToApi() *api.ControlPoint {
+	val := &api.ControlPoint{
+		Name: cp.name,
+	}
+
+	apiCP := &api.IntensityPoint{
+		Intensity: cp.Intensity,
+	}
+	val.Val = &api.ControlPoint_Intensity{apiCP}
+
+	return val
+}
+
+func (cp *IntensityControlPoint) SetFromApi(apiCP *api.ControlPoint) {
+	if apiCP == nil || apiCP.Val == nil {
+		return
+	}
+
+	apiVal := apiCP.GetIntensity()
+	if apiVal == nil {
+		return
+	}
+	cp.Intensity = apiVal.Intensity
 }
 
 func (cp *IntensityControlPoint) Apply(other ControlPoint) {
