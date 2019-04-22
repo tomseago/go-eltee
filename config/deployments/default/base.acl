@@ -1,3 +1,19 @@
+/*
+The base state defines the default set of control points with associated 
+default values and the initial set of patches between fixture controls
+and these control points.
+
+This set is loaded by ElTee and then the current operating set will be derived
+from this list.
+
+Other states will define a set of control points and eventually patches
+that when that state is set will override the existing values.
+*/
+
+
+////////////////////////////////////////////////////////////////////////
+// Control Points
+
 control_points: {
     ////////////////////////////////////////////////////////////////////////
     // Color
@@ -117,3 +133,22 @@ control_points: {
         intensity: 0.5
     }
 }
+
+////////////////////////////////////////////////////////////////////////
+// Patches
+
+patches:  {
+
+    "Flood Par 1": {
+        color: {
+            cp: primary_color
+        }   
+    }
+
+    "Pin Spot 2": {
+        color: {
+            cp: secondary_color
+        }   
+    }
+}    
+

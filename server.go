@@ -94,68 +94,76 @@ func NewServer(cfg *config.AclNode) *Server {
 	}
 
 	// Load the initial set of control points
-	s.stateJuggler = NewStateJuggler()
+	s.stateJuggler = NewStateJuggler(s.fixturesByName)
 
-	defCPFilename := defaultsNode.DefChildAsString("default", "control_points")
-	defCPFilename = path.Join("control_points", defCPFilename) + ".acl"
-	cpNode := config.NewAclNode()
-	err = cpNode.ParseFile(defCPFilename)
+	deploymentName := cfg.DefChildAsString("default", "deployment")
+	deploymentDir := path.Join("deployments", deploymentName)
+	err = s.stateJuggler.LoadDirectory(deploymentDir)
 	if err != nil {
-		log.Warningf("Unable to load default control points file '%v': %v", defCPFilename, err)
-	} else {
-		cpNode = cpNode.Child("control_points")
-		if cpNode == nil {
-			log.Warningf("File '%v' did not contain a control_points node", defCPFilename)
-		} else {
-			// s.controlPoints, s.controlPointsByName = CreateControlPointList(cpNode)
-			s.stateJuggler.BaseFrom(cpNode)
-		}
+		log.Errorf("%", err)
+		log.Error("Can not start")
+		return nil
 	}
 
-	// Load an initial mapping between fixtures and control points
-	defPatchFilename := defaultsNode.DefChildAsString("default", "patches")
-	defPatchFilename = path.Join("patches", defPatchFilename) + ".acl"
-	patchesNode := config.NewAclNode()
-	err = patchesNode.ParseFile(defPatchFilename)
-	if err != nil {
-		log.Warningf("Unable to load default patches file '%v': %v", defPatchFilename, err)
-	} else {
-		patchesNode = patchesNode.Child("patches")
-		if patchesNode == nil {
-			log.Warningf("File '%v' did not contain a patches node", defPatchFilename)
-		} else {
-			// The order of names is fixture -> fixture_control -> control_point & lens_stack
+	// defCPFilename = path.Join("control_points", defCPFilename) + ".acl"
+	// cpNode := config.NewAclNode()
+	// err = cpNode.ParseFile(defCPFilename)
+	// if err != nil {
+	// 	log.Warningf("Unable to load default control points file '%v': %v", defCPFilename, err)
+	// } else {
+	// 	cpNode = cpNode.Child("control_points")
+	// 	if cpNode == nil {
+	// 		log.Warningf("File '%v' did not contain a control_points node", defCPFilename)
+	// 	} else {
+	// 		// s.controlPoints, s.controlPointsByName = CreateControlPointList(cpNode)
+	// 		s.stateJuggler.BaseFrom(cpNode)
+	// 	}
+	// }
 
-			patchesNode.ForEachOrderedChild(func(fixName string, fixPatches *config.AclNode) {
-				fixture := s.fixturesByName[fixName]
-				if fixture == nil {
-					log.Warningf("Patching: Unable to find fixture named '%v'", fixName)
-					return
-				}
+	// // Load an initial mapping between fixtures and control points
+	// defPatchFilename := defaultsNode.DefChildAsString("default", "patches")
+	// defPatchFilename = path.Join("patches", defPatchFilename) + ".acl"
+	// patchesNode := config.NewAclNode()
+	// err = patchesNode.ParseFile(defPatchFilename)
+	// if err != nil {
+	// 	log.Warningf("Unable to load default patches file '%v': %v", defPatchFilename, err)
+	// } else {
+	// 	patchesNode = patchesNode.Child("patches")
+	// 	if patchesNode == nil {
+	// 		log.Warningf("File '%v' did not contain a patches node", defPatchFilename)
+	// 	} else {
+	// 		// The order of names is fixture -> fixture_control -> control_point & lens_stack
 
-				fixPatches.ForEachOrderedChild(func(fcId string, fcNode *config.AclNode) {
-					fixtureControl := fixture.Control(fcId)
-					if fixtureControl == nil {
-						log.Warningf("Patching: Fixture '%v' does not have a control with id '%v'", fixName, fcId)
-						return
-					}
+	// 		patchesNode.ForEachOrderedChild(func(fixName string, fixPatches *config.AclNode) {
+	// 			fixture := s.fixturesByName[fixName]
+	// 			if fixture == nil {
+	// 				log.Warningf("Patching: Unable to find fixture named '%v'", fixName)
+	// 				return
+	// 			}
 
-					// Get the control point, if any
-					cpName := fcNode.ChildAsString("cp")
-					if len(cpName) > 0 {
-						cp := s.stateJuggler.CurrentCP(cpName)
-						if cp == nil {
-							log.Warningf("Patching: Could not find control point '%v' to patch to fixture '%v' control '%v'", cpName, fixName, fcId)
-						} else {
-							fixtureControl.ControlPoint = cp
-						}
-					}
+	// 			fixPatches.ForEachOrderedChild(func(fcId string, fcNode *config.AclNode) {
+	// 				fixtureControl := fixture.Control(fcId)
+	// 				if fixtureControl == nil {
+	// 					log.Warningf("Patching: Fixture '%v' does not have a control with id '%v'", fixName, fcId)
+	// 					return
+	// 				}
 
-					// TODO: Add the lens stack
-				})
-			})
-		}
-	}
+	// 				// Get the control point, if any
+	// 				cpName := fcNode.ChildAsString("cp")
+	// 				if len(cpName) > 0 {
+	// 					cp := s.stateJuggler.CurrentCP(cpName)
+	// 					if cp == nil {
+	// 						log.Warningf("Patching: Could not find control point '%v' to patch to fixture '%v' control '%v'", cpName, fixName, fcId)
+	// 					} else {
+	// 						fixtureControl.ControlPoint = cp
+	// 					}
+	// 				}
+
+	// 				// TODO: Add the lens stack
+	// 			})
+	// 		})
+	// 	}
+	// }
 
 	s.apiServer = NewApiServer(s)
 

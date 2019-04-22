@@ -31,6 +31,9 @@ func main() {
 	log.Warningf("***********************************************************************************")
 
 	server := eltee.NewServer(cfg)
+	if server == nil {
+		return
+	}
 
 	server.DumpFixtures()
 	server.DumpControlPoints()

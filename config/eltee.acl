@@ -26,11 +26,11 @@ logging: {
 dmx: {
     connections: {
         // This gives you a log output of the dmx values. Kinda nice but more than a little verbose
-        // log: {
-        //     kind: log
-        //     start: 33
-        //     length: 10
-        // }
+        log: {
+            kind: log
+            start: 33
+            length: 10
+        }
 
         // olad: {
         //     kind: olad
@@ -64,9 +64,12 @@ dmx: {
 
 defaults: {
     fixtures: "default"
-    control_points: "default"
-    patches: "default"
 }
+//     control_points: "default"
+//     patches: "default"
+// }
+
+deployment: "default"
 
 web: {
     address: ":2000"

@@ -7,11 +7,16 @@ message StringMsg {
     string val = 1;
 }
 
+////////////////////////////////////////////////////////////////////////
+//
+// Profiles and their controls
+//
+
 // This is how we get polymorphic behavior for ProfileControls
 message ProfileControl {
     oneof sub {
         GroupProfileControl group = 1;
-        EnumProfileControl enum = 2;
+        EnumProfileControl enm = 2;
         IntensityProfileControl intensity = 3;
         PanTiltProfileControl panTilt = 4;
         LedVarProfileControl ledVar = 5;
@@ -85,8 +90,62 @@ message ProfilesResponse {
     map<string, Profile> profiles = 1;
 }
 
+////////////////////////////////////////////////////////////////////////
+//
+// Control Points
+//
+
+// Polymorphic holder message
+message ControlPoint {
+    oneof sub {
+        ColorPoint color = 1;
+        XYZPoint xyz = 2;
+        EnumPoint enm = 3;
+        IntensityPoint intensity = 4;
+    }
+}
+
+message ColorPoint {
+    string name = 1;
+
+    map<string, double> components = 2;
+}
+
+message XYZPoint {
+    string name = 1;
+
+    double x = 2;
+    double y = 3;
+    double z = 4;
+}
+
+message EnumPoint {
+    string name = 1;
+
+    int32 item = 2;
+    double degree = 3;
+}
+
+message IntensityPoint {
+    string name = 1;
+
+    double intensity = 2;
+}
+
+message ControlPointQuery {
+    string state = 1; // Id of the state to list the control points for
+}
+
+message ControlPointList {
+    repeated ControlPoint list = 1;
+}
+
+////////////////////////////////////////////////////////////////////////
+
 service ElTee {
     rpc Ping(StringMsg) returns (StringMsg) {}
 
     rpc ProfileLibrary(Void) returns (ProfilesResponse) {}
+
+    rpc ControlPoints(ControlPointQuery) returns (ControlPointList) {}
 }

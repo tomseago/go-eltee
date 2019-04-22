@@ -25,6 +25,26 @@ Glossary
 
 **Controller Patch** - A particular set of connections between controller instances and the control points. Unlike fixture patches, controller patches are two way in that controller instances will be notified as control point values they are connected to change. 
 
+Object Relationships
+====================
+
+There is a library of **Profiles** which define types of fixtures. So when a new type of light is introduced into the rig, a new **Profile** needs to be created for it before ElTee can do anything with it. This means writing a new configuration file which will define **Profile Controls** of different types and how those map to DMX address offsets or whatever else will be needed to control that type of light. Each **Profile Control** has both an Id and a Name. The Ids must be unique.
+
+The next set of definitions is for **Fixtures** which are specific instances of **Profiles**. In the land of DMX this means associating a **Profile** by name with a specific DMX base address. **Fixtures** also include a name like "Flood Par 1" that is used to refer to that specific fixture in the future. When **Fixtures** are instantiated, a set of **Fixture Controls** are also instantiated based on the **Profile Controls** defined for the **Profile**.  These **Fixture Controls** inherit the same id values as the **Profile Controls** they are derived from.
+
+The third set of objects is the set of **World States** that the **State Juggler** uses to know what **Control Points** exist and how to map between them and **Fixtures**. In the configuration directory these are known as deployments. 
+
+Each **World State** consists of a list of named **Control Points** with values and possibly a list of **Fixture Patches** which map between these **Control Points** and specific **Fixtures** by defining a **Lens Stack** that is used by the **Fixture** to observe it's control points. During the generation of each frame of output data, each **Fixture** is told to make this observation, which results in the **Fixture** setting specific DMX values into the DMX output buffer.
+
+The **State Juggler** manages the list of all known **World States** which includes those defined in the configuration files as well as a few states that are created dynamically. The State Juggler maintains an authoritative _current_ state with a list of **Control Points** that the **Fixture Controls** directly hold references to. This current state is built from the base **World State** defined for the deployment.
+
+Initially, the **State Juggler** does not know how to merge one state into another. Instead, it only knows how to "cut" to a new state. It does this by iterating through all **Control Points** defined in the new state and directly assigns their values to the existing **Control Points** in the current state. This means that if a **Control Point** isn't defined in the base state, a future state won't be able to assign that **Control Point** a value.
+
+In addition to applying an entire state, the **Control Points** in the current state can be directly manipulated via the api. This is a low level interface which should be done via more abstract Controller Adapters and Controller Patches perhaps, but we're also not there yet.
+
+In the future, we want the **State Juggler** to gain more interesting audio mixer like abilities. The idea is that you would have multiple state channels, each of which could then have effects or filters applied to it including an intensity modifier which would determine the "volume" of that particular state in terms of how much that state effects the current state. One can additionally imagine animations that apply to states which could be placed on these inputs.
+
+Lots of things will probably happen through the combination of local fixture state and lenses in the lens stack. Instead of layers of unary operations that might then rely on local state we might imagine using multi valued functional operations. The same things can probably be done with both approaches so it will have to be determined in practice what makes more sense. For now, we just do direct assignment from a single control point per control.
 
 
 Main Looper
@@ -76,3 +96,6 @@ Interface
 The ElTee server exposes a gRPC interface for all it's fun functionality. This includes management sort of things like learning the configuration or modifying it, as well as modifying control points. For web clients an external gRPC-web proxy (specifically Envoy) is needed in order to convert gRPC-web traffic into gRPC traffic.
 
 The idea is to keep everything gRPC, but if necessary we can always expose something else. For instance there is a websockets interface that was started, but is deprecated in favor of gRPC.
+
+
+

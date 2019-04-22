@@ -20,6 +20,7 @@ type WorldState struct {
 	name                string
 	controlPoints       []ControlPoint
 	controlPointsByName map[string]ControlPoint
+	patchesNode         *config.AclNode
 }
 
 func NewWorldState(name string) *WorldState {
@@ -36,7 +37,10 @@ func NewWorldStateFromNode(name string, root *config.AclNode) *WorldState {
 	ws := &WorldState{
 		name: name,
 	}
-	ws.controlPoints, ws.controlPointsByName = CreateControlPointList(root)
+
+	ws.controlPoints, ws.controlPointsByName = CreateControlPointList(root.Child("control_points"))
+
+	ws.patchesNode = root.Child("patches")
 
 	return ws
 }
@@ -125,6 +129,9 @@ func (ws *WorldState) Copy() *WorldState {
 		fresh.controlPoints = append(fresh.controlPoints, freshCP)
 		fresh.controlPointsByName[freshCP.Name()] = freshCP
 	}
+
+	// Inefficient, so don't want to copy a whole lot...
+	fresh.patchesNode = ws.patchesNode.Duplicate()
 
 	return fresh
 }
