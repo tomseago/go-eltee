@@ -73,10 +73,39 @@ fixtures:  {
     }
 
 
+    */
     "Gobo Mover 1": {
         kind: tomshine_gobomover
         base: 257
+
+        lenses: {
+            /*
+            color: [
+                {
+                    kind: "position"
+                },
+
+                {
+                    kind: "new_thing"
+                }
+            ]
+            */
+
+            position: [
+                {
+                    kind: "position"
+                }
+            ]
+        }
+
+        vars: {
+            pos_x: 1.0
+            pos_y: 1.0
+            pos_z: 0.0
+        }
+
     }
+    /*
     "Gobo Mover 2": {
         kind: tomshine_gobomover
     }

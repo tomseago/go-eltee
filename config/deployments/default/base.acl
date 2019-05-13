@@ -180,5 +180,11 @@ fixture_patches:  {
             cp: pinspot_color_macro
         }
     }
+
+    "Gobo Mover 1": {
+        position: {
+            cp: default_xyz
+        }
+    }
 }    
 

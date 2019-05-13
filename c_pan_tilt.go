@@ -26,7 +26,7 @@ func (u *PanTiltUpdater) Update(fc *FixtureControl) {
 
 	// TODO: Use the control point WasDirty() method?
 
-	value := fc.LensStack.Observe(fc.ControlPoint)
+	value := fc.LensStack.Observe(fc, fc.ControlPoint)
 
 	xyz, ok := value.(XYZPoint)
 	if !ok {

@@ -1,6 +1,7 @@
 package eltee
 
 import (
+	"github.com/eyethereal/go-config"
 	"sort"
 )
 
@@ -31,6 +32,8 @@ type Fixture interface {
 
 	GetInt(id string) int
 	SetInt(id string, val int)
+	GetF64(id string) float64
+	SetF64(id string, val float64)
 }
 
 type DmxFixture struct {
@@ -43,7 +46,8 @@ type DmxFixture struct {
 	controls     []*FixtureControl
 	controlsById map[string]*FixtureControl
 
-	variables map[string]int
+	varInts map[string]int
+	varF64  map[string]float64
 
 	overrideValues []byte
 	useOverrides   bool
@@ -59,7 +63,8 @@ func NewDmxFixture(name string, base int, channels []byte, profile *Profile) *Dm
 		controls:     make([]*FixtureControl, 0),
 		controlsById: make(map[string]*FixtureControl),
 
-		variables: make(map[string]int),
+		varInts: make(map[string]int),
+		varF64:  make(map[string]float64),
 
 		overrideValues: make([]byte, len(channels)),
 		useOverrides:   false,
@@ -148,11 +153,19 @@ func (f *DmxFixture) Update() {
 }
 
 func (f *DmxFixture) GetInt(id string) int {
-	return f.variables[id]
+	return f.varInts[id]
 }
 
 func (f *DmxFixture) SetInt(id string, val int) {
-	f.variables[id] = val
+	f.varInts[id] = val
+}
+
+func (f *DmxFixture) GetF64(id string) float64 {
+	return f.varF64[id]
+}
+
+func (f *DmxFixture) SetF64(id string, val float64) {
+	f.varF64[id] = val
 }
 
 func (f *DmxFixture) SetUseOverrides(use bool) {
@@ -183,4 +196,33 @@ func (f *DmxFixture) GetChannels() []byte {
 	out := make([]byte, len(f.channels))
 	copy(out, f.channels)
 	return out
+}
+
+func (f *DmxFixture) LensesFrom(node *config.AclNode) {
+	if node == nil {
+		return
+	}
+
+	node.ForEachOrderedChild(func(cName string, lensStackNode *config.AclNode) {
+		control := f.Control(cName)
+
+		if control == nil {
+			log.Warningf("Could not find a control %v to add lenses to", cName)
+			return
+		}
+
+		log.Infof("Adding lens stack to %v", cName)
+		control.LensStack = NewLensStackFromNode(lensStackNode)
+	})
+}
+
+func (f *DmxFixture) VarsFrom(node *config.AclNode) {
+	if node == nil {
+		return
+	}
+
+	node.ForEachOrderedChild(func(vName string, vNode *config.AclNode) {
+		log.Errorf("%v = %v", vName, vNode.AsFloat())
+		f.SetF64(vName, vNode.AsFloat())
+	})
 }

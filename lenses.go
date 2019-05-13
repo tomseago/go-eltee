@@ -17,10 +17,9 @@ import (
    should be like efficient and stuff.
 */
 type Lens interface {
-	Observe(in interface{}) interface{}
-
-	Kind() string
-	SetFromNode(node *config.AclNode)
+	Observe(fc *FixtureControl, in interface{}) interface{}
+	// Kind() string
+	// SetFromNode(node *config.AclNode)
 }
 
 //////////////////////////////
@@ -37,24 +36,22 @@ type PositionLens struct {
 	z float64
 }
 
-func (l *PositionLens) Observe(in interface{}) interface{} {
+func (l *PositionLens) Observe(fc *FixtureControl, in interface{}) interface{} {
 	src, ok := in.(XYZPoint)
 	if !ok {
 		return in
 	}
 
 	l.source = src
+	f := fc.Fixture
+	l.x = f.GetF64("pos_x")
+	l.y = f.GetF64("pos_y")
+	l.z = f.GetF64("pos_z")
 	return l
 }
 
 func (l *PositionLens) Kind() string {
 	return "position"
-}
-
-func (l *PositionLens) SetFromNode(node *config.AclNode) {
-	l.x = node.ChildAsFloat("x")
-	l.y = node.ChildAsFloat("y")
-	l.z = node.ChildAsFloat("z")
 }
 
 func (l *PositionLens) XYZ() (float64, float64, float64) {
@@ -73,20 +70,50 @@ type LensStack struct {
 	stack []Lens
 }
 
-func NewLenStack() *LensStack {
+func NewLensStack() *LensStack {
 	return &LensStack{
 		stack: make([]Lens, 0),
 	}
 }
 
-func (ls *LensStack) Observe(cp ControlPoint) interface{} {
+func NewLensStackFromNode(base *config.AclNode) *LensStack {
+	log.Infof("NewLensStackFrom %v", base)
+
+	if base == nil {
+		return nil
+	}
+
+	ls := &LensStack{
+		stack: make([]Lens, 0),
+	}
+
+	for i := 0; i < base.Len(); i++ {
+		lNode, ok := (base.Values[i]).(*config.AclNode)
+		if !ok {
+			continue
+		}
+		//    }
+
+		// base.ForEachOrderedChild(func(nn string, lNode *config.AclNode) {
+		lens := LensFromNode(lNode)
+		if lens != nil {
+			ls.stack = append(ls.stack, lens)
+		}
+	} //)
+
+	log.Infof("Lens stack %v", ls)
+
+	return ls
+}
+
+func (ls *LensStack) Observe(fc *FixtureControl, cp ControlPoint) interface{} {
 	if ls == nil {
 		return cp
 	}
 
 	var view interface{} = cp
 	for ix := 0; ix < len(ls.stack); ix++ {
-		view = ls.stack[ix].Observe(view)
+		view = ls.stack[ix].Observe(fc, view)
 	}
 
 	return view
@@ -102,4 +129,26 @@ func (ls *LensStack) Len() int {
 
 func (ls *LensStack) GetLens(ix int) Lens {
 	return ls.stack[ix]
+}
+
+//////////////////////////////
+
+func LensFromNode(node *config.AclNode) Lens {
+	log.Debugf("LensFromNode %v", node)
+	if node == nil {
+		return nil
+	}
+
+	kind := node.ChildAsString("kind")
+	if len(kind) == 0 {
+		return nil
+	}
+
+	if kind == "position" {
+		log.Infof("Returning position lens")
+		return &PositionLens{}
+	}
+
+	log.Errorf("Unknown lens type %v", kind)
+	return nil
 }

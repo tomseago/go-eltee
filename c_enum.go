@@ -29,7 +29,7 @@ func (u *EnumUpdater) Update(fc *FixtureControl) {
 
 	// TODO: Use the control point WasDirty() method?
 
-	value := fc.LensStack.Observe(fc.ControlPoint)
+	value := fc.LensStack.Observe(fc, fc.ControlPoint)
 
 	point, ok := value.(EnumPoint)
 	if !ok {

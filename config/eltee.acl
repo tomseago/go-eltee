@@ -28,8 +28,12 @@ dmx: {
         // This gives you a log output of the dmx values. Kinda nice but more than a little verbose
         log: {
             kind: log
+            /*
             start: 33
             length: 10
+            */
+            start: 256
+            length: 18
         }
 
         // olad: {

@@ -204,6 +204,9 @@ func (s *Server) CreateFixture(name string, node *config.AclNode, defBase int) (
 
 	fixture := NewDmxFixture(name, actualBase, channels, profile)
 
+	fixture.LensesFrom(node.Child("lenses"))
+	fixture.VarsFrom(node.Child("vars"))
+
 	return fixture, actualBase + profile.ChannelCount
 }
 

@@ -1,0 +1,134 @@
+name: "Tomshine Gobo Mover"
+channel_count: 18
+
+default_values: [
+        98 121 174 180 // Pan Tilt Coarse & Fine
+        0 // 5: PanTilt Speed high to low
+        100 // 6: Master Dimmer
+        0 // 7: Strobe {off:0, slow to fast: [1 255]} 
+
+        167 0 175 202 0 0 // 8-13: RGBWAU
+
+        0 /* 14: Motor Macro
+            off: 0
+            auto_3: 16
+            auto_2: 45
+            auto_1: 75
+            auto_0: 105
+            sound_3: 129
+            sound_2: 158
+            sound_1: 188
+            sound_0: 218
+        */
+        0 // 15: Motor sound sensitivity low to high
+
+        0 // 16:
+        0 // 17
+        0 // 18: Standard reset thing, 3seconds
+    ]
+
+controls: {
+    color: {
+        name: "Color"
+        kind: led_var
+        leds: {
+            red: 8
+            green: 9
+            blue: 10
+            white: 11
+            amber: 12
+            uv: 13
+        }
+    }
+
+    position: {
+        name: "Position"
+        kind: pan_tilt
+        pan: {
+            coarse: 1
+            fine: 2
+            min: 0
+            max: 540
+        }
+        tilt: {
+            coarse: 3
+            fine: 4
+            min: 0
+            max: 180
+        }
+        speed: 5
+    }
+
+    master: {
+        name: "Master Dimmer"
+        kind: intensity
+        channel: 6
+    }
+
+    strobe: {
+        name: "Strobe"
+        kind: intensity
+        channel: 7
+    }
+
+    auto_move: {
+        name: "Auto Move"
+        kind: enum
+        channel: 15
+        values: {
+            "Off": 0
+            "Auto 3": 16
+            "Auto 2": 45
+            "Auto 1": 75
+            "Auto 0": 105
+            "Sound 3": 129
+            "Sound 2": 158
+            "Sound 1": 188
+            "Sound 0": 218
+        }
+    }
+
+    auto_motor_sound: {
+        name: "Auto Move Sound Sensitivity"
+        kind: intensity
+        channel: 15
+    }
+
+    auto_color: {
+        name: "Auto Color"
+        kind: enum
+        channel: 16
+        values: {
+            "Off": 0
+            "Fade": [1 7]
+            "Fx1 Alternating w/ Speed": [8 39]
+            "Fx2 GBWF Matched w/ Speed": [40 72]
+            "Fx3 Matched w/ Speed": [73 105]
+            "Fx4 Unmatches Spot->Flood w/ Speed": [106 138]
+            "Fx5 1 side Flood->Spot w/ Speed": [139 140]
+            "Fx5 1 side Flood->Spot": [141 142]
+            "Fx1 Alternating": [143 167]
+            "Fx2 GBWF Matched": [168 195]
+            "Fx3 Matched": [196 223]
+            "Fx4 Unmatched Spot->Flood": [224 251]
+            "Fx5 1 side Flood->Spot": [252 255]
+        }
+    }
+
+    auto_color_speed: {
+        name: "Auto Color Change Speed"
+        kind: intensity
+        channel: 17
+    }
+
+    // We probably want to make a special reset control...
+    reset: {
+        name: "Reset"
+        kind: enum
+        channel: 18
+        values: {
+            "Off": 0
+            "Reset": 250
+        }
+    }
+}

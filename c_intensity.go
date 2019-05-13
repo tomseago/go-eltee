@@ -28,7 +28,7 @@ func (u *IntensityUpdater) Update(fc *FixtureControl) {
 
 	// TODO: Use the control point WasDirty() method?
 
-	value := fc.LensStack.Observe(fc.ControlPoint)
+	value := fc.LensStack.Observe(fc, fc.ControlPoint)
 
 	intensity, ok := value.(IntensityPoint)
 	if !ok {

@@ -25,7 +25,7 @@ func (u *LedVarUpdater) Update(fc *FixtureControl) {
 
 	// TODO: Use the control point WasDirty() method?
 
-	value := fc.LensStack.Observe(fc.ControlPoint)
+	value := fc.LensStack.Observe(fc, fc.ControlPoint)
 
 	color, ok := value.(ColorPoint)
 	if !ok {
