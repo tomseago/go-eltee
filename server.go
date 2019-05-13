@@ -2,6 +2,7 @@ package eltee
 
 import (
 	"github.com/eyethereal/go-config"
+	"os"
 	"path"
 )
 
@@ -19,6 +20,9 @@ var log = config.Logger("eltee")
 // reason.
 type Server struct {
 	cfg *config.AclNode
+
+	deploymentName    string
+	loadableStatesDir string
 
 	dmxHarness *DmxHarness
 	library    *ProfileLibrary
@@ -96,14 +100,27 @@ func NewServer(cfg *config.AclNode) *Server {
 	// Load the initial set of control points
 	s.stateJuggler = NewStateJuggler(s.fixturesByName)
 
-	deploymentName := cfg.DefChildAsString("default", "deployment")
-	deploymentDir := path.Join("deployments", deploymentName)
+	s.deploymentName = cfg.DefChildAsString("default", "deployment")
+	deploymentDir := path.Join("deployments", s.deploymentName)
 	err = s.stateJuggler.LoadDirectory(deploymentDir)
 	if err != nil {
-		log.Errorf("%", err)
+		log.Errorf("%v", err)
 		log.Error("Can not start")
 		return nil
 	}
+
+	s.loadableStatesDir = cfg.DefChildAsString("loadables", "states", "loadable_dir")
+	// Create the directory if necessary
+	err = os.MkdirAll(s.loadableStatesDir, 0755)
+	if err != nil {
+		log.Errorf("%v", err)
+		log.Error("Can not start")
+		return nil
+	}
+
+	// Debugging...
+	// log.Debugf("Saving all states to the loadables dir for fun...")
+	// s.stateJuggler.SaveAll(s.loadableStatesDir)
 
 	// defCPFilename = path.Join("control_points", defCPFilename) + ".acl"
 	// cpNode := config.NewAclNode()

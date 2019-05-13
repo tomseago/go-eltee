@@ -9,6 +9,11 @@ message StringMsg {
     repeated string list = 2;
 }
 
+message SrcDest {
+    string src = 1;
+    string dest = 2;
+}
+
 ////////////////////////////////////////////////////////////////////////
 //
 // Profiles and their controls
@@ -139,6 +144,10 @@ message ControlPointList {
     // This is useful when setting control points either to the current
     // state or to some other state
     string state = 2; 
+
+    // When setting control points this indicates that the control point
+    // should be added if it doesn't exist in the state already
+    bool upsert = 3;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -161,12 +170,31 @@ service ElTee {
 
     rpc ProfileLibrary(Void) returns (ProfilesResponse) {}
 
+    /* Get a list of state names and control point values in that state */
     rpc StateNames(Void) returns (StringMsg) {}
     rpc ControlPoints(StringMsg) returns (ControlPointList) {}
 
     /*
-    Sets current values directly without modifying any other state declaration
+    Sets current values directly without modifying any other state declaration.    
     */
     rpc SetControlPoints(ControlPointList) returns (Void) {}
+    rpc RemoveControlPoints(ControlPointList) returns (Void) {}
 
+    /* Set a particular state */
+    rpc ApplyState(StringMsg) returns (Void) {}
+
+    /* States can be loaded and saved */
+    rpc LoadableStateNames(Void) returns (StringMsg) {}
+    rpc LoadLoadableState(StringMsg) returns (Void) {}
+    rpc SaveLoadableState(StringMsg) returns (Void) {}
+    rpc SaveAllStates(Void) returns (Void) {}
+
+    /* Add and remove states, which could be then saved */
+    rpc AddState(StringMsg) returns (Void) {}
+    rpc RemoveState(StringMsg) returns (Void) {}
+
+    /* Duplicate and apply */
+    rpc CopyStateTo(SrcDest) returns (Void) {}
+    rpc MoveStateTo(SrcDest) returns (Void) {}
+    rpc ApplyStateTo(SrcDest) returns (Void) {}
 }

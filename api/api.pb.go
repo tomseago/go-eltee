@@ -102,6 +102,53 @@ func (m *StringMsg) GetList() []string {
 	return nil
 }
 
+type SrcDest struct {
+	Src                  string   `protobuf:"bytes,1,opt,name=src,proto3" json:"src,omitempty"`
+	Dest                 string   `protobuf:"bytes,2,opt,name=dest,proto3" json:"dest,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SrcDest) Reset()         { *m = SrcDest{} }
+func (m *SrcDest) String() string { return proto.CompactTextString(m) }
+func (*SrcDest) ProtoMessage()    {}
+func (*SrcDest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_00212fb1f9d3bf1c, []int{2}
+}
+
+func (m *SrcDest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SrcDest.Unmarshal(m, b)
+}
+func (m *SrcDest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SrcDest.Marshal(b, m, deterministic)
+}
+func (m *SrcDest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SrcDest.Merge(m, src)
+}
+func (m *SrcDest) XXX_Size() int {
+	return xxx_messageInfo_SrcDest.Size(m)
+}
+func (m *SrcDest) XXX_DiscardUnknown() {
+	xxx_messageInfo_SrcDest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SrcDest proto.InternalMessageInfo
+
+func (m *SrcDest) GetSrc() string {
+	if m != nil {
+		return m.Src
+	}
+	return ""
+}
+
+func (m *SrcDest) GetDest() string {
+	if m != nil {
+		return m.Dest
+	}
+	return ""
+}
+
 // This is how we get polymorphic behavior for ProfileControls
 type ProfileControl struct {
 	// Types that are valid to be assigned to Sub:
@@ -120,7 +167,7 @@ func (m *ProfileControl) Reset()         { *m = ProfileControl{} }
 func (m *ProfileControl) String() string { return proto.CompactTextString(m) }
 func (*ProfileControl) ProtoMessage()    {}
 func (*ProfileControl) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{2}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{3}
 }
 
 func (m *ProfileControl) XXX_Unmarshal(b []byte) error {
@@ -241,7 +288,7 @@ func (m *GroupProfileControl) Reset()         { *m = GroupProfileControl{} }
 func (m *GroupProfileControl) String() string { return proto.CompactTextString(m) }
 func (*GroupProfileControl) ProtoMessage()    {}
 func (*GroupProfileControl) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{3}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{4}
 }
 
 func (m *GroupProfileControl) XXX_Unmarshal(b []byte) error {
@@ -297,7 +344,7 @@ func (m *EnumProfileControlOption) Reset()         { *m = EnumProfileControlOpti
 func (m *EnumProfileControlOption) String() string { return proto.CompactTextString(m) }
 func (*EnumProfileControlOption) ProtoMessage()    {}
 func (*EnumProfileControlOption) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{4}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{5}
 }
 
 func (m *EnumProfileControlOption) XXX_Unmarshal(b []byte) error {
@@ -360,7 +407,7 @@ func (m *EnumProfileControl) Reset()         { *m = EnumProfileControl{} }
 func (m *EnumProfileControl) String() string { return proto.CompactTextString(m) }
 func (*EnumProfileControl) ProtoMessage()    {}
 func (*EnumProfileControl) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{5}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{6}
 }
 
 func (m *EnumProfileControl) XXX_Unmarshal(b []byte) error {
@@ -422,7 +469,7 @@ func (m *IntensityProfileControl) Reset()         { *m = IntensityProfileControl
 func (m *IntensityProfileControl) String() string { return proto.CompactTextString(m) }
 func (*IntensityProfileControl) ProtoMessage()    {}
 func (*IntensityProfileControl) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{6}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{7}
 }
 
 func (m *IntensityProfileControl) XXX_Unmarshal(b []byte) error {
@@ -478,7 +525,7 @@ func (m *PanTiltProfileControlAxis) Reset()         { *m = PanTiltProfileControl
 func (m *PanTiltProfileControlAxis) String() string { return proto.CompactTextString(m) }
 func (*PanTiltProfileControlAxis) ProtoMessage()    {}
 func (*PanTiltProfileControlAxis) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{7}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{8}
 }
 
 func (m *PanTiltProfileControlAxis) XXX_Unmarshal(b []byte) error {
@@ -542,7 +589,7 @@ func (m *PanTiltProfileControl) Reset()         { *m = PanTiltProfileControl{} }
 func (m *PanTiltProfileControl) String() string { return proto.CompactTextString(m) }
 func (*PanTiltProfileControl) ProtoMessage()    {}
 func (*PanTiltProfileControl) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{8}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{9}
 }
 
 func (m *PanTiltProfileControl) XXX_Unmarshal(b []byte) error {
@@ -611,7 +658,7 @@ func (m *LedVarProfileControl) Reset()         { *m = LedVarProfileControl{} }
 func (m *LedVarProfileControl) String() string { return proto.CompactTextString(m) }
 func (*LedVarProfileControl) ProtoMessage()    {}
 func (*LedVarProfileControl) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{9}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{10}
 }
 
 func (m *LedVarProfileControl) XXX_Unmarshal(b []byte) error {
@@ -669,7 +716,7 @@ func (m *Profile) Reset()         { *m = Profile{} }
 func (m *Profile) String() string { return proto.CompactTextString(m) }
 func (*Profile) ProtoMessage()    {}
 func (*Profile) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{10}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{11}
 }
 
 func (m *Profile) XXX_Unmarshal(b []byte) error {
@@ -729,7 +776,7 @@ func (m *ProfilesResponse) Reset()         { *m = ProfilesResponse{} }
 func (m *ProfilesResponse) String() string { return proto.CompactTextString(m) }
 func (*ProfilesResponse) ProtoMessage()    {}
 func (*ProfilesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{11}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{12}
 }
 
 func (m *ProfilesResponse) XXX_Unmarshal(b []byte) error {
@@ -775,7 +822,7 @@ func (m *ControlPoint) Reset()         { *m = ControlPoint{} }
 func (m *ControlPoint) String() string { return proto.CompactTextString(m) }
 func (*ControlPoint) ProtoMessage()    {}
 func (*ControlPoint) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{12}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{13}
 }
 
 func (m *ControlPoint) XXX_Unmarshal(b []byte) error {
@@ -887,7 +934,7 @@ func (m *ColorPoint) Reset()         { *m = ColorPoint{} }
 func (m *ColorPoint) String() string { return proto.CompactTextString(m) }
 func (*ColorPoint) ProtoMessage()    {}
 func (*ColorPoint) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{13}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{14}
 }
 
 func (m *ColorPoint) XXX_Unmarshal(b []byte) error {
@@ -928,7 +975,7 @@ func (m *XYZPoint) Reset()         { *m = XYZPoint{} }
 func (m *XYZPoint) String() string { return proto.CompactTextString(m) }
 func (*XYZPoint) ProtoMessage()    {}
 func (*XYZPoint) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{14}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{15}
 }
 
 func (m *XYZPoint) XXX_Unmarshal(b []byte) error {
@@ -982,7 +1029,7 @@ func (m *EnumPoint) Reset()         { *m = EnumPoint{} }
 func (m *EnumPoint) String() string { return proto.CompactTextString(m) }
 func (*EnumPoint) ProtoMessage()    {}
 func (*EnumPoint) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{15}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{16}
 }
 
 func (m *EnumPoint) XXX_Unmarshal(b []byte) error {
@@ -1028,7 +1075,7 @@ func (m *IntensityPoint) Reset()         { *m = IntensityPoint{} }
 func (m *IntensityPoint) String() string { return proto.CompactTextString(m) }
 func (*IntensityPoint) ProtoMessage()    {}
 func (*IntensityPoint) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{16}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{17}
 }
 
 func (m *IntensityPoint) XXX_Unmarshal(b []byte) error {
@@ -1067,7 +1114,7 @@ func (m *ControlPointQuery) Reset()         { *m = ControlPointQuery{} }
 func (m *ControlPointQuery) String() string { return proto.CompactTextString(m) }
 func (*ControlPointQuery) ProtoMessage()    {}
 func (*ControlPointQuery) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{17}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{18}
 }
 
 func (m *ControlPointQuery) XXX_Unmarshal(b []byte) error {
@@ -1100,7 +1147,10 @@ type ControlPointList struct {
 	// If set, indicates these control points are for a particular state
 	// This is useful when setting control points either to the current
 	// state or to some other state
-	State                string   `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	State string `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	// When setting control points this indicates that the control point
+	// should be added if it doesn't exist in the state already
+	Upsert               bool     `protobuf:"varint,3,opt,name=upsert,proto3" json:"upsert,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -1110,7 +1160,7 @@ func (m *ControlPointList) Reset()         { *m = ControlPointList{} }
 func (m *ControlPointList) String() string { return proto.CompactTextString(m) }
 func (*ControlPointList) ProtoMessage()    {}
 func (*ControlPointList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{18}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{19}
 }
 
 func (m *ControlPointList) XXX_Unmarshal(b []byte) error {
@@ -1145,6 +1195,13 @@ func (m *ControlPointList) GetState() string {
 	return ""
 }
 
+func (m *ControlPointList) GetUpsert() bool {
+	if m != nil {
+		return m.Upsert
+	}
+	return false
+}
+
 type StateQuery struct {
 	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -1156,7 +1213,7 @@ func (m *StateQuery) Reset()         { *m = StateQuery{} }
 func (m *StateQuery) String() string { return proto.CompactTextString(m) }
 func (*StateQuery) ProtoMessage()    {}
 func (*StateQuery) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{19}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{20}
 }
 
 func (m *StateQuery) XXX_Unmarshal(b []byte) error {
@@ -1195,7 +1252,7 @@ func (m *StateQueryReply) Reset()         { *m = StateQueryReply{} }
 func (m *StateQueryReply) String() string { return proto.CompactTextString(m) }
 func (*StateQueryReply) ProtoMessage()    {}
 func (*StateQueryReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_00212fb1f9d3bf1c, []int{20}
+	return fileDescriptor_00212fb1f9d3bf1c, []int{21}
 }
 
 func (m *StateQueryReply) XXX_Unmarshal(b []byte) error {
@@ -1226,6 +1283,7 @@ func (m *StateQueryReply) GetNames() []string {
 func init() {
 	proto.RegisterType((*Void)(nil), "Void")
 	proto.RegisterType((*StringMsg)(nil), "StringMsg")
+	proto.RegisterType((*SrcDest)(nil), "SrcDest")
 	proto.RegisterType((*ProfileControl)(nil), "ProfileControl")
 	proto.RegisterType((*GroupProfileControl)(nil), "GroupProfileControl")
 	proto.RegisterType((*EnumProfileControlOption)(nil), "EnumProfileControlOption")
@@ -1253,68 +1311,76 @@ func init() {
 func init() { proto.RegisterFile("api.proto", fileDescriptor_00212fb1f9d3bf1c) }
 
 var fileDescriptor_00212fb1f9d3bf1c = []byte{
-	// 964 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x56, 0xcd, 0x6e, 0xdb, 0x46,
-	0x10, 0xd6, 0x8a, 0xa2, 0x6d, 0x8e, 0xff, 0x37, 0x4e, 0xca, 0xa8, 0x69, 0xa2, 0x6e, 0x0e, 0x71,
-	0x51, 0x63, 0xd3, 0x2a, 0x05, 0x1a, 0xd4, 0x28, 0x8a, 0xd6, 0x30, 0x5a, 0x03, 0x4e, 0xe3, 0xae,
-	0x83, 0xa0, 0x3f, 0x27, 0x5a, 0x5a, 0x29, 0x8b, 0x50, 0x4b, 0x82, 0x5c, 0xa9, 0x92, 0x0f, 0x39,
-	0x17, 0x28, 0x7a, 0xed, 0x8b, 0xf4, 0xd2, 0x53, 0x9f, 0xa4, 0x0f, 0x53, 0xec, 0x0f, 0x45, 0xd2,
-	0x92, 0x53, 0x03, 0xb9, 0xed, 0xcc, 0x7c, 0xb3, 0x33, 0xf3, 0xed, 0xcc, 0x90, 0x10, 0x44, 0xa9,
-	0xa0, 0x69, 0x96, 0xa8, 0x84, 0xac, 0x40, 0xeb, 0x65, 0x22, 0xfa, 0xe4, 0x53, 0x08, 0xce, 0x55,
-	0x26, 0xe4, 0xf0, 0x59, 0x3e, 0xc4, 0x3b, 0xe0, 0x4d, 0xa2, 0x38, 0x44, 0x1d, 0xb4, 0x1f, 0x30,
-	0x7d, 0xc4, 0x18, 0x5a, 0xb1, 0xc8, 0x55, 0xd8, 0xec, 0x78, 0xfb, 0x01, 0x33, 0x67, 0xf2, 0x47,
-	0x13, 0xb6, 0xce, 0xb2, 0x64, 0x20, 0x62, 0x7e, 0x94, 0x48, 0x95, 0x25, 0x31, 0x3e, 0x00, 0x7f,
-	0x98, 0x25, 0xe3, 0xd4, 0xb8, 0xae, 0x77, 0xf7, 0xe8, 0xb7, 0x5a, 0xaa, 0x83, 0xbe, 0x6b, 0x30,
-	0x0b, 0xc2, 0x8f, 0xc0, 0xe3, 0x72, 0x14, 0x36, 0x0d, 0xf6, 0x16, 0x3d, 0x96, 0xe3, 0xd1, 0x02,
-	0x54, 0x23, 0xf0, 0x53, 0x08, 0x84, 0x54, 0x5c, 0xe6, 0x42, 0xcd, 0x42, 0xcf, 0xc0, 0x43, 0x7a,
-	0x52, 0x68, 0x16, 0x7c, 0x4a, 0x30, 0xee, 0xc2, 0x6a, 0x1a, 0xc9, 0x17, 0x22, 0x56, 0x61, 0xcb,
-	0xf8, 0xdd, 0xa1, 0x67, 0x56, 0x5e, 0xf0, 0x2a, 0x80, 0xf8, 0x31, 0xac, 0xc4, 0xbc, 0xff, 0x32,
-	0xca, 0x42, 0xdf, 0xb8, 0xdc, 0xa6, 0xa7, 0x46, 0x5c, 0xf0, 0x70, 0xb0, 0x6f, 0x7c, 0xf0, 0xf2,
-	0xf1, 0x05, 0x19, 0xc0, 0xad, 0x25, 0xe5, 0xe2, 0x2d, 0x68, 0x8a, 0xbe, 0xe3, 0xb2, 0x29, 0xfa,
-	0x9a, 0x4a, 0x19, 0x8d, 0xb8, 0x29, 0x3b, 0x60, 0xe6, 0x8c, 0x3f, 0x86, 0xb5, 0x9e, 0x85, 0xe7,
-	0xa1, 0xd7, 0xf1, 0xf6, 0xd7, 0xbb, 0xdb, 0xb4, 0x7e, 0x0d, 0x9b, 0x03, 0xc8, 0x1b, 0x08, 0x17,
-	0xa9, 0x7a, 0x9e, 0x2a, 0x91, 0xc8, 0xf9, 0xe5, 0xa8, 0x72, 0xf9, 0x1d, 0x58, 0x99, 0x44, 0xf1,
-	0x98, 0xe7, 0xe6, 0xf5, 0x7c, 0xe6, 0x24, 0x1c, 0xc2, 0xea, 0x24, 0xca, 0xbe, 0xd7, 0x70, 0xcf,
-	0xc0, 0x0b, 0x11, 0xdf, 0x83, 0x60, 0x12, 0x65, 0xcf, 0x07, 0x83, 0x9c, 0x5b, 0xde, 0x7c, 0x56,
-	0x2a, 0xc8, 0xef, 0x08, 0xf0, 0x62, 0x02, 0x37, 0xaa, 0xf3, 0x1e, 0x04, 0xbd, 0x57, 0x91, 0x94,
-	0x3c, 0x3e, 0x99, 0x9a, 0xa0, 0x3e, 0x2b, 0x15, 0xf8, 0x09, 0xac, 0x26, 0xa6, 0x8c, 0x3c, 0x6c,
-	0x19, 0x12, 0xee, 0xd2, 0xeb, 0x0a, 0x65, 0x05, 0x92, 0xfc, 0x02, 0xef, 0x5d, 0xd3, 0x09, 0xef,
-	0x9e, 0x11, 0xf9, 0x15, 0xee, 0x2e, 0x6d, 0x97, 0xaf, 0xa7, 0x22, 0xd7, 0xbc, 0xf6, 0x92, 0x28,
-	0xcb, 0x2d, 0xdb, 0x3e, 0x73, 0x92, 0x0e, 0x33, 0x10, 0xd2, 0x86, 0xf1, 0x99, 0x39, 0x6b, 0xec,
-	0x48, 0x48, 0x16, 0xf5, 0x4d, 0x0c, 0xc4, 0x9c, 0x64, 0xf4, 0xd1, 0x54, 0xeb, 0x5b, 0x4e, 0x6f,
-	0x24, 0xf2, 0x17, 0x82, 0xdb, 0x4b, 0x23, 0xdf, 0xa8, 0xa8, 0x03, 0xf0, 0xd2, 0x48, 0xba, 0x49,
-	0x69, 0xd3, 0x6b, 0x4b, 0x60, 0x1a, 0x86, 0x29, 0xb4, 0x54, 0x39, 0x20, 0x6f, 0x83, 0x1b, 0x9c,
-	0xee, 0x9b, 0xde, 0xab, 0xf3, 0x94, 0xf3, 0xbe, 0x19, 0x10, 0x9f, 0x15, 0x22, 0xf9, 0x1b, 0xc1,
-	0xde, 0xb2, 0x59, 0xb9, 0x51, 0xd2, 0x5f, 0xe9, 0x19, 0x88, 0x93, 0xec, 0x59, 0x94, 0xba, 0x19,
-	0x78, 0xb8, 0x74, 0xf0, 0xe8, 0x91, 0x43, 0x1d, 0x4b, 0x95, 0xcd, 0xd8, 0xdc, 0xa9, 0x7d, 0x08,
-	0x9b, 0x35, 0x93, 0x5e, 0x63, 0xaf, 0xf9, 0xac, 0x58, 0x63, 0xaf, 0xf9, 0x0c, 0xef, 0x81, 0x6f,
-	0x9a, 0xdf, 0xbd, 0x8d, 0x15, 0xbe, 0x68, 0x3e, 0x45, 0xe4, 0x0d, 0xac, 0xba, 0x30, 0x37, 0x4a,
-	0x96, 0xc0, 0x86, 0xeb, 0x92, 0xa3, 0x64, 0x2c, 0x95, 0xeb, 0x9c, 0x9a, 0xae, 0x36, 0xd4, 0x96,
-	0xdb, 0xb7, 0x0c, 0xf5, 0x9f, 0x08, 0x76, 0x9c, 0x31, 0x67, 0x3c, 0x4f, 0x13, 0x99, 0x73, 0x7c,
-	0x08, 0x6b, 0xa9, 0xd3, 0x85, 0xc8, 0x50, 0xf2, 0x80, 0x5e, 0x05, 0xcd, 0x15, 0x8e, 0x8e, 0xc2,
-	0xa1, 0x7d, 0x0c, 0x9b, 0x35, 0xd3, 0x12, 0x3a, 0xee, 0x57, 0xe9, 0x58, 0xef, 0xae, 0x15, 0x77,
-	0x55, 0x89, 0xf9, 0x07, 0xc1, 0x86, 0x4b, 0xf7, 0x2c, 0x11, 0x52, 0x2d, 0x5d, 0x31, 0x0f, 0xc1,
-	0x37, 0xcf, 0xe0, 0x2e, 0x5a, 0xb7, 0x6f, 0x64, 0xf0, 0x7a, 0xdd, 0x1b, 0x1b, 0xfe, 0x00, 0xbc,
-	0xe9, 0xec, 0xd2, 0x75, 0x65, 0x40, 0x7f, 0xfc, 0xe9, 0xe7, 0x02, 0xa0, 0xf5, 0xf8, 0xbe, 0xfd,
-	0x1a, 0x58, 0xa6, 0xc0, 0x4e, 0x7e, 0x61, 0xd7, 0x1f, 0x81, 0xc7, 0xd5, 0x8f, 0x80, 0xef, 0xf8,
-	0x2c, 0x47, 0xdf, 0x41, 0x4b, 0x8c, 0x5e, 0xcb, 0x93, 0x28, 0x26, 0xbf, 0x21, 0x80, 0x32, 0x1d,
-	0x7c, 0x08, 0xd0, 0x4b, 0x46, 0x69, 0x22, 0xb9, 0x54, 0x05, 0xab, 0xef, 0x57, 0xf2, 0xa5, 0x47,
-	0x73, 0xab, 0x65, 0xb4, 0x02, 0x6f, 0x7f, 0x09, 0xdb, 0x57, 0xcc, 0xff, 0xd7, 0x64, 0xa8, 0xca,
-	0xe5, 0x67, 0xb0, 0x56, 0x54, 0x8d, 0x37, 0x00, 0x4d, 0x8d, 0x17, 0x62, 0x68, 0xaa, 0xa5, 0x99,
-	0xc3, 0xa3, 0x99, 0x96, 0x2e, 0xdd, 0xa2, 0x40, 0x97, 0xe4, 0x73, 0x08, 0xe6, 0x64, 0x68, 0xf6,
-	0x85, 0xe2, 0x23, 0xb7, 0x72, 0xcc, 0x59, 0x2f, 0x91, 0x3e, 0x1f, 0x66, 0xbc, 0x88, 0xe8, 0x24,
-	0x42, 0x61, 0xab, 0xce, 0x8f, 0xde, 0x76, 0x25, 0x87, 0x36, 0x78, 0xa9, 0x20, 0x1f, 0xc1, 0x6e,
-	0xf5, 0xa5, 0x7f, 0x18, 0xf3, 0xcc, 0x54, 0x93, 0xab, 0x48, 0x15, 0xef, 0x6d, 0x05, 0x72, 0x02,
-	0x3b, 0x55, 0xe8, 0xa9, 0xc8, 0x15, 0x7e, 0x00, 0x5e, 0x2f, 0x2d, 0x28, 0xdd, 0xa4, 0x55, 0x3b,
-	0xd3, 0x96, 0xf2, 0xaa, 0x66, 0xf5, 0xaa, 0x0e, 0xc0, 0xb9, 0x3e, 0xd8, 0x70, 0x4b, 0xba, 0x8b,
-	0x3c, 0x82, 0xed, 0x12, 0xc1, 0x78, 0x1a, 0x9b, 0xac, 0xb4, 0xc9, 0x46, 0x0b, 0x98, 0x15, 0xba,
-	0xff, 0x22, 0xf0, 0x8f, 0xe3, 0x17, 0x9c, 0xe3, 0x0e, 0xb4, 0xce, 0x84, 0x1c, 0x62, 0xa0, 0xf3,
-	0xbf, 0x9a, 0x76, 0xe5, 0x4c, 0x1a, 0xf8, 0x60, 0xfe, 0xf3, 0x72, 0x2a, 0x2e, 0xb2, 0x28, 0x9b,
-	0x61, 0x9f, 0xea, 0x3f, 0xa1, 0xf6, 0xee, 0xc2, 0x88, 0x91, 0x06, 0xfe, 0xd0, 0x25, 0xa9, 0x3f,
-	0x8f, 0x79, 0x81, 0xac, 0x5f, 0xf8, 0x89, 0x5e, 0x3f, 0x65, 0xc9, 0x79, 0x2d, 0xf6, 0x2e, 0xbd,
-	0x4a, 0x17, 0x69, 0x60, 0x0a, 0x3b, 0xe7, 0x5c, 0xd5, 0x9d, 0x16, 0x81, 0x6d, 0x1b, 0x8d, 0x34,
-	0x2e, 0x56, 0xcc, 0x2f, 0xdb, 0x93, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0x36, 0x71, 0xc4, 0x41,
-	0xbf, 0x09, 0x00, 0x00,
+	// 1099 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x96, 0xcf, 0x6f, 0xdb, 0x36,
+	0x14, 0xc7, 0x23, 0xcb, 0x4a, 0xec, 0xe7, 0xfc, 0x64, 0xd2, 0x4e, 0xf5, 0xba, 0xc6, 0x61, 0x0f,
+	0x4d, 0xb1, 0x40, 0x59, 0xdd, 0x01, 0x2b, 0x16, 0x0c, 0x43, 0x96, 0x05, 0x5b, 0x81, 0x64, 0xcd,
+	0xe8, 0xa0, 0xd8, 0x8f, 0x13, 0x63, 0x31, 0xa9, 0x50, 0x99, 0x12, 0x44, 0xd9, 0xb3, 0x73, 0xe8,
+	0x79, 0xc0, 0xb0, 0xeb, 0xfe, 0x91, 0x5d, 0x76, 0xda, 0x9f, 0x36, 0x0c, 0xfc, 0x21, 0x4b, 0x8a,
+	0x95, 0xd4, 0x40, 0x6f, 0x7c, 0x8f, 0x9f, 0xf7, 0xf8, 0xf8, 0x25, 0x1f, 0x25, 0x68, 0xd2, 0x38,
+	0xf0, 0xe2, 0x24, 0x4a, 0x23, 0xbc, 0x08, 0xf5, 0xd7, 0x51, 0xe0, 0xe3, 0x67, 0xd0, 0xec, 0xa5,
+	0x49, 0xc0, 0xaf, 0x4e, 0xc5, 0x15, 0x5a, 0x07, 0x7b, 0x44, 0x43, 0xd7, 0xea, 0x58, 0xbb, 0x4d,
+	0x22, 0x87, 0x08, 0x41, 0x3d, 0x0c, 0x44, 0xea, 0xd6, 0x3a, 0xf6, 0x6e, 0x93, 0xa8, 0x31, 0xde,
+	0x87, 0xa5, 0x5e, 0xd2, 0xff, 0x96, 0x89, 0x54, 0x06, 0x88, 0xa4, 0x9f, 0x05, 0x88, 0xa4, 0x2f,
+	0x03, 0x7c, 0xa6, 0x02, 0xa4, 0x4b, 0x8d, 0xf1, 0x9f, 0x35, 0x58, 0x3d, 0x4b, 0xa2, 0xcb, 0x20,
+	0x64, 0x47, 0x11, 0x4f, 0x93, 0x28, 0x44, 0x7b, 0xe0, 0x5c, 0x25, 0xd1, 0x30, 0x56, 0xa1, 0xad,
+	0xee, 0x96, 0xf7, 0x9d, 0xb4, 0xca, 0xd0, 0xf7, 0x0b, 0x44, 0x43, 0xe8, 0x09, 0xd8, 0x8c, 0x0f,
+	0x54, 0xce, 0x56, 0x77, 0xd3, 0x3b, 0xe6, 0xc3, 0xc1, 0x0c, 0x2a, 0x09, 0xf4, 0x02, 0x9a, 0x01,
+	0x4f, 0x19, 0x17, 0x41, 0x3a, 0x71, 0x6d, 0x85, 0xbb, 0xde, 0xcb, 0xcc, 0x33, 0x13, 0x93, 0xc3,
+	0xa8, 0x0b, 0x4b, 0x31, 0xe5, 0xe7, 0x41, 0x98, 0xba, 0x75, 0x15, 0x77, 0xdf, 0x3b, 0xd3, 0xf6,
+	0x4c, 0x54, 0x06, 0xa2, 0x7d, 0x58, 0x0c, 0x99, 0xff, 0x9a, 0x26, 0xae, 0xa3, 0x42, 0xee, 0x79,
+	0x27, 0xca, 0x9c, 0x89, 0x30, 0xd8, 0x37, 0x0e, 0xd8, 0x62, 0x78, 0x81, 0x2f, 0x61, 0xb3, 0x62,
+	0xbb, 0x68, 0x15, 0x6a, 0x81, 0x6f, 0xb4, 0xac, 0x05, 0xbe, 0x94, 0x92, 0xd3, 0x01, 0xcb, 0xa4,
+	0x94, 0x63, 0xf4, 0x29, 0x34, 0xfa, 0x1a, 0x17, 0xae, 0xdd, 0xb1, 0x77, 0x5b, 0xdd, 0x35, 0xaf,
+	0x9c, 0x86, 0x4c, 0x01, 0xfc, 0x0e, 0xdc, 0x59, 0xa9, 0x5e, 0xc5, 0x69, 0x10, 0xf1, 0x69, 0x72,
+	0xab, 0x90, 0xfc, 0x3e, 0x2c, 0x8e, 0x68, 0x38, 0x64, 0x42, 0x1d, 0xb7, 0x43, 0x8c, 0x85, 0x5c,
+	0x58, 0x1a, 0xd1, 0xe4, 0x07, 0x89, 0xdb, 0x0a, 0xcf, 0x4c, 0xf4, 0x10, 0x9a, 0x23, 0x9a, 0xbc,
+	0xba, 0xbc, 0x14, 0x4c, 0xeb, 0xe6, 0x90, 0xdc, 0x81, 0xff, 0xb0, 0x00, 0xcd, 0x16, 0x30, 0xd7,
+	0x3e, 0x1f, 0x42, 0xb3, 0xff, 0x86, 0x72, 0xce, 0xc2, 0x97, 0x63, 0xb5, 0xa8, 0x43, 0x72, 0x07,
+	0x7a, 0x0e, 0x4b, 0x91, 0xda, 0x86, 0x70, 0xeb, 0x4a, 0x84, 0x07, 0xde, 0x6d, 0x1b, 0x25, 0x19,
+	0x89, 0x7f, 0x85, 0x8f, 0x6e, 0xb9, 0x09, 0x1f, 0x5e, 0x11, 0xfe, 0x0d, 0x1e, 0x54, 0x5e, 0x97,
+	0xc3, 0x71, 0x20, 0xa4, 0xae, 0xfd, 0x88, 0x26, 0x42, 0xab, 0xed, 0x10, 0x63, 0xc9, 0x65, 0x2e,
+	0x03, 0xae, 0x97, 0x71, 0x88, 0x1a, 0x4b, 0x76, 0x10, 0x70, 0x42, 0x7d, 0xb5, 0x86, 0x45, 0x8c,
+	0xa5, 0xfc, 0x74, 0x2c, 0xfd, 0x75, 0xe3, 0x57, 0x16, 0xfe, 0xdb, 0x82, 0x7b, 0x95, 0x2b, 0xcf,
+	0xb5, 0xa9, 0x3d, 0xb0, 0x63, 0xca, 0x4d, 0xa7, 0xb4, 0xbd, 0x5b, 0xb7, 0x40, 0x24, 0x86, 0x3c,
+	0xa8, 0xa7, 0x79, 0x83, 0xdc, 0x85, 0x2b, 0x4e, 0xde, 0x9b, 0xfe, 0x9b, 0x5e, 0xcc, 0x98, 0xaf,
+	0x1a, 0xc4, 0x21, 0x99, 0x89, 0xff, 0xb1, 0x60, 0xab, 0xaa, 0x57, 0xe6, 0x2a, 0xfa, 0x6b, 0xd9,
+	0x03, 0x61, 0x94, 0x9c, 0xd2, 0xd8, 0xf4, 0xc0, 0xe3, 0xca, 0xc6, 0xf3, 0x8e, 0x0c, 0x75, 0xcc,
+	0xd3, 0x64, 0x42, 0xa6, 0x41, 0xed, 0x03, 0x58, 0x29, 0x4d, 0xc9, 0x67, 0xec, 0x2d, 0x9b, 0x64,
+	0xcf, 0xd8, 0x5b, 0x36, 0x41, 0x5b, 0xe0, 0xa8, 0xcb, 0x6f, 0xce, 0x46, 0x1b, 0x5f, 0xd6, 0x5e,
+	0x58, 0xf8, 0x1d, 0x2c, 0x99, 0x65, 0xe6, 0x2a, 0x16, 0xc3, 0xb2, 0xb9, 0x25, 0x47, 0xd1, 0x90,
+	0xa7, 0xe6, 0xe6, 0x94, 0x7c, 0xa5, 0xa6, 0xd6, 0xda, 0xde, 0xd1, 0xd4, 0x7f, 0x59, 0xb0, 0x6e,
+	0x26, 0x05, 0x61, 0x22, 0x8e, 0xb8, 0x60, 0xe8, 0x00, 0x1a, 0xb1, 0xf1, 0xb9, 0x96, 0x92, 0x64,
+	0xdb, 0xbb, 0x09, 0x4d, 0x1d, 0x46, 0x8e, 0x2c, 0xa0, 0x7d, 0x0c, 0x2b, 0xa5, 0xa9, 0x0a, 0x39,
+	0x1e, 0x15, 0xe5, 0x68, 0x75, 0x1b, 0x59, 0xae, 0xa2, 0x30, 0xff, 0x5a, 0xb0, 0x6c, 0xca, 0x3d,
+	0x8b, 0x02, 0x9e, 0x56, 0x3e, 0x31, 0x8f, 0xc1, 0x51, 0xc7, 0x60, 0x12, 0xb5, 0xf4, 0x19, 0x29,
+	0x5e, 0x3e, 0xf7, 0x6a, 0x0e, 0x7d, 0x02, 0xf6, 0x78, 0x72, 0x6d, 0x6e, 0x65, 0xd3, 0xfb, 0xe9,
+	0xe7, 0x5f, 0x32, 0x40, 0xfa, 0xd1, 0x23, 0xfd, 0x35, 0xd0, 0x4a, 0x81, 0xee, 0xfc, 0x6c, 0x5e,
+	0x7e, 0x04, 0xf6, 0x8b, 0x1f, 0x01, 0xc7, 0xe8, 0x99, 0xb7, 0xbe, 0x41, 0x73, 0x46, 0x3e, 0xcb,
+	0x23, 0x1a, 0xe2, 0xdf, 0x2d, 0x80, 0xbc, 0x1c, 0x74, 0x00, 0xd0, 0x8f, 0x06, 0x71, 0xc4, 0x19,
+	0x4f, 0x33, 0x55, 0x3f, 0x2e, 0xd4, 0xeb, 0x1d, 0x4d, 0x67, 0xb5, 0xa2, 0x05, 0xbc, 0xfd, 0x15,
+	0xac, 0xdd, 0x98, 0x7e, 0xdf, 0x25, 0xb3, 0x8a, 0x5a, 0x7e, 0x0e, 0x8d, 0x6c, 0xd7, 0x68, 0x19,
+	0xac, 0xb1, 0x8a, 0xb2, 0x88, 0x35, 0x96, 0xd6, 0xc4, 0xf0, 0xd6, 0x44, 0x5a, 0xd7, 0xe6, 0xa1,
+	0xb0, 0xae, 0xf1, 0x17, 0xd0, 0x9c, 0x8a, 0x21, 0xd5, 0x0f, 0x52, 0x36, 0x30, 0x4f, 0x8e, 0x1a,
+	0xcb, 0x47, 0xc4, 0x67, 0x57, 0x09, 0xcb, 0x56, 0x34, 0x16, 0xf6, 0x60, 0xb5, 0xac, 0x8f, 0x7c,
+	0xed, 0x72, 0x0d, 0xf5, 0xe2, 0xb9, 0x03, 0x3f, 0x85, 0x8d, 0xe2, 0x49, 0xff, 0x38, 0x64, 0x89,
+	0xda, 0x8d, 0x48, 0x69, 0x9a, 0x9d, 0xb7, 0x36, 0x30, 0x85, 0xf5, 0x22, 0x7a, 0x12, 0x88, 0x14,
+	0x6d, 0x83, 0xdd, 0x8f, 0x33, 0x49, 0x57, 0xbc, 0xe2, 0x3c, 0x91, 0x33, 0x79, 0xaa, 0x5a, 0x21,
+	0x95, 0xac, 0x7e, 0x18, 0x0b, 0x96, 0xe8, 0x26, 0x6a, 0x10, 0x63, 0xe1, 0x0e, 0x40, 0x4f, 0x02,
+	0xba, 0x8c, 0x8a, 0x5b, 0x87, 0x9f, 0xc0, 0x5a, 0x4e, 0x10, 0x16, 0x87, 0xaa, 0x5a, 0x39, 0xa5,
+	0xab, 0x68, 0x12, 0x6d, 0x74, 0xff, 0xab, 0x83, 0x73, 0x1c, 0x9e, 0x33, 0x86, 0x3a, 0x50, 0x3f,
+	0x0b, 0xf8, 0x15, 0x02, 0x6f, 0xfa, 0x7b, 0xd4, 0x2e, 0x8c, 0xf1, 0x02, 0xda, 0x9b, 0xfe, 0xd4,
+	0x9c, 0x04, 0x17, 0x09, 0x4d, 0x26, 0xc8, 0xf1, 0xe4, 0x2f, 0x55, 0x7b, 0x63, 0xa6, 0xf5, 0xf0,
+	0x02, 0xda, 0x31, 0x45, 0xca, 0xcf, 0xa6, 0xc8, 0xc8, 0x72, 0xc2, 0xcf, 0xe4, 0xb3, 0x94, 0x4b,
+	0x21, 0x4a, 0x6b, 0x6f, 0x78, 0x37, 0x65, 0xc4, 0x0b, 0xc8, 0x83, 0xf5, 0x1e, 0x4b, 0xcb, 0x41,
+	0xb3, 0x60, 0x5b, 0xaf, 0x86, 0x17, 0xd0, 0x33, 0xd8, 0x24, 0x6c, 0x10, 0x8d, 0xd8, 0xfc, 0x21,
+	0x3b, 0x00, 0x87, 0x71, 0x1c, 0x4e, 0x54, 0xf1, 0xa5, 0x8a, 0xa6, 0xc8, 0x53, 0x40, 0x27, 0x11,
+	0xf5, 0xe9, 0x45, 0xc8, 0xde, 0xb7, 0xc5, 0x5d, 0xd8, 0x90, 0x68, 0x09, 0xaf, 0x4e, 0xba, 0x0b,
+	0x1b, 0x3d, 0x3a, 0x62, 0x73, 0x90, 0xdb, 0xb0, 0x22, 0xc9, 0xc3, 0x30, 0x54, 0xd0, 0x74, 0xe5,
+	0x02, 0xd0, 0x38, 0xf4, 0xfd, 0x3b, 0x32, 0x60, 0x68, 0x69, 0x59, 0xee, 0x60, 0x3a, 0xd0, 0x3a,
+	0x8a, 0x62, 0x2d, 0xc3, 0x79, 0x84, 0x1a, 0x9e, 0xf9, 0x05, 0x2e, 0x11, 0xa7, 0x59, 0x8e, 0x6a,
+	0x62, 0x07, 0x96, 0x73, 0x2d, 0x2b, 0x91, 0x8b, 0x45, 0xf5, 0x77, 0xfe, 0xfc, 0xff, 0x00, 0x00,
+	0x00, 0xff, 0xff, 0x67, 0x73, 0x5f, 0xbf, 0xaa, 0x0b, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1331,11 +1397,27 @@ const _ = grpc.SupportPackageIsVersion4
 type ElTeeClient interface {
 	Ping(ctx context.Context, in *StringMsg, opts ...grpc.CallOption) (*StringMsg, error)
 	ProfileLibrary(ctx context.Context, in *Void, opts ...grpc.CallOption) (*ProfilesResponse, error)
+	// Get a list of state names and control point values in that state
 	StateNames(ctx context.Context, in *Void, opts ...grpc.CallOption) (*StringMsg, error)
 	ControlPoints(ctx context.Context, in *StringMsg, opts ...grpc.CallOption) (*ControlPointList, error)
 	//
-	//Sets current values directly without modifying any other state declaration
+	//Sets current values directly without modifying any other state declaration.
 	SetControlPoints(ctx context.Context, in *ControlPointList, opts ...grpc.CallOption) (*Void, error)
+	RemoveControlPoints(ctx context.Context, in *ControlPointList, opts ...grpc.CallOption) (*Void, error)
+	// Set a particular state
+	ApplyState(ctx context.Context, in *StringMsg, opts ...grpc.CallOption) (*Void, error)
+	// States can be loaded and saved
+	LoadableStateNames(ctx context.Context, in *Void, opts ...grpc.CallOption) (*StringMsg, error)
+	LoadLoadableState(ctx context.Context, in *StringMsg, opts ...grpc.CallOption) (*Void, error)
+	SaveLoadableState(ctx context.Context, in *StringMsg, opts ...grpc.CallOption) (*Void, error)
+	SaveAllStates(ctx context.Context, in *Void, opts ...grpc.CallOption) (*Void, error)
+	// Add and remove states, which could be then saved
+	AddState(ctx context.Context, in *StringMsg, opts ...grpc.CallOption) (*Void, error)
+	RemoveState(ctx context.Context, in *StringMsg, opts ...grpc.CallOption) (*Void, error)
+	// Duplicate and apply
+	CopyStateTo(ctx context.Context, in *SrcDest, opts ...grpc.CallOption) (*Void, error)
+	MoveStateTo(ctx context.Context, in *SrcDest, opts ...grpc.CallOption) (*Void, error)
+	ApplyStateTo(ctx context.Context, in *SrcDest, opts ...grpc.CallOption) (*Void, error)
 }
 
 type elTeeClient struct {
@@ -1391,15 +1473,130 @@ func (c *elTeeClient) SetControlPoints(ctx context.Context, in *ControlPointList
 	return out, nil
 }
 
+func (c *elTeeClient) RemoveControlPoints(ctx context.Context, in *ControlPointList, opts ...grpc.CallOption) (*Void, error) {
+	out := new(Void)
+	err := c.cc.Invoke(ctx, "/ElTee/RemoveControlPoints", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *elTeeClient) ApplyState(ctx context.Context, in *StringMsg, opts ...grpc.CallOption) (*Void, error) {
+	out := new(Void)
+	err := c.cc.Invoke(ctx, "/ElTee/ApplyState", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *elTeeClient) LoadableStateNames(ctx context.Context, in *Void, opts ...grpc.CallOption) (*StringMsg, error) {
+	out := new(StringMsg)
+	err := c.cc.Invoke(ctx, "/ElTee/LoadableStateNames", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *elTeeClient) LoadLoadableState(ctx context.Context, in *StringMsg, opts ...grpc.CallOption) (*Void, error) {
+	out := new(Void)
+	err := c.cc.Invoke(ctx, "/ElTee/LoadLoadableState", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *elTeeClient) SaveLoadableState(ctx context.Context, in *StringMsg, opts ...grpc.CallOption) (*Void, error) {
+	out := new(Void)
+	err := c.cc.Invoke(ctx, "/ElTee/SaveLoadableState", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *elTeeClient) SaveAllStates(ctx context.Context, in *Void, opts ...grpc.CallOption) (*Void, error) {
+	out := new(Void)
+	err := c.cc.Invoke(ctx, "/ElTee/SaveAllStates", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *elTeeClient) AddState(ctx context.Context, in *StringMsg, opts ...grpc.CallOption) (*Void, error) {
+	out := new(Void)
+	err := c.cc.Invoke(ctx, "/ElTee/AddState", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *elTeeClient) RemoveState(ctx context.Context, in *StringMsg, opts ...grpc.CallOption) (*Void, error) {
+	out := new(Void)
+	err := c.cc.Invoke(ctx, "/ElTee/RemoveState", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *elTeeClient) CopyStateTo(ctx context.Context, in *SrcDest, opts ...grpc.CallOption) (*Void, error) {
+	out := new(Void)
+	err := c.cc.Invoke(ctx, "/ElTee/CopyStateTo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *elTeeClient) MoveStateTo(ctx context.Context, in *SrcDest, opts ...grpc.CallOption) (*Void, error) {
+	out := new(Void)
+	err := c.cc.Invoke(ctx, "/ElTee/MoveStateTo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *elTeeClient) ApplyStateTo(ctx context.Context, in *SrcDest, opts ...grpc.CallOption) (*Void, error) {
+	out := new(Void)
+	err := c.cc.Invoke(ctx, "/ElTee/ApplyStateTo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ElTeeServer is the server API for ElTee service.
 type ElTeeServer interface {
 	Ping(context.Context, *StringMsg) (*StringMsg, error)
 	ProfileLibrary(context.Context, *Void) (*ProfilesResponse, error)
+	// Get a list of state names and control point values in that state
 	StateNames(context.Context, *Void) (*StringMsg, error)
 	ControlPoints(context.Context, *StringMsg) (*ControlPointList, error)
 	//
-	//Sets current values directly without modifying any other state declaration
+	//Sets current values directly without modifying any other state declaration.
 	SetControlPoints(context.Context, *ControlPointList) (*Void, error)
+	RemoveControlPoints(context.Context, *ControlPointList) (*Void, error)
+	// Set a particular state
+	ApplyState(context.Context, *StringMsg) (*Void, error)
+	// States can be loaded and saved
+	LoadableStateNames(context.Context, *Void) (*StringMsg, error)
+	LoadLoadableState(context.Context, *StringMsg) (*Void, error)
+	SaveLoadableState(context.Context, *StringMsg) (*Void, error)
+	SaveAllStates(context.Context, *Void) (*Void, error)
+	// Add and remove states, which could be then saved
+	AddState(context.Context, *StringMsg) (*Void, error)
+	RemoveState(context.Context, *StringMsg) (*Void, error)
+	// Duplicate and apply
+	CopyStateTo(context.Context, *SrcDest) (*Void, error)
+	MoveStateTo(context.Context, *SrcDest) (*Void, error)
+	ApplyStateTo(context.Context, *SrcDest) (*Void, error)
 }
 
 // UnimplementedElTeeServer can be embedded to have forward compatible implementations.
@@ -1420,6 +1617,39 @@ func (*UnimplementedElTeeServer) ControlPoints(ctx context.Context, req *StringM
 }
 func (*UnimplementedElTeeServer) SetControlPoints(ctx context.Context, req *ControlPointList) (*Void, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetControlPoints not implemented")
+}
+func (*UnimplementedElTeeServer) RemoveControlPoints(ctx context.Context, req *ControlPointList) (*Void, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveControlPoints not implemented")
+}
+func (*UnimplementedElTeeServer) ApplyState(ctx context.Context, req *StringMsg) (*Void, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ApplyState not implemented")
+}
+func (*UnimplementedElTeeServer) LoadableStateNames(ctx context.Context, req *Void) (*StringMsg, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LoadableStateNames not implemented")
+}
+func (*UnimplementedElTeeServer) LoadLoadableState(ctx context.Context, req *StringMsg) (*Void, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LoadLoadableState not implemented")
+}
+func (*UnimplementedElTeeServer) SaveLoadableState(ctx context.Context, req *StringMsg) (*Void, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveLoadableState not implemented")
+}
+func (*UnimplementedElTeeServer) SaveAllStates(ctx context.Context, req *Void) (*Void, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveAllStates not implemented")
+}
+func (*UnimplementedElTeeServer) AddState(ctx context.Context, req *StringMsg) (*Void, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddState not implemented")
+}
+func (*UnimplementedElTeeServer) RemoveState(ctx context.Context, req *StringMsg) (*Void, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveState not implemented")
+}
+func (*UnimplementedElTeeServer) CopyStateTo(ctx context.Context, req *SrcDest) (*Void, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CopyStateTo not implemented")
+}
+func (*UnimplementedElTeeServer) MoveStateTo(ctx context.Context, req *SrcDest) (*Void, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MoveStateTo not implemented")
+}
+func (*UnimplementedElTeeServer) ApplyStateTo(ctx context.Context, req *SrcDest) (*Void, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ApplyStateTo not implemented")
 }
 
 func RegisterElTeeServer(s *grpc.Server, srv ElTeeServer) {
@@ -1516,6 +1746,204 @@ func _ElTee_SetControlPoints_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ElTee_RemoveControlPoints_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ControlPointList)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ElTeeServer).RemoveControlPoints(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ElTee/RemoveControlPoints",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ElTeeServer).RemoveControlPoints(ctx, req.(*ControlPointList))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ElTee_ApplyState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StringMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ElTeeServer).ApplyState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ElTee/ApplyState",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ElTeeServer).ApplyState(ctx, req.(*StringMsg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ElTee_LoadableStateNames_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Void)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ElTeeServer).LoadableStateNames(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ElTee/LoadableStateNames",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ElTeeServer).LoadableStateNames(ctx, req.(*Void))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ElTee_LoadLoadableState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StringMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ElTeeServer).LoadLoadableState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ElTee/LoadLoadableState",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ElTeeServer).LoadLoadableState(ctx, req.(*StringMsg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ElTee_SaveLoadableState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StringMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ElTeeServer).SaveLoadableState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ElTee/SaveLoadableState",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ElTeeServer).SaveLoadableState(ctx, req.(*StringMsg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ElTee_SaveAllStates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Void)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ElTeeServer).SaveAllStates(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ElTee/SaveAllStates",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ElTeeServer).SaveAllStates(ctx, req.(*Void))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ElTee_AddState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StringMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ElTeeServer).AddState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ElTee/AddState",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ElTeeServer).AddState(ctx, req.(*StringMsg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ElTee_RemoveState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StringMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ElTeeServer).RemoveState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ElTee/RemoveState",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ElTeeServer).RemoveState(ctx, req.(*StringMsg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ElTee_CopyStateTo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SrcDest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ElTeeServer).CopyStateTo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ElTee/CopyStateTo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ElTeeServer).CopyStateTo(ctx, req.(*SrcDest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ElTee_MoveStateTo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SrcDest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ElTeeServer).MoveStateTo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ElTee/MoveStateTo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ElTeeServer).MoveStateTo(ctx, req.(*SrcDest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ElTee_ApplyStateTo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SrcDest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ElTeeServer).ApplyStateTo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ElTee/ApplyStateTo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ElTeeServer).ApplyStateTo(ctx, req.(*SrcDest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _ElTee_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "ElTee",
 	HandlerType: (*ElTeeServer)(nil),
@@ -1539,6 +1967,50 @@ var _ElTee_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetControlPoints",
 			Handler:    _ElTee_SetControlPoints_Handler,
+		},
+		{
+			MethodName: "RemoveControlPoints",
+			Handler:    _ElTee_RemoveControlPoints_Handler,
+		},
+		{
+			MethodName: "ApplyState",
+			Handler:    _ElTee_ApplyState_Handler,
+		},
+		{
+			MethodName: "LoadableStateNames",
+			Handler:    _ElTee_LoadableStateNames_Handler,
+		},
+		{
+			MethodName: "LoadLoadableState",
+			Handler:    _ElTee_LoadLoadableState_Handler,
+		},
+		{
+			MethodName: "SaveLoadableState",
+			Handler:    _ElTee_SaveLoadableState_Handler,
+		},
+		{
+			MethodName: "SaveAllStates",
+			Handler:    _ElTee_SaveAllStates_Handler,
+		},
+		{
+			MethodName: "AddState",
+			Handler:    _ElTee_AddState_Handler,
+		},
+		{
+			MethodName: "RemoveState",
+			Handler:    _ElTee_RemoveState_Handler,
+		},
+		{
+			MethodName: "CopyStateTo",
+			Handler:    _ElTee_CopyStateTo_Handler,
+		},
+		{
+			MethodName: "MoveStateTo",
+			Handler:    _ElTee_MoveStateTo_Handler,
+		},
+		{
+			MethodName: "ApplyStateTo",
+			Handler:    _ElTee_ApplyStateTo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -81,6 +81,33 @@ func CreateControlPointList(root *config.AclNode) ([]ControlPoint, map[string]Co
 	return list, index
 }
 
+/*
+   CreateControlPoint creates a control point from a configuration node.
+   This is a switch between the string names and the NewXXXXControlPointFromNode
+   functions.
+*/
+func CreateControlPointFromApi(acp *api.ControlPoint) ControlPoint {
+	var cp ControlPoint
+
+	if acp.GetColor() != nil {
+		cp = NewColorControlPoint(acp.GetName())
+	} else if acp.GetXyz() != nil {
+		cp = NewXYZControlPoint(acp.GetName())
+	} else if acp.GetEnm() != nil {
+		cp = NewEnumControlPoint(acp.GetName())
+	} else if acp.GetIntensity() != nil {
+		cp = NewIntensityControlPoint(acp.GetName())
+	}
+
+	if cp == nil {
+		log.Errorf("Unknown control point from api")
+	} else {
+		cp.SetFromApi(acp)
+	}
+
+	return cp
+}
+
 ////////////
 
 // These types of Points represent raw data representations. We may want

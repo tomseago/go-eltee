@@ -75,3 +75,7 @@ web: {
     address: ":2000"
     root: "../www/root"
 }
+
+states: {
+    loadable_dir: "../loadables"
+}

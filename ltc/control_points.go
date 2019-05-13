@@ -101,7 +101,8 @@ func init() {
 	//////////////////////////////////////////////////////////////////////////////////////////
 	commands["lscp"] = func(lc *localContext, args []string) {
 
-		stateName := ""
+		stateName := lc.stateName
+
 		if len(args) > 0 {
 			stateName = args[0]
 		}
@@ -133,6 +134,8 @@ then values for the current state are returned.`,
 	//////////////////////////////////////////////////////////////////////////////////////////
 	commands["scolor"] = func(lc *localContext, args []string) {
 
+		stateName := lc.stateName
+
 		if len(args) < 2 {
 			fmt.Printf("Require a name and at least one color component")
 			return
@@ -163,7 +166,9 @@ then values for the current state are returned.`,
 		}
 
 		cpList := &api.ControlPointList{
-			Cps: make([]*api.ControlPoint, 1),
+			Cps:    make([]*api.ControlPoint, 1),
+			State:  stateName,
+			Upsert: true,
 		}
 		cpList.Cps[0] = cp
 
@@ -184,6 +189,8 @@ fixtures understand others like white, amber, and uv.`,
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	commands["sxyz"] = func(lc *localContext, args []string) {
+
+		stateName := lc.stateName
 
 		if len(args) < 4 {
 			fmt.Printf("Require a name and 3 values")
@@ -221,7 +228,9 @@ fixtures understand others like white, amber, and uv.`,
 		}
 
 		cpList := &api.ControlPointList{
-			Cps: make([]*api.ControlPoint, 1),
+			Cps:    make([]*api.ControlPoint, 1),
+			State:  stateName,
+			Upsert: true,
 		}
 		cpList.Cps[0] = cp
 
@@ -240,6 +249,8 @@ three values provided.`,
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	commands["senum"] = func(lc *localContext, args []string) {
+
+		stateName := lc.stateName
 
 		if len(args) < 2 {
 			fmt.Printf("Require a name and at least a value")
@@ -276,7 +287,9 @@ three values provided.`,
 		}
 
 		cpList := &api.ControlPointList{
-			Cps: make([]*api.ControlPoint, 1),
+			Cps:    make([]*api.ControlPoint, 1),
+			State:  stateName,
+			Upsert: true,
 		}
 		cpList.Cps[0] = cp
 
@@ -295,6 +308,8 @@ and optionally a degree value. The degree defaults to 1.0 if not specified.`,
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	commands["sintensity"] = func(lc *localContext, args []string) {
+
+		stateName := lc.stateName
 
 		if len(args) < 2 {
 			fmt.Printf("Require a name and a value")
@@ -322,7 +337,9 @@ and optionally a degree value. The degree defaults to 1.0 if not specified.`,
 		}
 
 		cpList := &api.ControlPointList{
-			Cps: make([]*api.ControlPoint, 1),
+			Cps:    make([]*api.ControlPoint, 1),
+			State:  stateName,
+			Upsert: true,
 		}
 		cpList.Cps[0] = cp
 
@@ -337,6 +354,46 @@ and optionally a degree value. The degree defaults to 1.0 if not specified.`,
 		syntax: "name value",
 		man: `Sets the named control point as an intensity point using the
 values provided.`,
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////////
+	commands["rmcp"] = func(lc *localContext, args []string) {
+
+		stateName := lc.stateName
+
+		if len(args) < 1 {
+			fmt.Printf("Require a name")
+			return
+		}
+
+		cp := &api.ControlPoint{
+			Name: args[0],
+		}
+
+		////
+
+		c, err := lc.c.Client()
+		if failedTo("get client", err) {
+			return
+		}
+
+		cpList := &api.ControlPointList{
+			Cps:   make([]*api.ControlPoint, 1),
+			State: stateName,
+		}
+		cpList.Cps[0] = cp
+
+		_, err = c.RemoveControlPoints(context.Background(), cpList)
+		if failedTo("get response", err) {
+			return
+		}
+	}
+
+	help["rmcp"] = &helpEntry{
+		short:  "Remove a control point",
+		syntax: "name",
+		man: `Removes the named control point from the
+current state.`,
 	}
 
 }

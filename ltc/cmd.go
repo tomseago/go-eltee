@@ -14,7 +14,8 @@ import (
 )
 
 type localContext struct {
-	c *api.AutoClient
+	c         *api.AutoClient
+	stateName string
 }
 
 type helpEntry struct {
@@ -55,7 +56,7 @@ func (lc *localContext) Run() {
 	for scanner.Scan(prompt) {
 		line := scanner.Text()
 		if len(line) > 0 {
-			scanner.AddToHistory(line)
+			// scanner.AddToHistory(line)
 			scanner.SaveHistory(historyFile)
 			lc.handleLine(scanner, line)
 
@@ -63,7 +64,7 @@ func (lc *localContext) Run() {
 			// if lc.userToken != nil {
 			//     tokenAuth = lc.userToken.Authority
 			// }
-			// prompt = fmt.Sprintf("%s:%s> ", lc.team, tokenAuth)
+			prompt = fmt.Sprintf("%s> ", lc.stateName)
 		}
 	}
 }

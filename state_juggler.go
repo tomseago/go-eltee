@@ -1,9 +1,12 @@
 package eltee
 
 import (
+	"bufio"
 	"errors"
+	"fmt"
 	"github.com/eyethereal/go-config"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 )
 
@@ -16,6 +19,8 @@ type StateJuggler struct {
 
 	statesByName   map[string]*WorldState
 	fixturesByName map[string]Fixture
+
+	lastStateApplied string
 }
 
 func NewStateJuggler(fixturesByName map[string]Fixture) *StateJuggler {
@@ -131,6 +136,32 @@ func (sj *StateJuggler) LoadFile(stateName string, file string) error {
 	return nil
 }
 
+func (sj *StateJuggler) SaveFile(stateName string, file string) error {
+	if sj == nil {
+		return errors.New("nil StateJuggler")
+	}
+
+	state := sj.statesByName[stateName]
+	if state == nil {
+		return fmt.Errorf("No state named '%v'", stateName)
+	}
+
+	stateNode := config.NewAclNode()
+	state.SetToNode(stateNode)
+
+	fp, err := os.Create(file)
+	if err != nil {
+		return err
+	}
+
+	bio := bufio.NewWriter(fp)
+	stateNode.StringTo(bio, "  ", 0, false)
+	bio.Flush()
+	fp.Close()
+
+	return nil
+}
+
 func (sj *StateJuggler) patchFixtures(fromState *WorldState) {
 	if sj == nil || fromState == nil {
 		return
@@ -164,4 +195,187 @@ func (sj *StateJuggler) patchFixtures(fromState *WorldState) {
 			// TODO: Add the lens stack
 		})
 	})
+}
+
+func (sj *StateJuggler) LoadableStateNames(dirname string) ([]string, error) {
+	if sj == nil {
+		return nil, errors.New("nil StateJuggler")
+	}
+
+	files, err := ioutil.ReadDir(dirname)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]string, 0)
+	for i := 0; i < len(files); i++ {
+		file := files[i]
+		if file.IsDir() {
+			continue
+		}
+
+		ext := filepath.Ext(file.Name())
+		if ext != ".acl" {
+			continue
+		}
+
+		base := filepath.Base(file.Name())
+		base = base[:len(base)-4]
+
+		out = append(out, base)
+	}
+
+	return out, nil
+}
+
+func (sj *StateJuggler) LoadLoadableState(dirname string, stateName string) error {
+	if sj == nil {
+		return errors.New("nil StateJuggler")
+	}
+
+	filename := filepath.Join(dirname, stateName+".acl")
+	return sj.LoadFile(stateName, filename)
+}
+
+func (sj *StateJuggler) SaveLoadableState(dirname string, stateName string) error {
+	if sj == nil {
+		return errors.New("nil StateJuggler")
+	}
+
+	filename := filepath.Join(dirname, stateName+".acl")
+	return sj.SaveFile(stateName, filename)
+}
+
+func (sj *StateJuggler) SaveAll(dirname string) {
+	if sj == nil {
+		return
+	}
+
+	for name, _ := range sj.statesByName {
+		if name == "CURRENT" || name == "base" {
+			log.Infof("Not saving state named %v", name)
+			continue
+		}
+
+		e := sj.SaveLoadableState(dirname, name)
+		if e != nil {
+			log.Warningf("While saving state %v: %v", name, e)
+		} else {
+			log.Debugf("Saved state %v", name)
+		}
+	}
+}
+
+func (sj *StateJuggler) ApplyState(stateName string) error {
+	if sj == nil {
+		return errors.New("nil StateJuggler")
+	}
+
+	if stateName == "CURRENT" {
+		// Silly, but whatever
+		return nil
+	}
+
+	state := sj.statesByName[stateName]
+	if state == nil {
+		return fmt.Errorf("Could not find state named '%v'", stateName)
+	}
+
+	sj.current.Apply(state)
+
+	sj.lastStateApplied = stateName
+
+	return nil
+}
+
+func (sj *StateJuggler) AddState(stateName string) error {
+	if sj == nil {
+		return errors.New("nil StateJuggler")
+	}
+
+	state := sj.State(stateName)
+	if state != nil {
+		return fmt.Errorf("State '%v' already exists", stateName)
+	}
+
+	state = NewWorldState(stateName)
+	sj.statesByName[stateName] = state
+
+	return nil
+}
+
+func (sj *StateJuggler) RemoveState(stateName string) error {
+	if sj == nil {
+		return errors.New("nil StateJuggler")
+	}
+
+	if len(stateName) == 0 {
+		return errors.New("Must specify a state name")
+	}
+
+	if stateName == "CURRENT" || stateName == "base" {
+		return fmt.Errorf("Can not remove state %v", stateName)
+	}
+
+	delete(sj.statesByName, stateName)
+
+	return nil
+}
+
+func (sj *StateJuggler) CopyStateTo(src string, dest string) error {
+	if sj == nil {
+		return errors.New("nil StateJuggler")
+	}
+
+	sState := sj.State(src)
+	if sState == nil {
+		return fmt.Errorf("Could not find source state '%v'", src)
+	}
+	if len(dest) == 0 || dest == "CURRENT" || dest == "base" || dest == src {
+		return fmt.Errorf("Can not copy to state '%v'", dest)
+	}
+
+	// In case it exists, simply remove it
+	sj.RemoveState(dest)
+
+	sj.statesByName[dest] = sState.Copy()
+
+	return nil
+}
+
+func (sj *StateJuggler) MoveStateTo(src string, dest string) error {
+	// A move is just a copy and a remove of the source
+	err := sj.CopyStateTo(src, dest)
+	if err != nil {
+		return err
+	}
+
+	// If it's an invalid name, that's okay
+	sj.RemoveState(src)
+
+	return nil
+}
+
+func (sj *StateJuggler) ApplyStateTo(src string, dest string) error {
+	if sj == nil {
+		return errors.New("nil StateJuggler")
+	}
+
+	if dest == src {
+		// Nothing to do
+		return nil
+	}
+
+	sState := sj.State(src)
+	if sState == nil {
+		return fmt.Errorf("Could not find source state '%v'", src)
+	}
+	dState := sj.State(dest)
+	if dState == nil {
+		return fmt.Errorf("Could not find destination state '%v'", dest)
+	}
+
+	dState.Apply(sState)
+
+	return nil
 }

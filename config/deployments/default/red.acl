@@ -1,0 +1,25 @@
+////////////////////////////////////////////////////////////////////////
+// Control Points
+
+control_points: {
+    ////////////////////////////////////////////////////////////////////////
+    // Color
+
+    default_color: {
+        kind: color
+        red: 1.0
+        green: 0.0
+        blue: 0.0
+
+        uv: 1.0
+    }
+
+    primary_color: {
+        kind: color
+        red: 1.0
+        green: 0.0
+        blue: 0.0
+    }
+
+}
+
