@@ -167,34 +167,64 @@ func (sj *StateJuggler) patchFixtures(fromState *WorldState) {
 		return
 	}
 
-	fromState.patchesNode.ForEachOrderedChild(func(fixName string, fixPatches *config.AclNode) {
-		fixture := sj.fixturesByName[fixName]
+	for _, fp := range fromState.fixturePatches {
+		fixture := sj.fixturesByName[fp.FixtureName]
 		if fixture == nil {
-			log.Warningf("Patching: Unable to find fixture named '%v'", fixName)
+			log.Warningf("Patching: Unable to find fixture named '%v'", fp.FixtureName)
 			return
 		}
 
-		fixPatches.ForEachOrderedChild(func(fcId string, fcNode *config.AclNode) {
-			fixtureControl := fixture.Control(fcId)
+		for cName, cpName := range fp.CpsByControl {
+			fixtureControl := fixture.Control(cName)
 			if fixtureControl == nil {
-				log.Warningf("Patching: Fixture '%v' does not have a control with id '%v'", fixName, fcId)
+				log.Warningf("Patching: Fixture '%v' does not have a control with id '%v'", fp.FixtureName, cName)
 				return
 			}
 
-			// Get the control point, if any
-			cpName := fcNode.ChildAsString("cp")
-			if len(cpName) > 0 {
+			if len(cpName) == 0 || cpName == "_" {
+				// Unpatch it
+				fixtureControl.ControlPoint = nil
+			} else {
 				cp := sj.current.ControlPoint(cpName)
 				if cp == nil {
-					log.Warningf("Patching: Could not find control point '%v' to patch to fixture '%v' control '%v'", cpName, fixName, fcId)
+					log.Warningf("Patching: Could not find control point '%v' to patch to fixture '%v' control '%v'", cpName, fp.FixtureName, cName)
 				} else {
 					fixtureControl.ControlPoint = cp
 				}
 			}
+		}
 
-			// TODO: Add the lens stack
-		})
-	})
+		// TODO: Lens stacks...
+	}
+
+	// fromState.patchesNode.ForEachOrderedChild(func(fixName string, fixPatches *config.AclNode) {
+	// 	fixture := sj.fixturesByName[fixName]
+	// 	if fixture == nil {
+	// 		log.Warningf("Patching: Unable to find fixture named '%v'", fixName)
+	// 		return
+	// 	}
+
+	// 	fixPatches.ForEachOrderedChild(func(fcId string, fcNode *config.AclNode) {
+	// 		fixtureControl := fixture.Control(fcId)
+	// 		if fixtureControl == nil {
+	// 			log.Warningf("Patching: Fixture '%v' does not have a control with id '%v'", fixName, fcId)
+	// 			return
+	// 		}
+
+	// 		// Get the control point, if any
+	// 		cpName := fcNode.ChildAsString("cp")
+	// 		if len(cpName) > 0 {
+	// 			cp := sj.current.ControlPoint(cpName)
+	// 			if cp == nil {
+	// 				log.Warningf("Patching: Could not find control point '%v' to patch to fixture '%v' control '%v'", cpName, fixName, fcId)
+	// 			} else {
+	// 				fixtureControl.ControlPoint = cp
+	// 			}
+	// 		}
+
+	// 		// TODO: Add the lens stack
+	// 	})
+	// })
 }
 
 func (sj *StateJuggler) LoadableStateNames(dirname string) ([]string, error) {
@@ -282,6 +312,9 @@ func (sj *StateJuggler) ApplyState(stateName string) error {
 	}
 
 	sj.current.Apply(state)
+
+	// Always repatch the fixture object references
+	sj.patchFixtures(sj.current)
 
 	sj.lastStateApplied = stateName
 

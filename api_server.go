@@ -146,6 +146,62 @@ func (asrv *apiServer) RemoveControlPoints(ctx context.Context, req *api.Control
 
 //////////////////
 
+func (asrv *apiServer) SetFixturePatches(ctx context.Context, req *api.FixturePatchMap) (*api.Void, error) {
+
+	state := asrv.server.stateJuggler.State(req.GetState())
+	if state == nil {
+		return nil, fmt.Errorf("Could not find state %v", req.GetState())
+	}
+
+	for fixtureName, apiFixPatch := range req.GetByFixture() {
+		fp := state.FixturePatch(fixtureName)
+
+		if fp == nil {
+			if !req.GetUpsert() {
+				return nil, fmt.Errorf("State does not have a fixture patch for '%v' and upsert was false", fixtureName)
+			}
+
+			// // Else, we make it happen
+			// cp = CreateControlPointFromApi(apiCP)
+			// if cp == nil {
+			// 	return nil, fmt.Errorf("Was not able to create control point '%v'", apiCP.GetName())
+			// }
+
+			// state.AddControlPoint(cp.Name(), cp)
+		}
+
+		//log.Debugf("Old: %v", cp)
+		fp.SetFromApi(apiFixPatch)
+		//log.Infof("New: %v", cp)
+	}
+
+	return &api.Void{}, nil
+}
+
+func (asrv *apiServer) RemoveFixturePatches(ctx context.Context, req *api.FixturePatchMap) (*api.Void, error) {
+
+	state := asrv.server.stateJuggler.State(req.GetState())
+	if state == nil {
+		return nil, fmt.Errorf("Could not find state %v", req.GetState())
+	}
+
+	for fixtureName, apiFixPatch := range req.GetByFixture() {
+		fp := state.FixturePatch(fixtureName)
+
+		if fp == nil {
+			continue
+		}
+
+		fp.RemoveFromApi(apiFixPatch)
+
+		// TODO: Check for empty and remove the whole thing??
+	}
+
+	return &api.Void{}, nil
+}
+
+//////////////////
+
 func (asrv *apiServer) ApplyState(ctx context.Context, req *api.StringMsg) (*api.Void, error) {
 
 	err := asrv.server.stateJuggler.ApplyState(req.GetVal())
@@ -246,4 +302,16 @@ func (asrv *apiServer) ApplyStateTo(ctx context.Context, req *api.SrcDest) (*api
 	}
 
 	return &api.Void{}, nil
+}
+
+//////////////////
+
+func (asrv *apiServer) FixturePatches(ctx context.Context, req *api.StringMsg) (*api.FixturePatchMap, error) {
+
+	state := asrv.server.stateJuggler.State(req.GetVal())
+	if state == nil {
+		return nil, fmt.Errorf("Could not find state %v", req.GetVal())
+	}
+
+	return state.FixturePatchMap(), nil
 }

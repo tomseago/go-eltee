@@ -159,7 +159,7 @@ control_points: {
 ////////////////////////////////////////////////////////////////////////
 // Patches
 
-patches:  {
+fixture_patches:  {
 
     "Flood Par 1": {
         color: {

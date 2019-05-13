@@ -1,0 +1,15 @@
+fixture_patches:  {
+
+    "Flood Par 1": {
+        color: {
+            cp: blue
+        }   
+    }
+
+    "Pin Spot 1": {
+        color: {
+            cp: blue
+        }
+    }
+}    
+

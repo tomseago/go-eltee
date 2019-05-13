@@ -152,15 +152,25 @@ message ControlPointList {
 
 ////////////////////////////////////////////////////////////////////////
 //
-// States
+// FixturePatches
 //
 
-message StateQuery {
-    string name = 1;
+message FCPatch {
+    string cp = 1;
+
+    // Todo: Lens stack
 }
 
-message StateQueryReply {
-    repeated string names = 1;
+message FixturePatch {
+    map<string, FCPatch> byControl = 1;
+}
+
+message FixturePatchMap {
+    map<string, FixturePatch> byFixture = 1;
+
+    string state = 2;
+
+    bool upsert = 3;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -173,12 +183,19 @@ service ElTee {
     /* Get a list of state names and control point values in that state */
     rpc StateNames(Void) returns (StringMsg) {}
     rpc ControlPoints(StringMsg) returns (ControlPointList) {}
+    rpc FixturePatches(StringMsg) returns (FixturePatchMap) {}
 
     /*
     Sets current values directly without modifying any other state declaration.    
     */
     rpc SetControlPoints(ControlPointList) returns (Void) {}
     rpc RemoveControlPoints(ControlPointList) returns (Void) {}
+
+    /*
+    Setting and removing fixture patches
+    */
+    rpc SetFixturePatches(FixturePatchMap) returns (Void) {}
+    rpc RemoveFixturePatches(FixturePatchMap) returns (Void) {}
 
     /* Set a particular state */
     rpc ApplyState(StringMsg) returns (Void) {}

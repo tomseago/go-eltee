@@ -2,6 +2,7 @@ package eltee
 
 import (
 	"github.com/eyethereal/go-config"
+	"github.com/tomseago/go-eltee/api"
 	"math"
 	"strings"
 )
@@ -17,10 +18,14 @@ func ByteFromFloat(v float64) byte {
 */
 
 type WorldState struct {
-	name                string
+	name string
+
 	controlPoints       []ControlPoint
 	controlPointsByName map[string]ControlPoint
-	patchesNode         *config.AclNode
+
+	fixturePatches       []*FixturePatch
+	fixturePatchesByName map[string]*FixturePatch
+	//patchesNode         *config.AclNode
 }
 
 func NewWorldState(name string) *WorldState {
@@ -28,6 +33,9 @@ func NewWorldState(name string) *WorldState {
 		name:                name,
 		controlPoints:       make([]ControlPoint, 0),
 		controlPointsByName: make(map[string]ControlPoint),
+
+		fixturePatches:       make([]*FixturePatch, 0),
+		fixturePatchesByName: make(map[string]*FixturePatch),
 	}
 
 	return ws
@@ -40,7 +48,7 @@ func NewWorldStateFromNode(name string, root *config.AclNode) *WorldState {
 
 	ws.controlPoints, ws.controlPointsByName = CreateControlPointList(root.Child("control_points"))
 
-	ws.patchesNode = root.Child("patches")
+	ws.fixturePatches, ws.fixturePatchesByName = CreateFixturePatchList(root.Child("fixture_patches"))
 
 	return ws
 }
@@ -57,6 +65,14 @@ func (ws *WorldState) Apply(other *WorldState) {
 			mine.Apply(theirs)
 		}
 	}
+
+	for _, theirs := range other.fixturePatches {
+		mine := ws.fixturePatchesByName[theirs.FixtureName]
+		if mine != nil {
+			mine.Apply(theirs)
+		}
+	}
+
 }
 
 func (ws *WorldState) String() string {
@@ -119,6 +135,9 @@ func (ws *WorldState) SetToNode(root *config.AclNode, path ...string) {
 	for _, cp := range ws.controlPoints {
 		cp.SetToNode(root, fp...)
 	}
+
+	pp := append(path, "fixture_patches")
+	FixturePatchListToNode(ws.fixturePatches, root, pp...)
 }
 
 func (ws *WorldState) Copy() *WorldState {
@@ -134,8 +153,11 @@ func (ws *WorldState) Copy() *WorldState {
 		fresh.controlPointsByName[freshCP.Name()] = freshCP
 	}
 
-	// Inefficient, so don't want to copy a whole lot...
-	fresh.patchesNode = ws.patchesNode.Duplicate()
+	for _, fp := range ws.fixturePatches {
+		freshFP := fp.Copy()
+		fresh.fixturePatches = append(fresh.fixturePatches, freshFP)
+		fresh.fixturePatchesByName[freshFP.FixtureName] = freshFP
+	}
 
 	return fresh
 }
@@ -150,4 +172,44 @@ func (ws *WorldState) ControlPoint(name string) ControlPoint {
 
 func (ws *WorldState) ControlPoints() []ControlPoint {
 	return ws.controlPoints
+}
+
+func (ws *WorldState) FixturePatch(name string) *FixturePatch {
+	if ws == nil {
+		return nil
+	}
+
+	return ws.fixturePatchesByName[name]
+}
+
+func (ws *WorldState) FixturePatches() []*FixturePatch {
+	return ws.fixturePatches
+}
+
+func (ws *WorldState) FixturePatchMap() *api.FixturePatchMap {
+
+	fpMap := &api.FixturePatchMap{
+		State:     ws.name,
+		ByFixture: make(map[string]*api.FixturePatch),
+	}
+
+	for _, fp := range ws.fixturePatches {
+		fpMap.ByFixture[fp.FixtureName] = fp.ToApi()
+	}
+
+	return fpMap
+}
+
+func (ws *WorldState) AddFixturePatch(fp *FixturePatch) {
+	if ws == nil || fp == nil || len(fp.FixtureName) == 0 {
+		return
+	}
+
+	if ws.fixturePatchesByName[fp.FixtureName] != nil {
+		// exists alread
+		return
+	}
+
+	ws.fixturePatchesByName[fp.FixtureName] = fp
+	ws.fixturePatches = append(ws.fixturePatches, fp)
 }
