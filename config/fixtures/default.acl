@@ -94,14 +94,27 @@ fixtures:  {
             position: [
                 {
                     kind: "position"
-                }
+                },
+
+                { 
+                    kind: "rotate"
+                    /*
+                    Can set roll, pitch, and yaw. 
+                    Roll to 180 is what you need when mounted upside down
+                    Yaw to 180 when display is facing up stage
+
+                    Position should appear before rotate to keep position coords in
+                    the regular world system
+                    */
+                    roll: 180
+                },
             ]
         }
 
         vars: {
             pos_x: 1.0
-            pos_y: 1.0
-            pos_z: 0.0
+            xpos_y: 1.0
+            Xpos_z: 0.0
         }
 
     }

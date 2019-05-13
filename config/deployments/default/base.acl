@@ -63,39 +63,47 @@ control_points: {
         z: 0.0
     }
 
+    center_xyz: {
+        kind: xyz
+        x: 0.0
+        y: 0.0
+        z: 0.0
+    }
+
     stage_left_up: {
         kind: xyz
-        x: -1.0
-        y: -1.0
-        z: -1.0
+        x: 1.0
+        y: 1.0
+        z: 0.0
     }
 
     stage_left_down: {
         kind: xyz
-        x: -1.0
-        y: 1.0
-        z: -1.0
+        x: 1.0
+        y: 0.0
+        z: 0.0
     }
 
     stage_right_up: {
         kind: xyz
-        x: 1.0
-        y: -1.0
-        z: -1.0
+        x: -1.0
+        y: 1.0
+        z: 0.0
     }
 
     stage_right_down: {
         kind: xyz
-        x: 1.0
-        y: 1.0
-        z: -1.0
+        x: -1.0
+        y: 0.0
+        z: 0.0
     }
+
 
     primary_xyz: {
         kind: xyz
-        x: 0.0
-        y: 0.0
-        z: -1.0
+        x: 1.0
+        y: 1.0
+        z: 1.0
     }
 
     secondary_xyz: {
@@ -133,6 +141,11 @@ control_points: {
         intensity: 0.5
     }
 
+    dim: {
+        kind: intensity
+        intensity: 0.1
+    }
+
     ////////////////////////////////////////////////////////////////////////
     // Enums
 
@@ -145,6 +158,12 @@ control_points: {
     pinspot_color_macro: {
         kind: enum
         item: 0
+        degree: 0
+    }
+
+    gobo_color_wheel: {
+        kind: enum
+        item: 2
         degree: 0
     }
 
@@ -183,7 +202,15 @@ fixture_patches:  {
 
     "Gobo Mover 1": {
         position: {
-            cp: default_xyz
+            cp: primary_xyz
+        }
+
+        color_wheel: {
+            cp: gobo_color_wheel
+        }
+
+        master: {
+            cp: dim
         }
     }
 }    

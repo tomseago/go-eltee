@@ -81,6 +81,7 @@ func (u *PanTiltUpdater) Update(fc *FixtureControl) {
 	// fixture is handled by each Axis
 	//log.Infof("tilt=%v pan=%v", tiltRad, panRad)
 	//log.Info("Tilt")
+	//tiltRad = 0.5 * math.Pi
 	pc.tilt.SetRadians(u.channels, tiltRad)
 
 	//log.Info("Pan")
@@ -108,7 +109,7 @@ type Axis struct {
 func NewAxis(node *config.AclNode) *Axis {
 	a := &Axis{}
 
-	log.Debugf("In NewAxis node is %v", node.ColoredString())
+	// log.Debugf("In NewAxis node is %v", node.ColoredString())
 	if node != nil {
 		a.coarse = node.ChildAsInt("coarse")
 		a.fine = node.ChildAsInt("fine")
@@ -126,7 +127,7 @@ func NewAxis(node *config.AclNode) *Axis {
 }
 
 func (a *Axis) SetRadians(channels []byte, rad float64) {
-	//log.Debugf("SetRadians(..., %v) for %v", rad, a)
+	// log.Debugf("SetRadians(..., %v) for %v", rad, a)
 	if rad < a.minRad {
 		rad = a.minRad
 	}
@@ -135,7 +136,7 @@ func (a *Axis) SetRadians(channels []byte, rad float64) {
 		rad = a.maxRad
 	}
 
-	//log.Debugf("rad = %v", rad)
+	// log.Debugf("rad = %v", rad)
 	p := (rad - a.minRad) / (a.maxRad - a.minRad)
 
 	// Now convert p to a 16-bit whole number
@@ -143,7 +144,7 @@ func (a *Axis) SetRadians(channels []byte, rad float64) {
 	hi := byte(value >> 8)
 	lo := byte(value & 0x00FF)
 
-	//log.Debugf("p=%v, value=%x, hi=%x lo=%x", p, value, hi, lo)
+	// log.Debugf("p=%v, value=%x, hi=%x lo=%x", p, value, hi, lo)
 
 	if a.coarse > 0 {
 		channels[a.coarse-1] = hi

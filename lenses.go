@@ -2,6 +2,7 @@ package eltee
 
 import (
 	"github.com/eyethereal/go-config"
+	"github.com/go-gl/mathgl/mgl64"
 )
 
 /*
@@ -62,6 +63,52 @@ func (l *PositionLens) XYZ() (float64, float64, float64) {
 	sx, sy, sz := l.source.XYZ()
 
 	return sx - l.x, sy - l.y, sz - l.z
+}
+
+//////////////////////////////
+
+/*
+ */
+type RotateLens struct {
+	source    XYZPoint
+	transform mgl64.Quat
+}
+
+func (l *RotateLens) Configure(node *config.AclNode) {
+	pitch := node.ChildAsFloat("pitch") * DEGREE_TO_RAD
+	roll := node.ChildAsFloat("roll") * DEGREE_TO_RAD
+	yaw := node.ChildAsFloat("yaw") * DEGREE_TO_RAD
+
+	l.transform = mgl64.AnglesToQuat(yaw, roll, pitch, mgl64.ZYX)
+}
+
+func (l *RotateLens) Observe(fc *FixtureControl, in interface{}) interface{} {
+	src, ok := in.(XYZPoint)
+	if !ok {
+		return in
+	}
+
+	l.source = src
+	return l
+}
+
+func (l *RotateLens) Kind() string {
+	return "rotate"
+}
+
+func (l *RotateLens) XYZ() (float64, float64, float64) {
+	if l.source == nil {
+		return 0, 0, 0
+	}
+
+	sx, sy, sz := l.source.XYZ()
+
+	vec := mgl64.Vec3{sx, sy, sz}
+	vr := l.transform.Rotate(vec)
+
+	log.Debugf("Rotate %v to %v", vec, vr)
+
+	return vr.X(), vr.Y(), vr.Z()
 }
 
 //////////////////////////////
@@ -147,6 +194,13 @@ func LensFromNode(node *config.AclNode) Lens {
 	if kind == "position" {
 		log.Infof("Returning position lens")
 		return &PositionLens{}
+	}
+
+	if kind == "rotate" {
+		log.Infof("Returning position lens")
+		l := &RotateLens{}
+		l.Configure(node)
+		return l
 	}
 
 	log.Errorf("Unknown lens type %v", kind)
