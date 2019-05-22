@@ -15,6 +15,10 @@
     "parcel-bundler": "^1.12.3"
   },
   "dependencies": {
+    "@grpc/grpc-js": "^0.4.0",
+    "google-protobuf": "^3.8.0-rc.1",
+    "grpc": "^1.20.3",
+    "grpc-web": "^1.0.4",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
   },

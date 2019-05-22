@@ -89,6 +89,15 @@ Install libftdi1 using
     
     sudo apt-get install libftdi1
 
+A good setup guide for gRPC and Envoy is
+https://medium.freecodecamp.org/how-to-use-grpc-web-with-react-1c93feb691b5
+
+To start envoy 
+
+    cd www/envoy
+    docker build -t eltee-envoy .
+    docker run -d -p 9090:9090 -p 9091:9091 eltee-envoy
+
 
 Interface
 =========
