@@ -12,7 +12,19 @@ function tParcelProd() {
         }));
 }
 
+function tParcel() {
+    return gulp.src("./src/index.html", {read:false})
+        .pipe(gulpParcel({
+            outDir: `${OUT}`,
+            cache: true,
+            watch: true,
+        }));
+}
+
+
+
 
 module.exports = {
     parcelProd: tParcelProd,
+    parcel: tParcel,
 }
