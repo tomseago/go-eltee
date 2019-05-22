@@ -106,5 +106,12 @@ The ElTee server exposes a gRPC interface for all it's fun functionality. This i
 
 The idea is to keep everything gRPC, but if necessary we can always expose something else. For instance there is a websockets interface that was started, but is deprecated in favor of gRPC.
 
+The main proto file which both defines and documents the interface is in `api/api.proto`.
+
+Information about grpc-web is here https://github.com/grpc/grpc-web
+
+There are two modes in which the client to proxy leg of the grpc-web architecture can encode data. The first, which we are using, is *grpcwebtext*. Payloads are base64 encoded (which sucks) AND both unary and server streaming calls are supported (which is cool). We want the streaming support for subscriptions to things like control point values.
+
+The other mode is called *grpcweb* which is a binary protobuf format, but in this mode only unary calls are supported right now.
 
 

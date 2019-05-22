@@ -1,18 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import RpcTest from "./rpc_test";
+import App from "./app";
 
-class HelloMessage extends React.Component {
-  render() {
-    return <div>Hello {this.props.name}</div>;
-  }
-}
+import "typeface-roboto";
+// import RpcTest from "./rpc_test";
 
-var mountNode = document.getElementById("app");
-ReactDOM.render(
-    <div>
-        <HelloMessage name="Fred" />
-        <RpcTest />
-    </div>
-    , mountNode);
+// class HelloMessage extends React.Component {
+//   render() {
+//     return <div>Hello {this.props.name}</div>;
+//   }
+// }
+
+const mountNode = document.getElementById("app");
+ReactDOM.render(<App />, mountNode);

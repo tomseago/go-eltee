@@ -42,7 +42,7 @@ function tParcel() {
 }
 
 function tProtoc(cb) {
-    execCmd(`protoc -I../api ../api/api.proto --js_out=import_style=commonjs:src --grpc-web_out=import_style=commonjs,mode=grpcwebtext:src`, cb)
+    execCmd(`protoc -I../api ../api/api.proto --js_out=import_style=commonjs:src/api --grpc-web_out=import_style=commonjs,mode=grpcwebtext:src/api`, cb)
 }
 
 
