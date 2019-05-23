@@ -21,9 +21,13 @@
     "google-protobuf": "^3.8.0-rc.1",
     "grpc": "^1.20.3",
     "grpc-web": "^1.0.4",
+    "material-ui": "^0.20.2",
     "pages": "^0.0.16",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
+    "prop-types": "^15.7.2",
+    "react": "^15.4.0 || ^16.0.0",
+    "react-dom": "^15.4.0 || ^16.0.0",
+    "react-redux": "^7.0.3",
+    "redux": "^4.0.1",
     "typeface-roboto": "^0.0.54"
   },
   "scripts": {

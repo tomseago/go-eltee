@@ -1,42 +1,104 @@
-import React, { Component, Fragment } from "react";
+import React, { Fragment, useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+
+import { withStyles } from "@material-ui/core/styles";
+import Button from "@material-ui/core/Button";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemText from "@material-ui/core/ListItemText";
+// import Divider from "@material-ui/core/Divider";
+
 import Log from "../../lib/logger";
+import Loading from "../../common/loading";
+import ErrorComp, { ErrorBoundary } from "../../common/error";
 
-import { StateNames } from "../../api";
+// import { StateNames, ApiCall } from "../../api";
+import proto from "../../api/api_pb";
+import { callStateNames } from "../../data/actions";
 
-class StatesPage extends Component {
-    state = {}
+const styles = theme => ({
+    root: {
+        width: "100%",
+        maxWidth: 360,
+        backgroundColor: theme.palette.background.paper,
+    },
+});
 
-    render() {
-        Log.info("StatesPage render");
-        
-        return (
-            <Fragment>
-                <h1>States are...</h1>
-                <StateNames>
-                    { (loading, data, error) => {
-                        if (loading) {
-                            return <h2>Loading...</h2>;
-                        }
+function StateListImpl(props) {
+    const { names, updatedAt, isLoading, lastError, dispatch } = props;
 
-                        if (error) {
-                            return <h2>{error}</h2>;
-                        }
+    const [selectedName, setSelectedName] = useState(null);
 
-                        console.log(data);
-                        if (!data) {
-                            return <h2>No data</h2>;
-                        }
+    useEffect(() => {
+        // Log.info(callStateNames);
+        // Log.warn(cbStateNames);
+        // cbStateNames();
+        // //callStateNames();
+        dispatch(callStateNames());
+    }, []);
 
-                        const items = data.map(name => (<li key={name}>{name}</li>));
-                        return (
-                            <ul>{items}</ul>
-                        );
-                    }}
-                </StateNames>
-            </Fragment>
-        );
+    if (isLoading) {
+        return <Loading />;
     }
+
+    if (lastError) {
+        return <ErrorComp>{lastError}</ErrorComp>;
+    }    
+
+
+    function itemClick(name) {
+        setSelectedName(name);
+    }
+
+    const stateItems = names.map((name) => {
+        return (
+            <ListItem
+                button
+                selected={selectedName === name}
+                onClick={() => itemClick(name)}
+                key={name}
+            >
+                <ListItemText primary={name} />
+            </ListItem>
+        );
+    });
+
+    return (
+        <List>
+            {stateItems}
+        </List>
+    );
+}
+StateListImpl.propTypes = {
+    names: PropTypes.arrayOf(PropTypes.string).isRequired,
+};
+
+function mapToStateListProps(state) {
+    return state.worldStates;
+}
+
+// const mapDispatchToStateListProps = (dispatch) => {
+//     cbStateNames: callStateNames,
+// };
+
+const StateList = connect(
+    mapToStateListProps,
+)(withStyles(styles)(StateListImpl));
+
+function StatesPageImpl(props) {
+    const { dispatch } = props;
+
+    return (
+        <ErrorBoundary>
+            <Fragment>
+                <StateList />
+                <Button variant="contained" onClick={() => dispatch(callStateNames())}>Refresh</Button>
+            </Fragment>
+        </ErrorBoundary>
+    );
 }
 
 
-export default StatesPage;
+export default connect()(StatesPageImpl);
