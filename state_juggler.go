@@ -67,7 +67,7 @@ func (sj *StateJuggler) Current() *WorldState {
 }
 
 func (sj *StateJuggler) State(name string) *WorldState {
-	if len(name) == 0 {
+	if len(name) == 0 || name == "CURRENT" {
 		return sj.current
 	}
 

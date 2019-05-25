@@ -3,20 +3,34 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
 import { withStyles } from "@material-ui/core/styles";
+import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
+
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 // import Divider from "@material-ui/core/Divider";
 
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import Typography from '@material-ui/core/Typography';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+
 import Log from "../../lib/logger";
+import { findApiOp } from "../../api/ops";
+import { maybeCallStateNames } from "../../data/actions";
+
 import Loading from "../../common/loading";
 import ErrorComp, { ErrorBoundary } from "../../common/error";
+import CpList from "../control_points";
 
 // import { StateNames, ApiCall } from "../../api";
-import proto from "../../api/api_pb";
-import { callStateNames } from "../../data/actions";
+// import proto from "../../api/api_pb";
+// import { callStateNames } from "../../data/actions";
+
+// import { ensureStateNames } from "../../api/ops";
 
 const styles = theme => ({
     root: {
@@ -24,51 +38,49 @@ const styles = theme => ({
         maxWidth: 360,
         backgroundColor: theme.palette.background.paper,
     },
+
+    paper: {
+        // ...theme.mixins.gutters(),
+        // paddingTop: theme.spacing.unit * 2,
+        // paddingBottom: theme.spacing.unit * 2,
+    },    
 });
 
 function StateListImpl(props) {
-    const { names, updatedAt, isLoading, lastError, dispatch } = props;
-
-    const [selectedName, setSelectedName] = useState(null);
+    const { names, namesOp, dispatch } = props;
 
     useEffect(() => {
-        // Log.info(callStateNames);
-        // Log.warn(cbStateNames);
-        // cbStateNames();
-        // //callStateNames();
-        dispatch(callStateNames());
+        dispatch(maybeCallStateNames(namesOp));
     }, []);
 
-    if (isLoading) {
+    if (namesOp.isLoading) {
         return <Loading />;
     }
 
-    if (lastError) {
-        return <ErrorComp>{lastError}</ErrorComp>;
+    if (namesOp.lastError) {
+        return <ErrorComp>{namesOp.lastError}</ErrorComp>;
     }    
 
+    const stateItems = names.map(name => (
+        <ExpansionPanel key={name}>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="h4">{name}</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails>
+                <CpList wsName={name} />
+            </ExpansionPanelDetails>
+        </ExpansionPanel>
+    ));
 
-    function itemClick(name) {
-        setSelectedName(name);
-    }
-
-    const stateItems = names.map((name) => {
-        return (
-            <ListItem
-                button
-                selected={selectedName === name}
-                onClick={() => itemClick(name)}
-                key={name}
-            >
-                <ListItemText primary={name} />
-            </ListItem>
-        );
-    });
-
+    // return (
+    //     <List>
+    //         {stateItems}
+    //     </List>
+    // );
     return (
-        <List>
+        <Fragment>
             {stateItems}
-        </List>
+        </Fragment>
     );
 }
 StateListImpl.propTypes = {
@@ -76,7 +88,10 @@ StateListImpl.propTypes = {
 };
 
 function mapToStateListProps(state) {
-    return state.worldStates;
+    return {
+        names: state.stateNames,
+        namesOp: findApiOp(state, "stateNames"),
+    };
 }
 
 // const mapDispatchToStateListProps = (dispatch) => {
@@ -87,18 +102,24 @@ const StateList = connect(
     mapToStateListProps,
 )(withStyles(styles)(StateListImpl));
 
+// //////////////////////////////////////////////////////////////////////
+
 function StatesPageImpl(props) {
-    const { dispatch } = props;
+    const { classes, namesOp, dispatch } = props;
 
     return (
         <ErrorBoundary>
             <Fragment>
-                <StateList />
-                <Button variant="contained" onClick={() => dispatch(callStateNames())}>Refresh</Button>
+                <Paper className={classes.paper}>
+                    <StateList />
+                </Paper>
+                <Button variant="contained" onClick={() => dispatch(maybeCallStateNames(namesOp))}>Refresh</Button>
             </Fragment>
         </ErrorBoundary>
     );
 }
 
 
-export default connect()(StatesPageImpl);
+export default connect(state => ({
+    namesOp: findApiOp(state, "stateNames"),
+}))(withStyles(styles)(StatesPageImpl));

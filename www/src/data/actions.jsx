@@ -47,3 +47,35 @@ export function callStateNames() {
     return x;
 }
 callStateNames.type = "CALL_STATE_NAMES";
+
+export function callControlPoints(wsName) {
+    return apiCallStart("controlPoints", new proto.StringMsg({ val: wsName }));
+}
+callControlPoints.type = "CALL_CONTROL_POINTS";
+
+// /////////
+
+// export function ensureRecentStateNames() {
+//     return {
+//         type: ensureRecentStateNames.type,
+//     };
+// }
+// ensureRecentStateNames.type = "ENSURE_STATE_NAMES";
+
+
+export function maybeDoOp(opVal, req) {
+    return {
+        type: maybeDoOp.type,
+        op: opVal,
+        req,
+    };
+}
+maybeDoOp.type = "MAYBE_DO_OP";
+
+export function maybeCallStateNames(opVal) {
+    return maybeDoOp(opVal, new proto.Void({}));
+}
+
+export function maybeCallControlPoints(opVal, wsName) {
+    return maybeDoOp(opVal, new proto.StringMsg({ val: wsName }));
+}

@@ -2,11 +2,14 @@
 import React, { useState, useEffect } from "react";
 
 import Log from "../lib/logger";
-import { ElTeePromiseClient } from "./api_grpc_web_pb";
 import proto from "./api_pb";
 
 // const client = new ElTeeClient("http://localhost:9090", null, null);
-export const client = new ElTeePromiseClient("http://localhost:9090", null, null);
+// export const client = new ElTeePromiseClient("http://localhost:9090", null, null);
+
+import clientL from "./client";
+
+export const client = clientL;
 
 // Really client could/should be passed in from the outside right???
 
