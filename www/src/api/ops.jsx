@@ -5,13 +5,15 @@ import proto from "./api_pb";
 import { apiCallStarted, apiCallData, apiCallFailed } from "../data/actions";
 
 
-export function findApiOp(state, name) {
-    if (!state.apiOps) {
+export function findApiCall(state, name) {
+    if (!state.apiCalls) {
         return { call: name };
     }
 
-    return state.apiOps[name] || { call: name };
+    return state.apiCalls[name] || { call: name };
 }
+
+/*
 
 function isUpdateNeeded(state, call) {
     const opState = state.apiCalls[call];
@@ -33,7 +35,7 @@ function makeCall(dispatch, call, req, handler) {
         throw new Error(`Could not find an apiCall named ${call}`);
     }
 
-    dispatch(apiCallStarted(call, req));    
+    dispatch(apiCallStarted(call, req));
     client[call](req, null)
         .then((resp) => {
             Log.info("Got a resp ", call, resp);
@@ -66,3 +68,4 @@ export function ensureStateNames(dispatch, state) {
 export function ensureControlPoints(dispatch, state, wsName) {
 
 }
+ */

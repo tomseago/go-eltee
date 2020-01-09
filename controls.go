@@ -9,6 +9,9 @@ import (
 // An instance of fixture control updater is attached to each fixture control and knows
 // how to use the control point in the fixture control instance to update some DMX
 // values (which are known to the updater).
+//
+// These are essentially how we attach virtual functions to each FixtureControl based
+// on the type of ProfileControl that it is an instance of.
 type FixtureControlUpdater interface {
 	// Causes the FixtureControlUpdater to observe the control point
 	// and update it's output state
@@ -26,11 +29,21 @@ type FixtureControlUpdater interface {
 //  * an optional LensStack through which the ControlPoint should be observed by the
 //    updater when it's trying to figure out new DMX output values
 //  * the Updater which is the logic used to get from the ControlPoint to DMX output
+//
+// FixtureControls have a second ControlPoint which is used as a local override
+// in order to directly reach in and control the fixture during things like lens
+// calibration or simply direct manual control. While these control points could
+// exist in the general pool of control points, having them local kind of keeps that
+// pool a little cleaner.
 type FixtureControl struct {
 	Fixture        Fixture
 	ProfileControl ProfileControl
 	ControlPoint   ControlPoint
 	LensStack      *LensStack
+
+	// If set to true the updater should use the ManualControlPoint directly
+	ManualControl       bool
+	ManualControlPoint  ControlPoint
 
 	// This is where the ProfileControl injects behavior into the FixtureControl instance
 	Updater FixtureControlUpdater
@@ -43,6 +56,14 @@ func NewFixtureControl(profileControl ProfileControl, updater FixtureControlUpda
 		ProfileControl: profileControl,
 		Updater:        updater,
 	}
+}
+
+func (fc *FixtureControl) ToAPI() *api.FixtureControlState {
+    out := &api.FixtureControlState{
+        Manual:               fc.ManualControl,
+    }
+
+    return out
 }
 
 //////

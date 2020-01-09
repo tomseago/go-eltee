@@ -2,19 +2,28 @@ import { combineReducers } from "redux";
 
 import Log from "../lib/logger";
 
-import { apiCallStarted, apiCallFailed, apiCallData } from "./actions";
+import {apiCallStarted, apiCallFailed, apiCallData, handleCallResult} from "./actions";
 
+// Our application state
 export const initialState = {
+    // A list of names of states
     stateNames: [],
+
+    // Control points indexed by the state name
     cpsByState: {},
-    apiOps: {},
+
+    // API calls that could be in flight, indexed by call name
+    apiCalls: {},
 };
 
 function updateStateCps(existing = {}, action) {
     Log.info("Applying cpl updates from ", action);
 
     const wsName = action.req.getVal();
-    
+    Log.debug("wsName = ", wsName);
+
+    existing[wsName] = action.data;
+    Log.debug(existing);
 
     return existing;
 }
@@ -31,10 +40,10 @@ function handleApiData(existing = {}, action) {
 
     switch (call) {
     case "stateNames":
-        out.stateNames = action.data.listList;
+        out.stateNames = action.data.getListList();
         break;
 
-    case "controlPoints": 
+    case "controlPoints":
         out.cpsByState = updateStateCps(out.cpsByState, action);
         break;
 
@@ -50,13 +59,12 @@ export default function reducers(existing = initialState, action) {
     case apiCallStarted.type:
         out = {
             ...existing,
-            apiOps: {
-                ...existing.apiOps,
+            apiCalls: {
+                ...existing.apiCalls,
                 [action.call]: {
                     call: action.call,
                     isLoading: true,
-                    startedAt: Date.now(),
-                    handler: action.handler,
+                    startedAt: action.at,
                 },
             },
         };
@@ -64,23 +72,21 @@ export default function reducers(existing = initialState, action) {
 
     case apiCallData.type:
         {
-            Log.info("existing.apiOps ", existing.apiOps);
-            const { startedAt } = existing.apiOps[action.call];
-            const now = Date.now();
+            Log.info("existing.apiOps ", existing.apiCalls);
+            const { startedAt } = existing.apiCalls[action.call];
 
             out = {
                 ...existing,
-                apiOps: {
-                    ...existing.apiOps,
+                apiCalls: {
+                    ...existing.apiCalls,
                     [action.call]: {
                         call: action.call,
                         isLoading: false,
-                        elapsedTime: now - startedAt,
-                        updatedAt: now,
+                        elapsedTime: action.at - startedAt,
+                        updatedAt: action.at,
                     },
                 },
             };
-            // Dpesn't have to be pure...
             handleApiData(out, action);
         }
         break;
@@ -88,8 +94,8 @@ export default function reducers(existing = initialState, action) {
     case apiCallFailed.type:
         out = {
             ...existing,
-            apiOps: {
-                ...existing.apiOps,
+            apiCalls: {
+                ...existing.apiCalls,
                 [action.call]: {
                     call: action.call,
                     isLoading: false,
@@ -97,6 +103,15 @@ export default function reducers(existing = initialState, action) {
                 },
             },
         };
+        break;
+
+    case handleCallResult.type:
+        out = {
+            ...existing,
+        };
+        if (action.handler) {
+            action.handler(out, action.result, action.req, action.call);
+        }
         break;
 
     default:

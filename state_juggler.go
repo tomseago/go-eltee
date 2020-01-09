@@ -10,6 +10,18 @@ import (
 	"path/filepath"
 )
 
+// The StateJuggler does exactly as its name implies - it juggles a list of
+// current and potential WorldStates. A WorldState has two parts, a list of
+// named control points and a set of FixturePatches which are connections between
+// FixtureControls and ControlPoints.
+//
+// A base WorldState defines defaults which hold until any other state is
+// applied. A current WorldState contains the singular active state for the
+// system. It's control points can be modified directly or another, typically
+// partial, WorldState can be "applied" onto the current state. Applying one
+// WorldState onto another overwrites shared values but doesn't delete anything
+// (although that should maybe get added). Applying one state onto another
+// may also cause FixturePatches to change.
 type StateJuggler struct {
 	// This one contains the default values and is loaded from the
 	// "control_points" directory

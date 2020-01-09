@@ -1,20 +1,12 @@
 import proto from "../api/api_pb";
+import Log from "../lib/logger";
 
-export function apiCallStart(call, req) {
-    return {
-        type: apiCallStart.type,
-        call,
-        req,
-    };
-}
-apiCallStart.type = "API_CALL_START";
-
-
-export function apiCallStarted(call, req) {
+// Records a start for a specific call
+export function apiCallStarted(call) {
     return {
         type: apiCallStarted.type,
         call,
-        req,
+        at: Date.now(),
     };
 }
 apiCallStarted.type = "API_CALL_STARTED";
@@ -26,6 +18,7 @@ export function apiCallFailed(call, req, error) {
         call,
         req,
         error,
+        at: Date.now(),
     };
 }
 apiCallFailed.type = "API_CALL_FAILED";
@@ -34,48 +27,71 @@ export function apiCallData(call, req, data) {
     return {
         type: apiCallData.type,
         call,
+        req,
         data,
+        at: Date.now(),
     };
 }
 apiCallData.type = "API_CALL_DATA";
 
 
-export function callStateNames() {
-    // return apiCallStart("stateNames", new proto.Void({}));
-    const p = new proto.Void({});
-    const x = apiCallStart("stateNames", p);
-    return x;
-}
-callStateNames.type = "CALL_STATE_NAMES";
-
-export function callControlPoints(wsName) {
-    return apiCallStart("controlPoints", new proto.StringMsg({ val: wsName }));
-}
-callControlPoints.type = "CALL_CONTROL_POINTS";
-
-// /////////
-
-// export function ensureRecentStateNames() {
-//     return {
-//         type: ensureRecentStateNames.type,
-//     };
-// }
-// ensureRecentStateNames.type = "ENSURE_STATE_NAMES";
-
-
-export function maybeDoOp(opVal, req) {
+/**
+ * This action is for making API calls that should only have one instance
+ * outstanding at a time and which have a global handler.
+ *
+ * @param call the name of the api call to make
+ * @param req the api request message
+ */
+export function maybeDoCall(call, req) {
     return {
-        type: maybeDoOp.type,
-        op: opVal,
+        type: maybeDoCall.type,
+        call,
         req,
     };
 }
-maybeDoOp.type = "MAYBE_DO_OP";
+maybeDoCall.type = "MAYBE_DO_CALL";
 
-export function maybeCallStateNames(opVal) {
-    return maybeDoOp(opVal, new proto.Void({}));
+export function maybeCallStateNames() {
+    return maybeDoCall("stateNames", new proto.Void({}));
 }
 
-export function maybeCallControlPoints(opVal, wsName) {
-    return maybeDoOp(opVal, new proto.StringMsg({ val: wsName }));
+export function maybeCallControlPoints(wsName) {
+    const req = new proto.StringMsg();
+    req.setVal(wsName);
+    return maybeDoCall(`controlPoints:${wsName}`, req);
 }
+
+/**
+ * For api calls that don't need to check for existing in flight calls
+ * use this action. Two handlers are provided for success and failure.
+ * The success handler is given an already copied state object so all it
+ * has to do is modify the parts of it that it wants to. It doesn't need
+ * to be a pure function.
+ * @param call the name of the rpc call
+ * @param req the message to send as the request
+ * @param success (stateCopy, resp, req, call) => {} success handler
+ * @param failure (stateCopy, error, req, call) => {} failure handler
+ * @returns {{call: *, success: *, failure: *, type: string, req: *}}
+ */
+export function doCall(call, req, success, failure) {
+    return {
+        type: doCall.type,
+        call,
+        req,
+        success,
+        failure,
+    };
+}
+doCall.type = "DO_CALL";
+
+
+export function handleCallResult(call, req, result, handler) {
+    return {
+        type: handleCallResult.type,
+        call,
+        req,
+        result,
+        handler,
+    };
+}
+handleCallResult.type = "HANDLE_CALL_RESULT";

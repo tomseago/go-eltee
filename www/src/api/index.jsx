@@ -13,7 +13,7 @@ export const client = clientL;
 
 // Really client could/should be passed in from the outside right???
 
-
+/*
 export const ApiContext = React.createContext(null);
 
 export function ApiProvider(props) {
@@ -115,3 +115,4 @@ export function ApiCall(props) {
         setSerial(serial + 1);
     });
 }
+*/

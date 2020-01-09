@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-message Void {    
+message Void {
 }
 
 message StringMsg {
@@ -89,12 +89,40 @@ message Profile {
     int32 channelCount = 3;
 
     // Even though we know this is a GroupProfileControl, it's a little
-    // easier on the client side if we keep it the same abstraction. 
+    // easier on the client side if we keep it the same abstraction.
     ProfileControl controls = 4;
 }
 
 message ProfilesResponse {
     map<string, Profile> profiles = 1;
+}
+
+////////////////////////////////////////////////////////////////////////
+//
+// Fixtures
+//
+
+message FixtureControlState {
+    bool manual = 1;
+}
+
+message Fixture {
+    string name = 1;
+    string profileId = 2;
+
+    // For now we don't include the hierarchy of controls because that is
+    // implied by the Profile. For control specific fields we reference
+    // them directly by control ids.
+    // FixtureControl rootControl = 3;
+
+    map<string, FixtureControlState> controlState = 4;
+
+    map<string, int32> varInts = 5;
+    map<string, double> varDoubles = 6;
+}
+
+message FixtureListResponse {
+    repeated Fixture fixtures = 1;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -143,7 +171,7 @@ message ControlPointList {
     // If set, indicates these control points are for a particular state
     // This is useful when setting control points either to the current
     // state or to some other state
-    string state = 2; 
+    string state = 2;
 
     // When setting control points this indicates that the control point
     // should be added if it doesn't exist in the state already
@@ -180,16 +208,20 @@ service ElTee {
 
     rpc ProfileLibrary(Void) returns (ProfilesResponse) {}
 
+    rpc FixtureList(Void) returns (FixtureListResponse) {}
+
     /* Get a list of state names and control point values in that state */
     rpc StateNames(Void) returns (StringMsg) {}
     rpc ControlPoints(StringMsg) returns (ControlPointList) {}
     rpc FixturePatches(StringMsg) returns (FixturePatchMap) {}
 
     /*
-    Sets current values directly without modifying any other state declaration.    
+    Sets current values directly without modifying any other state declaration.
     */
     rpc SetControlPoints(ControlPointList) returns (Void) {}
     rpc RemoveControlPoints(ControlPointList) returns (Void) {}
+
+    rpc ControlPointChanges(Void) returns (stream ControlPointList) {}
 
     /*
     Setting and removing fixture patches

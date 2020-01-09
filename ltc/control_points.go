@@ -1,12 +1,12 @@
 package main
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"github.com/tomseago/go-eltee/api"
-	"strconv"
-	"strings"
+    "context"
+    "errors"
+    "fmt"
+    "github.com/tomseago/go-eltee/api"
+    "strconv"
+    "strings"
 )
 
 // func printIndent(level int) {
@@ -396,4 +396,81 @@ values provided.`,
 current state.`,
 	}
 
+    //////////////////////////////////////////////////////////////////////////////////////////
+    commands["cplisten"] = func(lc *localContext, args []string) {
+
+        enable := true
+
+        if len(args) >= 1 {
+            enable, _ = strconv.ParseBool(args[0])
+        }
+
+        if enable {
+            if lc.cpListener != nil {
+                fmt.Printf("Already listening\n")
+                return
+            }
+
+            c, err := lc.c.Client()
+            if failedTo("get client", err) {
+                return
+            }
+
+            ctx, cancelFunc := context.WithCancel(context.Background())
+
+            stream, err := c.ControlPointChanges(ctx, &api.Void{})
+            if failedTo("get stream", err) {
+                return
+            }
+
+            lc.cpListener = NewCPListening(stream, cancelFunc)
+            go lc.cpListener.Run()
+        } else {
+            if lc.cpListener == nil {
+                fmt.Printf("Not listening\n")
+                return
+            }
+
+            lc.cpListener.Stop()
+            lc.cpListener = nil
+        }
+    }
+
+    help["cplisten"] = &helpEntry{
+        short:  "Start/Stop listening to CP changes",
+        syntax: "enable",
+        man: `Starts or stops listening to the changes stream for control points`,
+    }
+}
+
+type cpListening struct {
+    stream api.ElTee_ControlPointChangesClient
+    cancelFunc context.CancelFunc
+}
+
+func NewCPListening(stream api.ElTee_ControlPointChangesClient, cancelFunc context.CancelFunc) *cpListening {
+    out := &cpListening{
+        stream: stream,
+        cancelFunc: cancelFunc,
+    }
+    return out
+}
+
+func (cpl *cpListening) Run() {
+    fmt.Printf("cpListening.Run starting\n\r");
+
+    for {
+        list, err := cpl.stream.Recv()
+        if err != nil {
+            fmt.Printf("\n\rClosing listen stream %v\n\r", err)
+            break
+        }
+
+        // TODO: Add formatting
+        fmt.Printf("\n\rChanges: %v\n\r", list)
+    }
+}
+
+func (cpl *cpListening) Stop() {
+    cpl.cancelFunc()
 }

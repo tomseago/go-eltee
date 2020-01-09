@@ -19,18 +19,15 @@ import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import Log from "../../lib/logger";
-import { findApiOp } from "../../api/ops";
+import { findApiCall } from "../../api/ops";
 import { maybeCallStateNames } from "../../data/actions";
 
 import Loading from "../../common/loading";
 import ErrorComp, { ErrorBoundary } from "../../common/error";
 import CpList from "../control_points";
 
-// import { StateNames, ApiCall } from "../../api";
-// import proto from "../../api/api_pb";
-// import { callStateNames } from "../../data/actions";
+import PingWidget from "../../common/ping_widget";
 
-// import { ensureStateNames } from "../../api/ops";
 
 const styles = theme => ({
     root: {
@@ -43,23 +40,23 @@ const styles = theme => ({
         // ...theme.mixins.gutters(),
         // paddingTop: theme.spacing.unit * 2,
         // paddingBottom: theme.spacing.unit * 2,
-    },    
+    },
 });
 
 function StateListImpl(props) {
-    const { names, namesOp, dispatch } = props;
+    const { names, namesCall, dispatch } = props;
 
     useEffect(() => {
-        dispatch(maybeCallStateNames(namesOp));
+        dispatch(maybeCallStateNames());
     }, []);
 
-    if (namesOp.isLoading) {
+    if (namesCall.isLoading) {
         return <Loading />;
     }
 
-    if (namesOp.lastError) {
-        return <ErrorComp>{namesOp.lastError}</ErrorComp>;
-    }    
+    if (namesCall.lastError) {
+        return <ErrorComp>{namesCall.lastError}</ErrorComp>;
+    }
 
     const stateItems = names.map(name => (
         <ExpansionPanel key={name}>
@@ -72,11 +69,6 @@ function StateListImpl(props) {
         </ExpansionPanel>
     ));
 
-    // return (
-    //     <List>
-    //         {stateItems}
-    //     </List>
-    // );
     return (
         <Fragment>
             {stateItems}
@@ -89,23 +81,20 @@ StateListImpl.propTypes = {
 
 function mapToStateListProps(state) {
     return {
-        names: state.stateNames,
-        namesOp: findApiOp(state, "stateNames"),
+        names: state.stateNames || [],
+        namesCall: findApiCall(state, "StateNames"),
     };
 }
 
-// const mapDispatchToStateListProps = (dispatch) => {
-//     cbStateNames: callStateNames,
-// };
-
-const StateList = connect(
-    mapToStateListProps,
-)(withStyles(styles)(StateListImpl));
+const StateList = connect(state => ({
+    names: state.stateNames || [],
+    namesCall: findApiCall(state, "StateNames"),
+}))(withStyles(styles)(StateListImpl));
 
 // //////////////////////////////////////////////////////////////////////
 
 function StatesPageImpl(props) {
-    const { classes, namesOp, dispatch } = props;
+    const { classes, dispatch } = props;
 
     return (
         <ErrorBoundary>
@@ -113,7 +102,8 @@ function StatesPageImpl(props) {
                 <Paper className={classes.paper}>
                     <StateList />
                 </Paper>
-                <Button variant="contained" onClick={() => dispatch(maybeCallStateNames(namesOp))}>Refresh</Button>
+                <Button variant="contained" onClick={() => dispatch(maybeCallStateNames())}>Refresh</Button>
+                <PingWidget/>
             </Fragment>
         </ErrorBoundary>
     );
@@ -121,5 +111,4 @@ function StatesPageImpl(props) {
 
 
 export default connect(state => ({
-    namesOp: findApiOp(state, "stateNames"),
 }))(withStyles(styles)(StatesPageImpl));

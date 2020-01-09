@@ -114,4 +114,66 @@ There are two modes in which the client to proxy leg of the grpc-web architectur
 
 The other mode is called *grpcweb* which is a binary protobuf format, but in this mode only unary calls are supported right now.
 
+Render Stack
+============
 
+Recall that Fixtures are instances of Profiles and will have a set of FixtureControls which are instantiations of the ProfileControls associates with the Profile. Each of these FixtureControls can be patched to a single ControlPoint which is observed via a LensStack that contains one or more Lenses. The generation of DMX values is done by each individual FixtureControl. Thus, to generate a full frame of DMX data all Fixtures with their associated FixtureControls are iterated, each FixtureControl observes it's patched ControlPoint and generates DMX data at an address configured into each FixtureControl.
+
+The ControlPoints themselves are stored in a WorldState object. The StateJuggler holds a reference to a current WorldState which contains all the current ControlPoints as well as the FixturePatches which map between the named ControlPoints and FixtureControls. The list of WorldStates that the StateJuggler holds come from those statically configured in the deployment as well as those found in the "loadables" directory. New empty WorldStates can also be created on the fly and then saved as a loadable state.
+
+To modify the current state, one of the other named states can be "applied" to the current state. This will cause the current _value_ of each control point in the state being applied to be copied into the control point of the same name in the current state. If the current state does not have a control point of the same name one will not be created.
+
+Note that this notion of applying one state onto another copies data but does not otherwise create new control point objects or replace the ones that already exist. Similarly FixturePatches also have their data copied. After a state is applied onto the current state, the fixtures are all repatched which means their FixtureControls will have new control points set as their active control point which they are observing.
+
+The fixture patching process does allow for a previously patched fixture control to become unpatched by assigning it an empty control point name or a name of "_".
+
+Applying an entire new state allows multiple control points to be changed at one time as well as several patches. This is the mechanism where a new state can be created in an offline mode without disturbing what is currently being shown and then applied all in one fell swoop.
+
+At the moment lens stacks are not modifiable in this way, nor are animators, however this should be examined in the future.
+
+Applying an entire state isn't the only way to change control point values. Individual control points, in either the current or a named state, can be looked up and modified directly via the api.
+
+In the future, in addition to setting a new state in a "cut" fashion we will want to add transition options which tween between two states.  
+
+Starting the Server
+===================
+
+This should work from the project dir
+
+    go run ./eltee
+    
+That will cd into the config directory and then read `eltee.acl` and go from there. The web server should start on port 2000 and it will try to find the FTDI adapter.
+
+## The Web App
+
+It's a React app that is built from the `./www` directory. To work on it cd into there, use `yarn` for dependencies and `npx gulp ****` to build it. The output goes into the `./www/root` directory which is where the web server finds it.
+
+If the protobufs have changed you need to
+
+    npx gulp protoc
+    
+To build the packaged app use either `parcel` or `parcelProd` as
+
+    npx gulp parcel
+
+The gRPC api needs Envoy to be running in order to work. To build the Envoy docker image, from the `./www/envoy` directory:
+
+    docker build -t eltee-envoy:latest .
+    
+To run that image exposing ports 9090 and 9091 to the same ports on the host
+
+    docker run -d --name envoy -p 9090:9090 -p 9091:9091 eltee-envoy:latest
+    
+You can verify running and exposed ports with:
+
+    docker port envoy
+
+TODOs
+=====
+* Implement a more robust and precise loop for the generation of DMX frames so that the timing stays consistent and any render variance is buffered in between outputs.
+* Go through the profiles and make sure that all control point types are implemented and that the syntax in the profile files is accurate.
+* Add tweening between two states instead of just setting a new one wholesale.
+* Lots of documentation for all the classes
+* Listen to the ControlPointChanges stream with the web client
+* Add api to adjust the manual control points somehow
+* Add CP type widgets for the web

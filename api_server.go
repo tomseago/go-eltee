@@ -10,19 +10,99 @@ import (
 	"github.com/tomseago/go-eltee/api"
 )
 
+type cpListener struct {
+    stream api.ElTee_ControlPointChangesServer
+    c chan *api.ControlPointList
+
+    cleanup func(l *cpListener)
+}
+
+func NewCpListener(stream api.ElTee_ControlPointChangesServer, cleanup func(l *cpListener)) *cpListener {
+    out := &cpListener{
+        stream: stream,
+        c: make(chan *api.ControlPointList, 4),
+        cleanup: cleanup,
+    }
+
+    return out
+}
+
+func (l *cpListener) SendList(list *api.ControlPointList) {
+    log.Debugf("cpListener.SendList list=%v",list)
+    l.c <- list
+}
+
+func (l *cpListener) Run() {
+    log.Debugf("cpListener.Run")
+
+
+    for done := false ; !done ; {
+        select {
+        case list := <-l.c:
+            log.Debugf("from channel list=%v",list)
+            err := l.stream.Send(list)
+            if err != nil {
+                log.Debugf("cpListener.stream.Send err=%v", err);
+                // l.done <- true
+                done = true
+            }
+        }
+    }
+
+    log.Debugf("cpListener calling cleanup");
+    l.cleanup(l)
+}
+
+
 type apiServer struct {
 	server *Server
 
 	grpc *grpc.Server
+
+	// List of client channels that want to receive cp changes
+	cpListeners []*cpListener
+	deadListeners chan *cpListener
 }
 
 func NewApiServer(server *Server) *apiServer {
 	asrv := &apiServer{
 		server: server,
+		cpListeners: make([]*cpListener,0),
+		deadListeners: make(chan *cpListener, 2),
 	}
 
 	return asrv
 }
+
+func (asrv *apiServer) SendCPChanges(list *api.ControlPointList) {
+    listeners := asrv.cpListeners
+
+    for _, v := range listeners {
+        v.SendList(list)
+    }
+}
+
+func (asrv *apiServer) deadListenerRemover() {
+    for {
+        dead := <- asrv.deadListeners
+
+        ix := -1
+        for i, v := range asrv.cpListeners {
+            if v == dead {
+                ix = i
+                break
+            }
+        }
+        if ix != -1 {
+            // Copy last element into this position
+            asrv.cpListeners[ix] = asrv.cpListeners[len(asrv.cpListeners) - 1]
+            // Remove the last element
+            asrv.cpListeners = asrv.cpListeners[:len(asrv.cpListeners) - 1]
+        }
+    }
+}
+
+////////
 
 func (asrv *apiServer) Start() {
 	// TODO: More options for where to start the server
@@ -35,7 +115,8 @@ func (asrv *apiServer) Start() {
 	asrv.grpc = grpc.NewServer()
 	api.RegisterElTeeServer(asrv.grpc, asrv)
 
-	// More config
+	// Need to get rid of dead listeners
+	go asrv.deadListenerRemover()
 
 	log.Info("gRPC server started")
 	asrv.grpc.Serve(lis)
@@ -68,6 +149,19 @@ func (asrv *apiServer) ProfileLibrary(ctx context.Context, req *api.Void) (*api.
 	}
 
 	return rsp, nil
+}
+
+func (asrv *apiServer) FixtureList(ctx context.Context, req *api.Void) (*api.FixtureListResponse, error) {
+
+    rsp := &api.FixtureListResponse{
+        Fixtures: make([]*api.Fixture, 0),
+    }
+
+    for _, v := range asrv.server.fixtures {
+        rsp.Fixtures = append(rsp.Fixtures, v.ToAPI())
+    }
+
+    return rsp, nil
 }
 
 func (asrv *apiServer) StateNames(ctx context.Context, req *api.Void) (*api.StringMsg, error) {
@@ -106,13 +200,22 @@ func (asrv *apiServer) SetControlPoints(ctx context.Context, req *api.ControlPoi
 		return nil, fmt.Errorf("Could not find state %v", req.GetState())
 	}
 
+	// Make sure all the control points exist before we set any of them
+    for _, apiCP := range req.GetCps() {
+        cp := state.ControlPoint(apiCP.GetName())
+        if cp == nil {
+            if !req.GetUpsert() {
+                return nil, fmt.Errorf("State does not have a control point named '%v' and upsert was false", apiCP.GetName())
+            }
+        }
+    }
+
+    // Okay everything should be fine
+
 	for _, apiCP := range req.GetCps() {
 		cp := state.ControlPoint(apiCP.GetName())
 
 		if cp == nil {
-			if !req.GetUpsert() {
-				return nil, fmt.Errorf("State does not have a control point named '%v' and upsert was false", apiCP.GetName())
-			}
 			// Else, we make it happen
 			cp = CreateControlPointFromApi(apiCP)
 			if cp == nil {
@@ -126,6 +229,9 @@ func (asrv *apiServer) SetControlPoints(ctx context.Context, req *api.ControlPoi
 		cp.SetFromApi(apiCP)
 		//log.Infof("New: %v", cp)
 	}
+
+	// And now tell other listeners about this
+	asrv.SendCPChanges(req)
 
 	return &api.Void{}, nil
 }
@@ -142,6 +248,23 @@ func (asrv *apiServer) RemoveControlPoints(ctx context.Context, req *api.Control
 	}
 
 	return &api.Void{}, nil
+}
+
+func (asrv *apiServer) ControlPointChanges(req *api.Void, stream api.ElTee_ControlPointChangesServer ) (error) {
+
+    done := make(chan bool)
+
+    listener := NewCpListener(stream, func(l *cpListener) {
+        asrv.deadListeners <- l
+        done <- true
+    })
+    asrv.cpListeners = append(asrv.cpListeners, listener)
+
+    go listener.Run()
+
+    <-done
+
+    return nil
 }
 
 //////////////////

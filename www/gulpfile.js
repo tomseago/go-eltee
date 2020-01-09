@@ -37,7 +37,7 @@ function tParcel() {
         .pipe(gulpParcel({
             outDir: `${OUT}`,
             cache: true,
-            watch: true,
+            watch: false, // watch doesn't seem to really work right
         }));
 }
 

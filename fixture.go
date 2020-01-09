@@ -2,7 +2,8 @@ package eltee
 
 import (
 	"github.com/eyethereal/go-config"
-	"sort"
+    "github.com/tomseago/go-eltee/api"
+    "sort"
 )
 
 // "github.com/eyethereal/go-config"
@@ -34,6 +35,8 @@ type Fixture interface {
 	SetInt(id string, val int)
 	GetF64(id string) float64
 	SetF64(id string, val float64)
+
+	ToAPI() *api.Fixture
 }
 
 type DmxFixture struct {
@@ -168,6 +171,31 @@ func (f *DmxFixture) SetF64(id string, val float64) {
 	f.varF64[id] = val
 }
 
+func (f *DmxFixture) ToAPI()*api.Fixture {
+    out := &api.Fixture{
+        Name:                 f.name,
+        ProfileId:            f.profile.Id,
+        ControlState:         make(map[string]*api.FixtureControlState),
+        VarInts:              make(map[string]int32),
+        VarDoubles:           make(map[string]float64),
+    }
+
+    for k, v := range f.controlsById {
+        out.ControlState[k] = v.ToAPI()
+    }
+
+    // Copy these so no ones messes with our internal stuff I guess
+    for k, v := range f.varInts {
+        out.VarInts[k] = int32(v)
+    }
+
+    for k, v := range f.varF64 {
+        out.VarDoubles[k] = v
+    }
+
+    return out
+}
+
 func (f *DmxFixture) SetUseOverrides(use bool) {
 	if f == nil {
 		return
@@ -226,3 +254,4 @@ func (f *DmxFixture) VarsFrom(node *config.AclNode) {
 		f.SetF64(vName, vNode.AsFloat())
 	})
 }
+

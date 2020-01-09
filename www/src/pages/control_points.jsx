@@ -19,15 +19,12 @@ import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import Log from "../lib/logger";
-import { findApiOp } from "../api/ops";
+import { findApiCall } from "../api/ops";
 import { maybeCallControlPoints } from "../data/actions";
 
 import Loading from "../common/loading";
 import ErrorComp, { ErrorBoundary } from "../common/error";
 
-// import { StateNames, ApiCall } from "../../api";
-// import proto from "../../api/api_pb";
-// import { callControlPoints } from "../data/actions";
 
 const styles = theme => ({
     root: {
@@ -40,7 +37,7 @@ const styles = theme => ({
         // ...theme.mixins.gutters(),
         // paddingTop: theme.spacing.unit * 2,
         // paddingBottom: theme.spacing.unit * 2,
-    },    
+    },
 });
 
 /////////////
@@ -66,7 +63,7 @@ function ControlPointListImpl(props) {
     const { wsName, cpList, cpOp, dispatch } = props;
 
     useEffect(() => {
-        dispatch(maybeCallControlPoints(cpOp, wsName));
+        dispatch(maybeCallControlPoints(wsName));
     }, []);
 
     if (cpOp.isLoading) {
@@ -118,19 +115,13 @@ ControlPointListImpl.propTypes = {
 //    names: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
-// function mapToStateListProps(state) {
-//     return state.worldStates;
-// }
-
-// const mapDispatchToStateListProps = (dispatch) => {
-//     cbStateNames: callStateNames,
-// };
 
 export default connect((state, ownProps) => {
-    const wsName = ownProps.wsName;
+    const { wsName } = ownProps;
+    Log.info(`State ${wsName} state.cpsByState =`, state.cpsByState)
 
     return {
         cpList: state.cpsByState[wsName],
-        cpOp: findApiOp(state, `controlPoints:${wsName}`)
+        cpOp: findApiCall(state, `controlPoints:${wsName}`)
     };
 })(withStyles(styles)(ControlPointListImpl));

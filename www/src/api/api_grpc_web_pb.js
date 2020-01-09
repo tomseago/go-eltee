@@ -199,6 +199,61 @@ proto.ElTeePromiseClient.prototype.profileLibrary =
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
  *   !proto.Void,
+ *   !proto.FixtureListResponse>}
+ */
+const methodInfo_ElTee_FixtureList = new grpc.web.AbstractClientBase.MethodInfo(
+  proto.FixtureListResponse,
+  /** @param {!proto.Void} request */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.FixtureListResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.Void} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.Error, ?proto.FixtureListResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.FixtureListResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.ElTeeClient.prototype.fixtureList =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/ElTee/FixtureList',
+      request,
+      metadata || {},
+      methodInfo_ElTee_FixtureList,
+      callback);
+};
+
+
+/**
+ * @param {!proto.Void} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.FixtureListResponse>}
+ *     A native promise that resolves to the response
+ */
+proto.ElTeePromiseClient.prototype.fixtureList =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/ElTee/FixtureList',
+      request,
+      metadata || {},
+      methodInfo_ElTee_FixtureList);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.AbstractClientBase.MethodInfo<
+ *   !proto.Void,
  *   !proto.StringMsg>}
  */
 const methodInfo_ElTee_StateNames = new grpc.web.AbstractClientBase.MethodInfo(

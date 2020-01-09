@@ -18,6 +18,13 @@ var log = config.Logger("eltee")
 // else. Generally there is only one, but as it is an object a larger server might
 // embed this server along with other servers, or multiple servers for some crazy
 // reason.
+//
+// As the core object the Server holds what are essentially singletons for other
+// interesting objects. The library is an instance of ProfileLibrary which contains
+// entries for all known Profiles (i.e. types of Fixtures). The fixtures and
+// fixturesByName fields hold the instances of Fixtures (which are instantiations of
+// a particular Profile). The stateJuggler holds collections of control points and
+// patches between them and Fixtures.
 type Server struct {
 	cfg *config.AclNode
 
@@ -248,6 +255,11 @@ func (s *Server) Start() {
 // data out. If the data was pre-calculated then lovely. In a simple first
 // implementation this is where we will actually do the updates to the frame
 // values based on the current time.
+//
+// A slightly cooler implementation would be to send the last frame which
+// was calculated and then immediately start calculating a new frame. The
+// advantage of this would be that if it takes a variable length of time to
+// calculate frames, this variance wouldn't effect the output frame rate.
 //
 // The job to be done in the function is the first part of what is described
 // as the main looper

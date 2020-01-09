@@ -16,6 +16,7 @@ import (
 type localContext struct {
 	c         *api.AutoClient
 	stateName string
+    cpListener *cpListening
 }
 
 type helpEntry struct {

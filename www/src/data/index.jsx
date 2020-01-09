@@ -2,10 +2,13 @@ import { createStore, applyMiddleware } from "redux";
 
 import Log from "../lib/logger";
 import reducers, { initialState } from "./reducers";
-import { apiCallStart, apiCallStarted, apiCallFailed, apiCallData, maybeDoOp } from "./actions";
+import { apiMiddleware } from "./api_middleware";
+
+// import { apiCallStart, apiCallStarted, apiCallFailed, apiCallData, maybeDoOp } from "./actions";
 
 import { client } from "../api";
 
+/*
 const CACHE_TIME = 1000;
 
 const apiAdapter = ({ getState, dispatch }) => next => (action) => {
@@ -19,13 +22,13 @@ const apiAdapter = ({ getState, dispatch }) => next => (action) => {
             if (ix !== -1) {
                 call = call.substring(0, ix);
             }
-            Log.info("apiCallStart action=", action);        
+            Log.info("apiCallStart action=", action);
             if (!client[call]) {
                 Log.error("Could not find an api method named ", call);
                 return null;
             }
 
-            // This counts as a start 
+            // This counts as a start
             dispatch(apiCallStarted(action.call, action.req));
             client[call](action.req, null)
                 .then((resp) => {
@@ -47,7 +50,7 @@ const apiAdapter = ({ getState, dispatch }) => next => (action) => {
             } else if (op.isLoading) {
                 Log.info(`Op ${op.call} is already loading`);
             } else if (Date.now() - op.updatedAt < CACHE_TIME) {
-                Log.info(`Op ${op.call} is to recent: ${Date.now() - op.updatedAt}ms ago`);                
+                Log.info(`Op ${op.call} is to recent: ${Date.now() - op.updatedAt}ms ago`);
             } else {
                 // Seems like we can allow it
                 dispatch(apiCallStart(op.call, action.req));
@@ -67,4 +70,7 @@ const apiAdapter = ({ getState, dispatch }) => next => (action) => {
 
 const store = createStore(reducers, initialState, applyMiddleware(apiAdapter));
 export default store;
+*/
 
+const store = createStore(reducers, initialState, applyMiddleware(apiMiddleware));
+export default store;

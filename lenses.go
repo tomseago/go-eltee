@@ -106,7 +106,7 @@ func (l *RotateLens) XYZ() (float64, float64, float64) {
 	vec := mgl64.Vec3{sx, sy, sz}
 	vr := l.transform.Rotate(vec)
 
-	log.Debugf("Rotate %v to %v", vec, vr)
+	// log.Debugf("Rotate %v to %v", vec, vr)
 
 	return vr.X(), vr.Y(), vr.Z()
 }

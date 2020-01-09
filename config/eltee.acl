@@ -13,7 +13,7 @@ logging: {
         console: {
             type: stdout
             format: "%{color}%{time:15:04:05.000} %{level:4.4s} %{module:8.8s} %{color:bold}%{shortfunc:10.10s}%{color:reset} ▶ %{message}"
-        }        
+        }
     }
 
     // Set debug to true to print a log message to each log level after
@@ -27,7 +27,7 @@ dmx: {
     connections: {
         // This gives you a log output of the dmx values. Kinda nice but more than a little verbose
         log: {
-            kind: log
+            kind: logXXX
             /*
             start: 33
             length: 10
@@ -69,9 +69,6 @@ dmx: {
 defaults: {
     fixtures: "default"
 }
-//     control_points: "default"
-//     patches: "default"
-// }
 
 deployment: "default"
 
