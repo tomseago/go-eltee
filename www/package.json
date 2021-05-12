@@ -15,7 +15,7 @@
     "parcel-bundler": "^1.12.3"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^0.4.0",
+    "@grpc/grpc-js": "^1.1.8",
     "@material-ui/core": "^3.9.3",
     "@material-ui/icons": "^3.0.2",
     "google-protobuf": "^3.8.0-rc.1",
