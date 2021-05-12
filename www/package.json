@@ -19,7 +19,7 @@
     "@material-ui/core": "^3.9.3",
     "@material-ui/icons": "^3.0.2",
     "google-protobuf": "^3.8.0-rc.1",
-    "grpc": "^1.20.3",
+    "grpc": "^1.24.9",
     "grpc-web": "^1.0.4",
     "material-ui": "^0.20.2",
     "pages": "^0.0.16",
